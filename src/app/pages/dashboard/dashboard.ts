@@ -3,7 +3,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-
+import { ChartModule } from 'primeng/chart';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
@@ -52,6 +52,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     InputNumberModule,
     DialogModule,
     TagModule,
+    ChartModule,
     InputIconModule,
     IconFieldModule,
     ConfirmDialogModule,
@@ -158,6 +159,16 @@ import { ManageAdminsService } from '../service/manageadmins.service';
 
       </div>
     </div>
+    <div class="card mt-5">
+  <h4>Module-wise Data</h4>
+  <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
+</div>
+
+<div class="card mt-5">
+  <h4>Domain-wise Data</h4>
+  <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
+</div>
+
     </div>
    
   `
@@ -168,6 +179,9 @@ export class Dashboard implements OnInit {
   approvedReposCount = 0;
   unapprovedReposCount = 0;
   usersCount = 0;
+
+  moduleData: any;
+  domainData: any;
 
   isvalid = true;
 
@@ -194,6 +208,7 @@ export class Dashboard implements OnInit {
     this.fetchCounts();
     this.setGreetingMessage();
     this.getUsername();
+    this.loadChartData();
   }
 
   setGreetingMessage() {
@@ -229,6 +244,35 @@ export class Dashboard implements OnInit {
       error: (err) => {
         console.error('Error loading counts', err);
       }
+    });
+  }
+
+
+  loadChartData() {
+    this.managereposervice.getdatabymodule().subscribe(data => {
+      this.moduleData = {
+        labels: Object.keys(data),
+        datasets: [
+          {
+            label: 'Modules',
+            data: Object.values(data),
+            backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#26A69A', '#AB47BC']
+          }
+        ]
+      };
+    });
+
+    this.managereposervice.getdatabydomain().subscribe(data => {
+      this.domainData = {
+        labels: Object.keys(data),
+        datasets: [
+          {
+            label: 'Domains',
+            data: Object.values(data),
+            backgroundColor: ['#FFA726', '#26A69A', '#AB47BC', '#42A5F5', '#66BB6A']
+          }
+        ]
+      };
     });
   }
 }

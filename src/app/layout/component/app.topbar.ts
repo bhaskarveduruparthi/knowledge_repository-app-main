@@ -68,8 +68,9 @@ styles:`
 </a>
 
       </div>
-
+      
       <div class="layout-topbar-actions">
+       
         <div class="layout-config-menu">
           <!--<button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
             <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
@@ -89,7 +90,7 @@ styles:`
             <app-configurator />
           </div>
         </div>
-
+         
         <button
           class="layout-topbar-menu-button layout-topbar-action"
           pStyleClass="@next"

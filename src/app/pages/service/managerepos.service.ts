@@ -1,3 +1,4 @@
+import { PaginatorModule } from 'primeng/paginator';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { UrlService } from './url.service';
@@ -78,12 +79,28 @@ downloadWorkbook(id: number): Observable<Blob> {
     return this.http.get(`${this.url}/repos/getallreporecords`);
   }
 
+  get_approval_repos(page: number){
+    return this.http.get(`${this.url}repos/getapprovalrepos?page=${page}`);
+  }
+
+  get_approval_records(){
+    return this.http.get(`${this.url}/repos/getapprovalreposrecords`);
+  }
+
   uploadreference(repository: Repository, formData: any) {
     return this.http.post(`${this.url}/repos/upload_ref/${repository.id}`, formData);
   }
 
   download_reference(id: any) {
     return this.http.get(`${this.url}/repos/refdownload/${id}`);
+  }
+
+  getdatabydomain(){
+    return this.http.get(`${this.url}/repos/repodatabydomain`);
+  }
+
+  getdatabymodule(){
+    return this.http.get(`${this.url}/repos/repodatabymodule`);
   }
 
   

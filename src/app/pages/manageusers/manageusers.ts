@@ -325,83 +325,107 @@ interface ExportColumn {
 
   <p-dialog [(visible)]="userEditDialog" [style]="{width: '700px'}" header="Edit User Details" [modal]="true"
     class="p-fluid">
-    <ng-template pTemplate="content" >
-      <div  class="responsive-form">
-<div class="form-grid">
-<div class="form-field">
-<label class="required" for="type">Type</label>
-<p-autocomplete
-           [dropdown]="true"
-           [suggestions]="types"
-           [required]="true"
-           [disabled]="true"
-           [(ngModel)]="user.type"
-           #type="ngModel"
-           optionLabel="type"
-           optionValue="type"
-           [showClear]="true"
-           placeholder="Select a Type"
-           [ngClass]="{'ng-invalid ng-dirty': submitted && !user.type}">
+    <ng-template pTemplate="content">
+    <div class="responsive-form">
+      <div class="form-grid">
+        <!-- User Type Dropdown -->
+        <div class="form-field">
+          <label class="required" for="type">Type</label>
+          <p-autocomplete
+  [dropdown]="true"
+  [suggestions]="filteredTypes"
+  (completeMethod)="filterTypes($event)"
+  [(ngModel)]="user.type"
+  optionLabel="label"
+  optionValue="value"
+  placeholder="Select a Type"
+  [forceSelection]="true"
+  [showClear]="true"
+  [required]="true"
+  #type="ngModel"
+  [ngClass]="{'ng-invalid ng-dirty': submitted && !user.type}">
 </p-autocomplete>
 <p-message *ngIf="((type.touched || type.dirty || submitted) && type.invalid)" severity="error" text="User Type is required"></p-message>
-</div>
-<div class="form-field">
-<label class="required" for="b_unit">Business Unit</label>
-<p-autocomplete
-           [dropdown]="true"
-           [suggestions]="businessunits"
-           [(ngModel)]="user.b_unit"
-           #b_unit="ngModel"
-           optionLabel="unit"
-           optionValue="unit"
-           [showClear]="true"
-           placeholder="Select Business Unit"
-           [required]="true"
-           [ngClass]="{'ng-invalid ng-dirty': submitted && !user.b_unit}">
+        </div>
+
+        <!-- Business Unit Dropdown -->
+        <div class="form-field">
+          <label class="required" for="b_unit">Business Unit</label>
+          <p-autocomplete
+  [dropdown]="true"
+  [suggestions]="filteredBusinessUnits"
+  (completeMethod)="filterBusinessUnits($event)"
+  [(ngModel)]="user.b_unit"
+  optionLabel="label"
+  optionValue="value"
+  placeholder="Select Business Unit"
+  [forceSelection]="true"
+  [showClear]="true"
+  [required]="true"
+  #b_unit="ngModel"
+  [ngClass]="{'ng-invalid ng-dirty': submitted && !user.b_unit}">
 </p-autocomplete>
 <p-message *ngIf="((b_unit.touched || b_unit.dirty || submitted) && b_unit.invalid)" severity="error" text="Business Unit is required"></p-message>
-</div>
-<div class="form-field">
-<label class="required" for="yash_id">Yash ID</label>
-<input type="text" pInputText id="yash_id"
-           [(ngModel)]="user.yash_id"
-           required
-           [disabled]="true" 
-           #yash_id="ngModel"
-           [pattern]="integerRegex"
-           [ngClass]="{error: yash_id.errors && ((yash_id.touched || yash_id.dirty || submitted) && yash_id.invalid)}">
-<div *ngIf="yash_id.errors && ((yash_id.touched || yash_id.dirty || submitted) && yash_id.invalid)">
-<p-message *ngIf="yash_id.errors['required']" severity="error" text="Yash ID is required"></p-message>
-<p-message *ngIf="yash_id.errors['pattern']" severity="error" text="Not a Valid Format"></p-message>
-</div>
-</div>
-<div class="form-field">
-<label class="required" for="name">User Name</label>
-<input type="text" pInputText id="name"
-           [(ngModel)]="user.name"
-           #name="ngModel"
-           required
-           [ngClass]="{'ng-invalid ng-dirty': submitted && !user.name}" />
-<p-message *ngIf="((name.touched || name.dirty || submitted) && name.invalid)" severity="error" text="User Name is required"></p-message>
-</div>
+        </div>
+        
+        <!-- Yash ID -->
+        <div class="form-field">
+          <label class="required" for="yash_id">Yash ID</label>
+          <input type="text" pInputText id="yash_id"
+                 [(ngModel)]="user.yash_id"
+                 required
+                 #yash_id="ngModel"
+                 [pattern]="integerRegex"
+                 [ngClass]="{error: yash_id.errors && ((yash_id.touched || yash_id.dirty || submitted) && yash_id.invalid)}">
+          <div *ngIf="yash_id.errors && ((yash_id.touched || yash_id.dirty || submitted) && yash_id.invalid)">
+            <p-message *ngIf="yash_id.errors['required']" severity="error" text="Yash ID is required"></p-message>
+            <p-message *ngIf="yash_id.errors['pattern']" severity="error" text="Not a Valid Format"></p-message>
+          </div>
+        </div>
 
-<div class="form-field">
-<label class="required" for="email">Email</label>
-<input type="email" pInputText id="email"
-           [(ngModel)]="user.email"
-           #email="ngModel"
-           [pattern]="emailRegex"
-           required
-           [ngClass]="{error: email.errors && ((email.touched || email.dirty || submitted) && email.invalid)}" />
-<div *ngIf="email.errors && ((email.touched || email.dirty || submitted) && email.invalid)">
-<p-message *ngIf="email.errors['required']" severity="error" text="Email is required"></p-message>
-<p-message *ngIf="email.errors['pattern']" severity="error" text="Not a Valid Format"></p-message>
-</div>
-</div>
-</div> 
-</div>
+        <!-- User Name -->
+        <div class="form-field">
+          <label class="required" for="name">User Name</label>
+          <input type="text" pInputText id="name"
+                 [(ngModel)]="user.name"
+                 #name="ngModel"
+                 required
+                 [ngClass]="{'ng-invalid ng-dirty': submitted && !user.name}" />
+          <p-message *ngIf="((name.touched || name.dirty || submitted) && name.invalid)" severity="error" text="User Name is required"></p-message>
+        </div>
 
-    </ng-template>
+        <!-- Password -->
+        <div class="form-field">
+          <label class="required" for="password">Password</label>
+          <p-password id="password"
+                      [(ngModel)]="user.password"
+                      required
+                      #password="ngModel"
+                      [toggleMask]="true"
+                      styleClass="mb-5"
+                      inputStyleClass="w-full p-3 md:w-40rem"
+                      [ngClass]="{'ng-invalid ng-dirty': submitted && !user.password}">
+          </p-password>
+          <p-message *ngIf="((password.touched || password.dirty || submitted) && password.invalid)" severity="error" text="Password is required"></p-message>
+        </div>
+
+        <!-- Email -->
+        <div class="form-field">
+          <label class="required" for="email">Email</label>
+          <input type="email" pInputText id="email"
+                 [(ngModel)]="user.email"
+                 #email="ngModel"
+                 [pattern]="emailRegex"
+                 required
+                 [ngClass]="{error: email.errors && ((email.touched || email.dirty || submitted) && email.invalid)}" />
+          <div *ngIf="email.errors && ((email.touched || email.dirty || submitted) && email.invalid)">
+            <p-message *ngIf="email.errors['required']" severity="error" text="Email is required"></p-message>
+            <p-message *ngIf="email.errors['pattern']" severity="error" text="Not a Valid Format"></p-message>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 
     <ng-template pTemplate="footer">
       <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"

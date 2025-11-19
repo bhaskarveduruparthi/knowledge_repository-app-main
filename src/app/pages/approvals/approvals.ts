@@ -47,7 +47,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-managerepos',
+    selector: 'app-approvals',
     standalone: true,
     styles: `
         .custom-file-input {
@@ -167,16 +167,7 @@ interface ExportColumn {
     template: `
         <p-toast />
         <div class="card">
-            <p-toolbar styleClass="mb-6">
-                <ng-template #start>
-                    <p-button label="Create Repository" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
-                </ng-template>
-                <ng-template #end>
-                    <p-button label="Upload Repos" icon="pi pi-upload" severity="help" (click)="upload_dialog()" />
-                    <span style="margin-left: 1rem;"></span>
-                    <p-button label="Export to Excel" icon="pi pi-download" severity="success" (onClick)="exportCSV()" [disabled]="!isExportEnabled" />
-                </ng-template>
-            </p-toolbar>
+            
             <p-table
                 #dt
                 [value]="repositories() || []"
@@ -191,7 +182,7 @@ interface ExportColumn {
             >
                 <ng-template #caption>
                     <div class="flex items-center justify-between">
-                        <h5 class="m-0">Manage Repository</h5>
+                        <h5 class="m-0">Manage Approvals</h5>
                         <p-iconfield>
                             <p-inputicon styleClass="pi pi-search" />
                             <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
@@ -246,10 +237,9 @@ interface ExportColumn {
                         <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
                         <td>
                             <div class="flex" style="min-width: 100px;">
-                                <button pButton pRipple icon="pi pi-send"  class="p-button-rounded p-button-help mr-2" *ngIf="sendforapproval"   (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"  ></button> 
+                               
                                 <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-info mr-2" *ngIf="isvalid" (click)="approve_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
-                                <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info mr-2" *ngIf="attachvalid" (click)="upload_ref(repo)"   ></button>
-                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
+                                
                             </div>
                         </td>
                     </tr>
@@ -263,55 +253,12 @@ interface ExportColumn {
             <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
         </div>
 
-<p-dialog [(visible)]="uploaddialog" header="Upload Repositories" [modal]="true" [style]="{ width: '450px' }">
-    <div class="flex align-items-c justify-content-c">
-        <div>
-            <label class="custom-file-label">Choose Excel and Attachments</label>
-            <input type="file" class="custom-file-input" multiple (change)="onFilesSelected($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
-        </div>
-    </div>
-    <ng-template pTemplate="footer">
-        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploaddialog = false"></button>
-        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Upload" (click)="uploadFiles()" [disabled]="!selectedFiles.length"></button>
-    </ng-template>
-</p-dialog>
+
 
 
 
         <!-- Your main form can be elsewhere in your template -->
 
-<p-dialog [(visible)]="sendforapprovaldialog" header="Send the Repository for Approval" [modal]="true" [style]="{ width: '450px' }">
-  <div class="flex align-items-c justify-content-c">
-    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-    <span *ngIf="repository">
-      Are you sure you want to Send the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository for Approval?
-    </span>
-  </div>
-  <br>
-  <ng-template pTemplate="content">
-    <form [formGroup]="approvalForm">
-      <label class="required" for="business_justification">Business Justification</label>
-      <textarea id="business_justification" pInputTextarea rows="3" formControlName="business_justification"></textarea>
-
-      <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['required'] && approvalForm.controls['business_justification'].touched"
-        severity="error" text="Business Justification is required"></p-message>
-      <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['minlength'] && approvalForm.controls['business_justification'].touched"
-        severity="error" text="Minimum 10 characters required"></p-message>
-      <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['maxlength'] && approvalForm.controls['business_justification'].touched"
-        severity="error" text="Maximum 250 characters allowed"></p-message>
-    </form>
-  </ng-template>
-  <ng-template pTemplate="footer">
-    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
-    <button pButton 
-      pRipple 
-      icon="pi pi-check" 
-      class="p-button-text" 
-      label="Yes" 
-      (click)="Repo_approval(repository)" 
-      [disabled]="approvalForm.invalid"></button>
-  </ng-template>
-</p-dialog>
 
 <p-dialog [(visible)]="approvedialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
   <div class="flex align-items-c justify-content-c">
@@ -348,179 +295,17 @@ interface ExportColumn {
 
 
 
-<p-dialog [(visible)]="createdialog" header="Create Repository" [modal]="true" [style]="{ width: '1000px' }" [resizable]="false">
-            <ng-template pTemplate="content">
-                <form [formGroup]="repoForm" (ngSubmit)="onSubmit()" class="responsive-form">
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label class="required" for="customer_name">Customer Name</label>
-                            <input id="customer_name" pInputText formControlName="customer_name" />
-                            <p-message *ngIf="repoForm.controls['customer_name'].invalid && repoForm.controls['customer_name'].touched" severity="error" text="Customer Name is required"></p-message>
-                        </div>
-                        <div  class="form-field">
-                            <label class="required" for="domain">Domain</label>
-                            <p-autoComplete
-  inputId="domain"
-  formControlName="domain"
-  [suggestions]="filteredDomains"
-  (completeMethod)="filterDomain($event)"
-  [forceSelection]="true"
-  [dropdown]="true"
-  [minLength]="1"
-  
-  placeholder="Select Domain"
-></p-autoComplete>
-                            <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="sector">Sector</label>
-                            <input id="sector" pInputText formControlName="sector" />
-                            <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="module_name">Module Name</label>
-                            <p-autoComplete
-  inputId="modulename"
-  formControlName="module_name"
-  [suggestions]="filteredModules"
-  (completeMethod)="filterModule($event)"
-  [forceSelection]="true"
-  [dropdown]="true"
-  [minLength]="1"
-  placeholder="Select Module"
-></p-autoComplete>
-                            <p-message *ngIf="repoForm.controls['module_name'].invalid && repoForm.controls['module_name'].touched" severity="error" text="Module Name is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="detailed_requirement">Detailed Requirement</label>
-                            <textarea id="detailed_requirement" pInputTextarea rows="3" formControlName="detailed_requirement"></textarea>
-                            <p-message *ngIf="repoForm.controls['detailed_requirement'].invalid && repoForm.controls['detailed_requirement'].touched" severity="error" text="Detailed Requirement is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="standard_custom">Standard/Custom</label>
-                            <input id="standard_custom" pInputText formControlName="standard_custom" />
-                            <p-message *ngIf="repoForm.controls['standard_custom'].invalid && repoForm.controls['standard_custom'].touched" severity="error" text="Standard/Custom is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="technical_details">Technical Details</label>
-                            <textarea id="technical_details" pInputTextarea rows="3" formControlName="technical_details"></textarea>
-                            <p-message *ngIf="repoForm.controls['technical_details'].invalid && repoForm.controls['technical_details'].touched" severity="error" text="Technical Details is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="customer_benefit">Customer Benefit</label>
-                            <input id="customer_benefit" pInputText formControlName="customer_benefit" />
-                            <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label class="required" for="remarks">Remarks</label>
-                            <input id="remarks" pInputText formControlName="remarks" />
-                            <p-message *ngIf="repoForm.controls['remarks'].invalid && repoForm.controls['remarks'].touched" severity="error" text="Remarks is required"></p-message>
-                        </div>
-                        
-                    </div>
-                    
-                </form>
-            </ng-template>
-             <ng-template pTemplate="footer">
-                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="createdialog = false"></button>
-                <button pButton type="submit" pRipple icon="pi pi-check" class="p-button-text" label="Add" [disabled]="repoForm.invalid" (click)="onSubmit()"  ></button>
-            </ng-template>
-</p-dialog>
-
-<p-dialog [(visible)]="editrepodialog" header="Create Repository" [modal]="true" [style]="{ width: '700px' }" [resizable]="false">
-            <ng-template pTemplate="content">
-                <form [formGroup]="repoForm" (ngSubmit)="onSubmit()" class="responsive-form">
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label for="customer_name">Customer Name</label>
-                            <input id="customer_name" pInputText formControlName="customer_name" />
-                            <p-message *ngIf="repoForm.controls['customer_name'].invalid && repoForm.controls['customer_name'].touched" severity="error" text="Customer Name is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="domain">Domain</label>
-                            <input id="domain" pInputText formControlName="domain" />
-                            <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="sector">Sector</label>
-                            <input id="sector" pInputText formControlName="sector" />
-                            <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="module_name">Module Name</label>
-                            <input id="module_name" pInputText formControlName="module_name" />
-                            <p-message *ngIf="repoForm.controls['module_name'].invalid && repoForm.controls['module_name'].touched" severity="error" text="Module Name is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="detailed_requirement">Detailed Requirement</label>
-                            <textarea id="detailed_requirement" pInputTextarea rows="3" formControlName="detailed_requirement"></textarea>
-                            <p-message *ngIf="repoForm.controls['detailed_requirement'].invalid && repoForm.controls['detailed_requirement'].touched" severity="error" text="Detailed Requirement is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="standard_custom">Standard/Custom</label>
-                            <input id="standard_custom" pInputText formControlName="standard_custom" />
-                            <p-message *ngIf="repoForm.controls['standard_custom'].invalid && repoForm.controls['standard_custom'].touched" severity="error" text="Standard/Custom is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="technical_details">Technical Details</label>
-                            <textarea id="technical_details" pInputTextarea rows="3" formControlName="technical_details"></textarea>
-                            <p-message *ngIf="repoForm.controls['technical_details'].invalid && repoForm.controls['technical_details'].touched" severity="error" text="Technical Details is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="customer_benefit">Customer Benefit</label>
-                            <input id="customer_benefit" pInputText formControlName="customer_benefit" />
-                            <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="remarks">Remarks</label>
-                            <input id="remarks" pInputText formControlName="remarks" />
-                            <p-message *ngIf="repoForm.controls['remarks'].invalid && repoForm.controls['remarks'].touched" severity="error" text="Remarks is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="code_document">Code/Process Document</label>
-                            <input id="code_document" pInputText formControlName="code_document" />
-                            <p-message *ngIf="repoForm.controls['code_document'].invalid && repoForm.controls['code_document'].touched" severity="error" text="Code/Process Document is required"></p-message>
-                        </div>
-                    </div>
-                    <div style="margin-top:24px;">
-                        <button pButton type="submit" label="Submit" [disabled]="repoForm.invalid"></button>
-                    </div>
-                </form>
-            </ng-template>
-</p-dialog>
 
 
-<p-dialog [(visible)]="uploadcodeprocessdocdialog" header="Attach Code/Process Document for Reference" [modal]="true" [style]="{ width: '450px' }">
-    <div class="flex align-items-c justify-content-c">
-        <div>
-            <label class="custom-file-label">Choose Excel or Attachments</label>
-            <input type="file" class="custom-file-input" multiple (change)="onUpload($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
-        </div>
-    </div>
-    <ng-template pTemplate="footer">
-        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploadcodeprocessdocdialog = false"></button>
-        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Attach" (click)="submitData(repository)"   ></button>
-    </ng-template>
-</p-dialog>
 
-<p-dialog [(visible)]="deleteRepoDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
-    <div class="flex align-items-c justify-content-c">
-      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-      <span *ngIf="repository">
-      Are you sure you want to delete the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
-    </span>
-    </div>
-    <ng-template pTemplate="footer">
-      <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No"
-        (click)="deleteRepoDialog = false"></button>
-      <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes"
-       (click)="delete_repo(repository)" ></button>
-    </ng-template>
-  </p-dialog>
+
+
+
+
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
-export class ManageRepos implements OnInit {
+export class ManageApprovals implements OnInit {
     adminDialog: boolean = false;
     repositories = signal<Repository[]>([]);
     repository!: Repository;
@@ -551,57 +336,6 @@ export class ManageRepos implements OnInit {
     deleteRepoDialog: boolean = false;
 
     file: any;
-   domainOptions = [
-  'Manufacturing',
-  'Pharma',
-  'Chemical',
-  'Automotive',
-  'Agriculture',
-  'Engineering Services',
-  'Life Sciences',
-  'Insurance',
-  'Financial Services',
-  'Oil and Gas',
-  'Retail',
-  'Banking Services',
-  'Poultry',
-  'Utilities'
-];
-
-filteredDomains: string[] = [];
-
-moduleOptions = [
-  'FI: Financial Accounting',
-  'CO: Controlling',
-  'MM: Materials Management',
-  'SD: Sales and Distribution',
-  'HCM: Human Capital Management',
-  'PP: Production Planning',
-  'PM: Plant Maintenance',
-  'QM: Quality Management',
-  'PS: Project System',
-  'FSCM: Financial Supply Chain Management',
-  'SRM: Supplier Relationship Management',
-  'CRM: Customer Relationship Management',
-  'LE: Logistics Execution',
-  'EWM: Extended Warehouse Management',
-  'TRM: Treasury and Risk Management',
-  'FM: Funds Management',
-  'IM: Investment Management',
-  'PLM: Product Lifecycle Management',
-  'BI/BW: Business Intelligence / Business Warehouse',
-  'GRC: Governance, Risk, and Compliance',
-  'MDM: Master Data Management',
-  'EHS: Environment, Health, and Safety',
-  'SEM: Strategic Enterprise Management',
-  'BASIS: SAP Basis (technical administration)',
-  'ABAP: Advanced Business Application Programming (development)',
-  'PI/XI: Process Integration / Exchange Infrastructure (middleware)',
-  'EP: Enterprise Portal',
-  'SOLMAN: SAP Solution Manager'
-];
-
-filteredModules: string[] = [];
 
     editrepodialog: boolean = false;
 business_justification: any;
@@ -691,16 +425,9 @@ business_justification: any;
   );
 }
 
-filterModule(event: any) {
-  const query = event.query.toLowerCase();
-  this.filteredModules = this.moduleOptions.filter(option =>
-    option.toLowerCase().includes(query)
-  );
-}
-
 
     loadDemoData(page: number) {
-        this.managereposervice.getallrepos(page).subscribe((data: any) => {
+        this.managereposervice.get_approval_repos(page).subscribe((data: any) => {
             if (Array.isArray(data)) {
                 this.repositories.set(data);
             } else {
@@ -929,14 +656,6 @@ onUpload(event: any) {
         this.repoForm.reset();
     }
 
-
-    filterDomain(event: any) {
-  const query = event.query.toLowerCase();
-  this.filteredDomains = this.domainOptions.filter(option =>
-    option.toLowerCase().includes(query)
-  );
-}
-
     upload_dialog() {
         this.uploaddialog = true;
     }
@@ -972,7 +691,7 @@ onUpload(event: any) {
     }
 
     form_records() {
-        this.managereposervice.get_repo_records().subscribe((data: any) => {
+        this.managereposervice.get_approval_records().subscribe((data: any) => {
             this.totalitems = data.length;
             this.totalrecords = data.totalrecords;
         });
