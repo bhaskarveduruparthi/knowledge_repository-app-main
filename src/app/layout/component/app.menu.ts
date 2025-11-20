@@ -49,7 +49,7 @@ export class AppMenu implements OnInit {
             label: 'Support',
             icon: '',
             items:[
-                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageapprovals'] }
+                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
             ]
         }
     ];
@@ -71,7 +71,7 @@ export class AppMenu implements OnInit {
             label: 'Support',
             icon: '',
             items:[
-                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageapprovals'] }
+                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
             ]
         }
     ];
