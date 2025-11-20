@@ -227,7 +227,10 @@ interface ExportColumn {
 
             <div class="flex items-center justify-between mb-3">
                 <h5 class="m-0">Manage Repositories</h5>
-                
+                <!--<p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input pInputText type="text" (input)="onSearch($event)" placeholder="Search..." />
+                </p-iconfield>-->
             </div>
 
             <div class="custom-table-container">
@@ -235,7 +238,8 @@ interface ExportColumn {
                     <thead>
                         <tr>
                             <th>
-                                </th>
+                                Select
+                            </th>
                             <th>Customer Name</th>
                             <th>Domain</th>
                             <th>Sector</th>
@@ -255,7 +259,7 @@ interface ExportColumn {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let repo of repositories()">
+                        <tr *ngFor="let repo of repositories()" >
                             <td>
                                 <input type="checkbox" 
                                     [checked]="isRepoSelected(repo)" 
@@ -472,8 +476,8 @@ export class ManageRepos implements OnInit {
     selectedrepositories: Repository[] = [];
     submitted: boolean = false;
     selectedFile: File | null = null;
-    
-    // @ViewChild('dt') dt!: Table; // REMOVED: No longer using PrimeNG table
+    searchTerm: string = '';
+    filteredRepoList: Repository[] = [];
     
     exportColumns!: ExportColumn[];
     isvalid: boolean = false;
@@ -592,6 +596,24 @@ export class ManageRepos implements OnInit {
                 this.attachvalid = true;
             }
         });
+    }
+
+
+    onSearch(event: Event) {
+        const value = (event.target as HTMLInputElement).value.toLowerCase();
+        this.searchTerm = value;
+        this.first = 0; // Reset to first page on search
+
+        if (!value) {
+            this.filteredRepoList = this.repositories();
+        } else {
+            this.filteredRepoList = this.repositories().filter(repository => 
+                repository.customer_name?.includes(value) || 
+                repository.module_name?.includes(value) || 
+                repository.domain?.includes(value) || 
+                repository.sector?.includes(value)
+            );
+        }
     }
 
     downloadWorkbook(id: number, filename: string) {

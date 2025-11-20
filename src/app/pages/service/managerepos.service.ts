@@ -107,8 +107,31 @@ downloadWorkbook(id: number): Observable<Blob> {
     return this.http.get(`${this.url}/repos/repodatabydomain`);
   }
 
+  upvoteAnswer(answerId: number) {
+  return this.http.post(`${this.url}support/upvote/${answerId}`, {});
+  }
+
+  downvoteAnswer(answerId: number) {
+    return this.http.post(`${this.url}support/downvote/${answerId}`, {});
+  }
+
+
   getdatabymodule(){
     return this.http.get(`${this.url}/repos/repodatabymodule`);
+  }
+
+  getQuestions(): Observable<any> {
+    return this.http.get<any>(`${this.url}support/getquestions`);
+  }
+
+  // Create a new question
+  createQuestion(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.url}support/createquestion`, payload);
+  }
+
+  // Create a new answer
+  createAnswer(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.url}support/createanswer`, payload);
   }
 
   

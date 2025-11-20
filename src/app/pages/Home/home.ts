@@ -26,7 +26,6 @@ import { PanelModule } from 'primeng/panel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 
-// Make sure these paths are correct for your project structure
 import { ManageReposService } from '../service/managerepos.service';
 import { AuthenticationService } from '../service/authentication.service';
 import { ManageAdminsService } from '../service/manageadmins.service';
@@ -168,27 +167,60 @@ import { debounceTime, Subject } from 'rxjs';
       background-color: #2563eb;
     }
     .cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.cards-container p-card {
-  flex: 1 1 320px; /* Minimum width; grows for small results */
-  max-width: 420px; /* Prevent excessive width */
-  min-width: 320px;
-  box-sizing: border-box;
-}
-
-.cards-container.single-card p-card {
-  flex: 0 1 420px;
-  max-width: 520px;
-  min-width: 320px;
-  margin: auto;
-}
-
-
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    .cards-container p-card {
+      flex: 1 1 320px;
+      max-width: 420px;
+      min-width: 320px;
+      min-height: 260px;
+      box-sizing: border-box;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.125);
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .cards-container p-card:hover {
+      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.18);
+    }
+    .cards-container .card-content {
+      padding: 1.5rem;
+      color: #19202C;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .more-info-row {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex: 1;
+    }
+    .cards-container p-card .p-card-header {
+      background: rgba(255,255,255,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: 24px 24px 0 0;
+    }
+    .cards-container.single-card p-card {
+      flex: 0 1 420px;
+      max-width: 520px;
+      min-width: 320px;
+      margin: auto;
+    }
     .card-content p {
       margin: 0.25rem 0;
     }
@@ -197,7 +229,6 @@ import { debounceTime, Subject } from 'rxjs';
     <p-toast></p-toast>
     <div class="center-wrapper">
       <div class="greeting">Hello, {{ username }}!</div>
-
       <div class="search-wrapper">
         <div class="search-container">
           <select 
@@ -209,18 +240,14 @@ import { debounceTime, Subject } from 'rxjs';
             <option value="" disabled selected hidden>Filter By</option>
             <option *ngFor="let option of filterOptions" [value]="option">{{ option }}</option>
           </select>
-
           <div class="divider"></div>
-
           <input 
             type="text" 
             [(ngModel)]="searchText" 
             placeholder="Search Repository..." 
             (ngModelChange)="onSearchInputChange($event)"
             class="search-input"
-            
           />
-
           <button class="search-button" (click)="onSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
@@ -231,50 +258,48 @@ import { debounceTime, Subject } from 'rxjs';
             <span>Search</span>
           </button>
           <button 
-  *ngIf="searchText.trim()" 
-  class="search-button" 
-  style="background-color: #6b7280; margin-left: 8px;" 
-  (click)="clearSearch()"
->
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-  <span>Clear</span>
-</button>
+            *ngIf="searchText.trim()" 
+            class="search-button" 
+            style="background-color: #6b7280; margin-left: 8px;" 
+            (click)="clearSearch()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>Clear</span>
+          </button>
         </div>
       </div>
       <span
-  *ngIf="searchResults.length > 0"
-  style="display: block; margin-bottom: 1rem; font-size: 1.1rem; color: #3b82f6; font-weight: 500;"
->
-  Search Results
-</span>
-<span
-  *ngIf="searchResults.length === 0 && searchText.trim()"
-  style="display: block; margin-bottom: 1rem; font-size: 1.1rem; color: #ef4444; font-weight: 500;"
->
-  No Results Found
-</span>
-
+        *ngIf="searchResults.length > 0"
+        style="display: block; margin-bottom: 1rem; font-size: 1.1rem; color: #3b82f6; font-weight: 500;"
+      >
+        Search Results
+      </span>
+      <span
+        *ngIf="searchResults.length === 0 && searchText.trim()"
+        style="display: block; margin-bottom: 1rem; font-size: 1.1rem; color: #ef4444; font-weight: 500;"
+      >
+        No Results Found
+      </span>
       <div class="cards-container" [ngClass]="{'single-card': searchResults.length === 1}" >
-  <p-card 
-    *ngFor="let repo of searchResults" 
-    header="{{ repo.module_name }} - {{ repo.domain }}" 
-    
-  >
-    <ng-template pTemplate="content">
-      <div class="card-content">
-        <p><b>Customer:</b> {{ repo.customer_name }}</p>
-        <p><b>Sector:</b> {{ repo.sector }}</p>
-        <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
-        <button pButton type="button" label="More Info" (click)="showDetails(repo)"></button>
+        <p-card 
+          *ngFor="let repo of searchResults" 
+          header="{{ repo.module_name }} - {{ repo.domain }}" 
+          
+        >
+          <ng-template pTemplate="content">
+            <div class="card-content">
+              <p><b>Customer:</b> {{ repo.customer_name }}</p>
+              <p><b>Sector:</b> {{ repo.sector }}</p>
+              <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
+              <div class="more-info-row">
+                <button pButton type="button" label="More Info" (click)="showDetails(repo)"></button>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
       </div>
-    </ng-template>
-  </p-card>
-</div>
-
-
       <p-dialog 
         header="Repository Details" 
         [(visible)]="dialogVisible" 
@@ -292,7 +317,6 @@ import { debounceTime, Subject } from 'rxjs';
           <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
           <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
           <p><b>Remarks:</b> {{ selectedRepo.remarks }}</p>
-          <!-- Add more fields as needed -->
         </div>
       </p-dialog>
     </div>
@@ -331,14 +355,14 @@ export class Home implements OnInit {
   ngOnInit() {
     this.setGreetingMessage();
     this.searchInputChanged.pipe(
-    debounceTime(300) // adjust delay as needed
-  ).subscribe(value => {
-    if (value.trim()) {
-      this.onSearch();
-    } else {
-      this.searchResults = [];
-    }
-  });
+      debounceTime(300)
+    ).subscribe(value => {
+      if (value.trim()) {
+        this.onSearch();
+      } else {
+        this.searchResults = [];
+      }
+    });
   }
 
   setGreetingMessage() {
@@ -369,11 +393,10 @@ export class Home implements OnInit {
   }
 
   clearSearch() {
-  this.selectedFilter = '';
-  this.searchText = '';
-  this.searchResults = [];
-}
-
+    this.selectedFilter = '';
+    this.searchText = '';
+    this.searchResults = [];
+  }
 
   showDetails(repo: any) {
     this.selectedRepo = repo;
@@ -381,9 +404,8 @@ export class Home implements OnInit {
   }
 
   onSearchInputChange(value: string) {
-  this.searchInputChanged.next(value);
+    this.searchInputChanged.next(value);
   }
-
 
   closeDetails() {
     this.selectedRepo = null;

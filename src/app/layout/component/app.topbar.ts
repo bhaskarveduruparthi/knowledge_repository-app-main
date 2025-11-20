@@ -388,5 +388,7 @@ getUserInitials(): string {
 
   logout() {
     this.authservice.logout();
+    localStorage.removeItem('CurrentPage');
+
   }
 }
