@@ -1,5 +1,5 @@
 import { PaginatorModule } from 'primeng/paginator';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { UrlService } from './url.service';
 import { Observable } from 'rxjs';
@@ -64,6 +64,14 @@ downloadWorkbook(id: number): Observable<Blob> {
   delete_repo(repository: Repository) {
     
     return this.http.delete(`${this.url}repos/deleterepo/${repository.id}`);
+  }
+
+  searchRepositories(filter: string, query: string): Observable<any> {
+    let params = new HttpParams();
+    params = params.append('filter', filter);
+    params = params.append('query', query);
+
+    return this.http.get<any>(`${this.url}repos/search`, { params });
   }
 
 

@@ -93,9 +93,9 @@ export class Login {
       this.auth.userValue = data;
       localStorage.setItem('user', JSON.stringify(data));
       if (data?.type == 'Superadmin') {
-        this.router.navigate(['/app/pages/manageusers']);
-      } else {
         this.router.navigate(['/app']);
+      } else {
+        this.router.navigate(['/app/pages/home']);
       }
     });
   }

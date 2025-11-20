@@ -274,11 +274,11 @@ export class AppTopbar implements OnInit {
             icon: 'pi pi-user',
             command: () => this.openprofile(),
           },
-          {
+          /*{
             label: isDarkMode ? 'Turn Dark Mode Off' : 'Turn Dark Mode On',
             icon: 'pi pi-moon',
             command: () => this.toggleDarkMode(),
-          },
+          },*/
           {
             label: 'Change Password',
             icon: 'pi pi-key',

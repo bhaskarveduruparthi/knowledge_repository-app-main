@@ -28,7 +28,7 @@ interface MenuChangeEvent {
 export class LayoutService {
     _config: layoutConfig = {
         preset: 'Material',
-        primary: 'indigo',
+        primary: 'teal',
         surface: 'ocean',
         darkTheme: false,
         menuMode: 'overlay'

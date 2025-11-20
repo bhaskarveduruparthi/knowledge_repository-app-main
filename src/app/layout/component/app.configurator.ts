@@ -115,7 +115,7 @@ export class AppConfigurator {
     menuModeOptions = [
         { label: 'Static', value: 'static' },
         { label: 'Overlay', value: 'overlay' },
-        {label: 'Compact', value:'compact'}
+        
     ];
 
     ngOnInit() {

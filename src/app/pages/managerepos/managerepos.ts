@@ -1,8 +1,8 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core'; // Removed ViewChild
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+// Removed Table, TableModule imports
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
@@ -50,6 +50,7 @@ interface ExportColumn {
     selector: 'app-managerepos',
     standalone: true,
     styles: `
+        /* --- Existing Styles --- */
         .custom-file-input {
             border: 1px solid #ced4da;
             border-radius: 6px;
@@ -74,7 +75,7 @@ interface ExportColumn {
             font-weight: 500;
         }
 
-        .card {
+        /*.card {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 15px;
             backdrop-filter: blur(10px);
@@ -85,15 +86,63 @@ interface ExportColumn {
             color: #222;
             display: flex;
             flex-direction: column;
+        }*/
+
+        /* --- NEW CUSTOM TABLE STYLES --- */
+        .custom-table-container {
+            width: 100%;
+            overflow-x: auto; /* Horizontal scroll for small screens */
+            margin-bottom: 1rem;
+            border-radius: 8px;
         }
 
+        .glass-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 75rem; /* Match previous tableStyle min-width */
+            font-size: 0.95rem;
+        }
+
+        .glass-table thead th {
+            text-align: left;
+            padding: 1rem;
+            font-weight: bold;
+            color: #11224E;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+            white-space: nowrap;
+        }
+
+        .glass-table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            vertical-align: middle;
+            color: #222;
+        }
+
+        .glass-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        /* Hover effect matching glass theme */
+        .glass-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Checkbox styling */
+        .glass-table input[type="checkbox"] {
+            accent-color: #11224E;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* --- Form Styles --- */
         .responsive-form .custom-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
         }
 
-        /* Adapt to single column on small screens */
         @media (max-width: 700px) {
             .responsive-form .custom-grid {
                 grid-template-columns: 1fr;
@@ -125,20 +174,18 @@ interface ExportColumn {
         }
 
         label.required:after {
-    content: "*";
-    color: red;
-    /* Or any preferred color */
-    margin-left: 5px;
-    /* Adjust as needed */
-}
+            content: "*";
+            color: red;
+            margin-left: 5px;
+        }
 
-.error {
-    border: 1px solid red;
-}
+        .error {
+            border: 1px solid red;
+        }
     `,
     imports: [
         CommonModule,
-        TableModule,
+        // TableModule, // REMOVED
         FormsModule,
         ReactiveFormsModule,
         ButtonModule,
@@ -177,178 +224,146 @@ interface ExportColumn {
                     <p-button label="Export to Excel" icon="pi pi-download" severity="success" (onClick)="exportCSV()" [disabled]="!isExportEnabled" />
                 </ng-template>
             </p-toolbar>
-            <p-table
-                #dt
-                [value]="repositories() || []"
-                [rows]="10"
-                [loading]="loading"
-                [rowHover]="true"
-                [columns]="cols"
-                dataKey="id"
-                [globalFilterFields]="['customer_name', 'domain', 'sector', 'module_name']"
-                [showCurrentPageReport]="true"
-                [tableStyle]="{ 'min-width': '75rem' }"
-            >
-                <ng-template #caption>
-                    <div class="flex items-center justify-between">
-                        <h5 class="m-0">Manage Repository</h5>
-                        <p-iconfield>
-                            <p-inputicon styleClass="pi pi-search" />
-                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-                        </p-iconfield>
-                    </div>
-                </ng-template>
-                <ng-template #header>
-                    <tr>
-                        <th></th>
-                        <!-- Checkbox header -->
-                        
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Customer Name</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Domain</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Sector</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Module Name</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Detailed Requirement</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Standard/Custom</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Technical details(Z object name or Process developed/configured)</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Customer Benefit</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Remarks</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Code/Process Document</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Created On</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Business Justification</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Repo Status</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Repo Approver</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Repo Approval Date</th>
-                        <th style="font-weight: bold; color: #11224E;">Actions</th>
-                    </tr>
-                </ng-template>
-                <ng-template #body let-repo>
-                    <tr>
-                        <td>
-                            <input type="checkbox" [checked]="isRepoSelected(repo)" (change)="onCheckboxChange(repo, $event)" [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
-                        </td>
-                        
-                        <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                        <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                        <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                        <td style="white-space: nowrap;">{{ repo.module_name }}</td>
-                        <td>{{ repo.detailed_requirement }}</td>
-                        <td>{{ repo.standard_custom }}</td>
-                        <td>{{ repo.technical_details }}</td>
-                        <td>{{ repo.customer_benefit }}</td>
-                        <td>{{ repo.remarks }}</td>
-                        <td>
-                        <p-button label="Download" icon="pi pi-download" severity="primary" (click)="download_ref(repo, repo.id)" />
-</td>       
-                        <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
-                        <td>{{repo.business_justification}}</td>
-                        <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
-                        <td style="white-space: nowrap;">{{ repo.Approver }}</td>
-                        <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
-                        <td>
-                            <div class="flex" style="min-width: 100px;">
-                                <button pButton pRipple icon="pi pi-send"  class="p-button-rounded p-button-help mr-2" *ngIf="sendforapproval"   (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"  ></button> 
-                                <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-info mr-2" *ngIf="isvalid" (click)="approve_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
-                                <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info mr-2" *ngIf="attachvalid" (click)="upload_ref(repo)"   ></button>
-                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage">
-                    <tr>
-                        <td colspan="17">No Repositories found.</td>
-                    </tr>
-                </ng-template>
-            </p-table>
+
+            <div class="flex items-center justify-between mb-3">
+                <h5 class="m-0">Manage Repositories</h5>
+                
+            </div>
+
+            <div class="custom-table-container">
+                <table class="glass-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                </th>
+                            <th>Customer Name</th>
+                            <th>Domain</th>
+                            <th>Sector</th>
+                            <th>Module Name</th>
+                            <th>Detailed Requirement</th>
+                            <th>Standard/Custom</th>
+                            <th>Technical details</th>
+                            <th>Customer Benefit</th>
+                            <th>Remarks</th>
+                            <th>Code/Process Document</th>
+                            <th>Created On</th>
+                            <th>Business Justification</th>
+                            <th>Repo Status</th>
+                            <th>Repo Approver</th>
+                            <th>Repo Approval Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let repo of repositories()">
+                            <td>
+                                <input type="checkbox" 
+                                    [checked]="isRepoSelected(repo)" 
+                                    (change)="onCheckboxChange(repo, $event)" 
+                                    [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
+                            </td>
+                            <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
+                            <td style="white-space: nowrap;">{{ repo.domain }}</td>
+                            <td style="white-space: nowrap;">{{ repo.sector }}</td>
+                            <td style="white-space: nowrap;">{{ repo.module_name }}</td>
+                            <td>{{ repo.detailed_requirement }}</td>
+                            <td>{{ repo.standard_custom }}</td>
+                            <td>{{ repo.technical_details }}</td>
+                            <td>{{ repo.customer_benefit }}</td>
+                            <td>{{ repo.remarks }}</td>
+                            <td>
+  <p-button 
+    label="Download" 
+    icon="pi pi-download" 
+    severity="primary" 
+    (click)="download_ref(repo, repo.id)" 
+    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+  </p-button>
+</td>
+
+                            <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
+                            <td>{{ repo.business_justification }}</td>
+                            <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
+                            <td style="white-space: nowrap;">{{ repo.Approver }}</td>
+                            <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
+                            <td>
+                                <div class="flex" style="min-width: 100px; gap: 0.5rem;">
+                                    <button pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-help" *ngIf="sendforapproval" (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
+                                    <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-info" *ngIf="isvalid" (click)="approve_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
+                                    <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="attachvalid" (click)="upload_ref(repo)"></button>
+                                    <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="repositories().length === 0 && !loading">
+                            <td colspan="17" style="text-align:center; padding: 2rem;">No Repositories found.</td>
+                        </tr>
+                         <tr *ngIf="loading">
+                            <td colspan="17" style="text-align:center; padding: 2rem;">Loading Data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
+        
         </div>
+        <p-dialog [(visible)]="uploaddialog" header="Upload Repositories" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-c justify-content-c">
+                <div>
+                    <label class="custom-file-label">Choose Excel and Attachments</label>
+                    <input type="file" class="custom-file-input" multiple (change)="onFilesSelected($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploaddialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Upload" (click)="uploadFiles()" [disabled]="!selectedFiles.length"></button>
+            </ng-template>
+        </p-dialog>
 
-<p-dialog [(visible)]="uploaddialog" header="Upload Repositories" [modal]="true" [style]="{ width: '450px' }">
-    <div class="flex align-items-c justify-content-c">
-        <div>
-            <label class="custom-file-label">Choose Excel and Attachments</label>
-            <input type="file" class="custom-file-input" multiple (change)="onFilesSelected($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
-        </div>
-    </div>
-    <ng-template pTemplate="footer">
-        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploaddialog = false"></button>
-        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Upload" (click)="uploadFiles()" [disabled]="!selectedFiles.length"></button>
-    </ng-template>
-</p-dialog>
+        <p-dialog [(visible)]="sendforapprovaldialog" header="Send the Repository for Approval" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-c justify-content-c">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="repository">
+                    Are you sure you want to Send the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository for Approval?
+                </span>
+            </div>
+            <br>
+            <ng-template pTemplate="content">
+                <form [formGroup]="approvalForm">
+                    <label class="required" for="business_justification">Business Justification</label>
+                    <textarea id="business_justification" pInputTextarea rows="3" formControlName="business_justification"></textarea>
+                    <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['required'] && approvalForm.controls['business_justification'].touched" severity="error" text="Business Justification is required"></p-message>
+                    <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['minlength'] && approvalForm.controls['business_justification'].touched" severity="error" text="Minimum 10 characters required"></p-message>
+                    <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['maxlength'] && approvalForm.controls['business_justification'].touched" severity="error" text="Maximum 250 characters allowed"></p-message>
+                </form>
+            </ng-template>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Repo_approval(repository)" [disabled]="approvalForm.invalid"></button>
+            </ng-template>
+        </p-dialog>
 
+        <p-dialog [(visible)]="approvedialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-c justify-content-c">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="repository">
+                    Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
+                </span>
+            </div>
+            <br>
+            <ng-template pTemplate="content">
+                <label for="business_justification">Business Justification</label>
+                <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
+                    {{ repository.business_justification }}
+                </div>
+            </ng-template>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Repoapproval(repository)"></button>
+            </ng-template>
+        </p-dialog>
 
-
-        <!-- Your main form can be elsewhere in your template -->
-
-<p-dialog [(visible)]="sendforapprovaldialog" header="Send the Repository for Approval" [modal]="true" [style]="{ width: '450px' }">
-  <div class="flex align-items-c justify-content-c">
-    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-    <span *ngIf="repository">
-      Are you sure you want to Send the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository for Approval?
-    </span>
-  </div>
-  <br>
-  <ng-template pTemplate="content">
-    <form [formGroup]="approvalForm">
-      <label class="required" for="business_justification">Business Justification</label>
-      <textarea id="business_justification" pInputTextarea rows="3" formControlName="business_justification"></textarea>
-
-      <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['required'] && approvalForm.controls['business_justification'].touched"
-        severity="error" text="Business Justification is required"></p-message>
-      <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['minlength'] && approvalForm.controls['business_justification'].touched"
-        severity="error" text="Minimum 10 characters required"></p-message>
-      <p-message *ngIf="approvalForm.controls['business_justification'].errors?.['maxlength'] && approvalForm.controls['business_justification'].touched"
-        severity="error" text="Maximum 250 characters allowed"></p-message>
-    </form>
-  </ng-template>
-  <ng-template pTemplate="footer">
-    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
-    <button pButton 
-      pRipple 
-      icon="pi pi-check" 
-      class="p-button-text" 
-      label="Yes" 
-      (click)="Repo_approval(repository)" 
-      [disabled]="approvalForm.invalid"></button>
-  </ng-template>
-</p-dialog>
-
-<p-dialog [(visible)]="approvedialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
-  <div class="flex align-items-c justify-content-c">
-    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-    <span *ngIf="repository">
-      Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
-    </span>
-  </div>
-  <br>
-  <ng-template pTemplate="content">
-    
-      <label for="business_justification">Business Justification</label>
-<div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
-  {{ repository.business_justification }}
-</div>
-
-
-
-      
-    
-  </ng-template>
-  <ng-template pTemplate="footer">
-    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
-    <button pButton 
-      pRipple 
-      icon="pi pi-check" 
-      class="p-button-text" 
-      label="Yes" 
-      (click)="Repoapproval(repository)" 
-      ></button>
-  </ng-template>
-</p-dialog>
-
-
-
-
-<p-dialog [(visible)]="createdialog" header="Create Repository" [modal]="true" [style]="{ width: '1000px' }" [resizable]="false">
+        <p-dialog [(visible)]="createdialog" header="Create Repository" [modal]="true" [style]="{ width: '1000px' }" [resizable]="false">
             <ng-template pTemplate="content">
                 <form [formGroup]="repoForm" (ngSubmit)="onSubmit()" class="responsive-form">
                     <div class="form-grid">
@@ -357,19 +372,9 @@ interface ExportColumn {
                             <input id="customer_name" pInputText formControlName="customer_name" />
                             <p-message *ngIf="repoForm.controls['customer_name'].invalid && repoForm.controls['customer_name'].touched" severity="error" text="Customer Name is required"></p-message>
                         </div>
-                        <div  class="form-field">
+                        <div class="form-field">
                             <label class="required" for="domain">Domain</label>
-                            <p-autoComplete
-  inputId="domain"
-  formControlName="domain"
-  [suggestions]="filteredDomains"
-  (completeMethod)="filterDomain($event)"
-  [forceSelection]="true"
-  [dropdown]="true"
-  [minLength]="1"
-  
-  placeholder="Select Domain"
-></p-autoComplete>
+                            <p-autoComplete inputId="domain" formControlName="domain" [suggestions]="filteredDomains" (completeMethod)="filterDomain($event)" [forceSelection]="true" [dropdown]="true" [minLength]="1" placeholder="Select Domain"></p-autoComplete>
                             <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
                         </div>
                         <div class="form-field">
@@ -379,16 +384,7 @@ interface ExportColumn {
                         </div>
                         <div class="form-field">
                             <label class="required" for="module_name">Module Name</label>
-                            <p-autoComplete
-  inputId="modulename"
-  formControlName="module_name"
-  [suggestions]="filteredModules"
-  (completeMethod)="filterModule($event)"
-  [forceSelection]="true"
-  [dropdown]="true"
-  [minLength]="1"
-  placeholder="Select Module"
-></p-autoComplete>
+                            <p-autoComplete inputId="modulename" formControlName="module_name" [suggestions]="filteredModules" (completeMethod)="filterModule($event)" [forceSelection]="true" [dropdown]="true" [minLength]="1" placeholder="Select Module"></p-autoComplete>
                             <p-message *ngIf="repoForm.controls['module_name'].invalid && repoForm.controls['module_name'].touched" severity="error" text="Module Name is required"></p-message>
                         </div>
                         <div class="form-field">
@@ -416,107 +412,56 @@ interface ExportColumn {
                             <input id="remarks" pInputText formControlName="remarks" />
                             <p-message *ngIf="repoForm.controls['remarks'].invalid && repoForm.controls['remarks'].touched" severity="error" text="Remarks is required"></p-message>
                         </div>
-                        
                     </div>
-                    
                 </form>
             </ng-template>
-             <ng-template pTemplate="footer">
+            <ng-template pTemplate="footer">
                 <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="createdialog = false"></button>
-                <button pButton type="submit" pRipple icon="pi pi-check" class="p-button-text" label="Add" [disabled]="repoForm.invalid" (click)="onSubmit()"  ></button>
+                <button pButton type="submit" pRipple icon="pi pi-check" class="p-button-text" label="Add" [disabled]="repoForm.invalid" (click)="onSubmit()"></button>
             </ng-template>
-</p-dialog>
+        </p-dialog>
 
-<p-dialog [(visible)]="editrepodialog" header="Create Repository" [modal]="true" [style]="{ width: '700px' }" [resizable]="false">
-            <ng-template pTemplate="content">
+        <p-dialog [(visible)]="editrepodialog" header="Create Repository" [modal]="true" [style]="{ width: '700px' }" [resizable]="false">
+             <ng-template pTemplate="content">
                 <form [formGroup]="repoForm" (ngSubmit)="onSubmit()" class="responsive-form">
                     <div class="form-grid">
-                        <div class="form-field">
+                       <div class="form-field">
                             <label for="customer_name">Customer Name</label>
                             <input id="customer_name" pInputText formControlName="customer_name" />
-                            <p-message *ngIf="repoForm.controls['customer_name'].invalid && repoForm.controls['customer_name'].touched" severity="error" text="Customer Name is required"></p-message>
                         </div>
-                        <div class="form-field">
-                            <label for="domain">Domain</label>
-                            <input id="domain" pInputText formControlName="domain" />
-                            <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
                         </div>
-                        <div class="form-field">
-                            <label for="sector">Sector</label>
-                            <input id="sector" pInputText formControlName="sector" />
-                            <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="module_name">Module Name</label>
-                            <input id="module_name" pInputText formControlName="module_name" />
-                            <p-message *ngIf="repoForm.controls['module_name'].invalid && repoForm.controls['module_name'].touched" severity="error" text="Module Name is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="detailed_requirement">Detailed Requirement</label>
-                            <textarea id="detailed_requirement" pInputTextarea rows="3" formControlName="detailed_requirement"></textarea>
-                            <p-message *ngIf="repoForm.controls['detailed_requirement'].invalid && repoForm.controls['detailed_requirement'].touched" severity="error" text="Detailed Requirement is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="standard_custom">Standard/Custom</label>
-                            <input id="standard_custom" pInputText formControlName="standard_custom" />
-                            <p-message *ngIf="repoForm.controls['standard_custom'].invalid && repoForm.controls['standard_custom'].touched" severity="error" text="Standard/Custom is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="technical_details">Technical Details</label>
-                            <textarea id="technical_details" pInputTextarea rows="3" formControlName="technical_details"></textarea>
-                            <p-message *ngIf="repoForm.controls['technical_details'].invalid && repoForm.controls['technical_details'].touched" severity="error" text="Technical Details is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="customer_benefit">Customer Benefit</label>
-                            <input id="customer_benefit" pInputText formControlName="customer_benefit" />
-                            <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="remarks">Remarks</label>
-                            <input id="remarks" pInputText formControlName="remarks" />
-                            <p-message *ngIf="repoForm.controls['remarks'].invalid && repoForm.controls['remarks'].touched" severity="error" text="Remarks is required"></p-message>
-                        </div>
-                        <div class="form-field">
-                            <label for="code_document">Code/Process Document</label>
-                            <input id="code_document" pInputText formControlName="code_document" />
-                            <p-message *ngIf="repoForm.controls['code_document'].invalid && repoForm.controls['code_document'].touched" severity="error" text="Code/Process Document is required"></p-message>
-                        </div>
-                    </div>
                     <div style="margin-top:24px;">
                         <button pButton type="submit" label="Submit" [disabled]="repoForm.invalid"></button>
                     </div>
                 </form>
             </ng-template>
-</p-dialog>
+        </p-dialog>
 
+        <p-dialog [(visible)]="uploadcodeprocessdocdialog" header="Attach Code/Process Document for Reference" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-c justify-content-c">
+                <div>
+                    <label class="custom-file-label">Choose Excel or Attachments</label>
+                    <input type="file" class="custom-file-input" multiple (change)="onUpload($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploadcodeprocessdocdialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Attach" (click)="submitData(repository)"></button>
+            </ng-template>
+        </p-dialog>
 
-<p-dialog [(visible)]="uploadcodeprocessdocdialog" header="Attach Code/Process Document for Reference" [modal]="true" [style]="{ width: '450px' }">
-    <div class="flex align-items-c justify-content-c">
-        <div>
-            <label class="custom-file-label">Choose Excel or Attachments</label>
-            <input type="file" class="custom-file-input" multiple (change)="onUpload($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
-        </div>
-    </div>
-    <ng-template pTemplate="footer">
-        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploadcodeprocessdocdialog = false"></button>
-        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Attach" (click)="submitData(repository)"   ></button>
-    </ng-template>
-</p-dialog>
-
-<p-dialog [(visible)]="deleteRepoDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
-    <div class="flex align-items-c justify-content-c">
-      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-      <span *ngIf="repository">
-      Are you sure you want to delete the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
-    </span>
-    </div>
-    <ng-template pTemplate="footer">
-      <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No"
-        (click)="deleteRepoDialog = false"></button>
-      <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes"
-       (click)="delete_repo(repository)" ></button>
-    </ng-template>
-  </p-dialog>
+        <p-dialog [(visible)]="deleteRepoDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-c justify-content-c">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="repository">
+                    Are you sure you want to delete the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
+                </span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteRepoDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="delete_repo(repository)"></button>
+            </ng-template>
+        </p-dialog>
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
@@ -527,10 +472,12 @@ export class ManageRepos implements OnInit {
     selectedrepositories: Repository[] = [];
     submitted: boolean = false;
     selectedFile: File | null = null;
-    @ViewChild('dt') dt!: Table;
+    
+    // @ViewChild('dt') dt!: Table; // REMOVED: No longer using PrimeNG table
+    
     exportColumns!: ExportColumn[];
     isvalid: boolean = false;
-    issent:boolean = false;
+    issent: boolean = false;
     cols!: Column[];
     downloadvalid: boolean = false;
     uploaddialog: boolean = false;
@@ -546,65 +493,37 @@ export class ManageRepos implements OnInit {
     totalitems!: number;
     totalrecords: any;
     attachvalid: boolean = false;
-    sendforapproval:boolean = false;
+    sendforapproval: boolean = false;
     sendforapprovaldialog: boolean = false;
     deleteRepoDialog: boolean = false;
 
     file: any;
-   domainOptions = [
-  'Manufacturing',
-  'Pharma',
-  'Chemical',
-  'Automotive',
-  'Agriculture',
-  'Engineering Services',
-  'Life Sciences',
-  'Insurance',
-  'Financial Services',
-  'Oil and Gas',
-  'Retail',
-  'Banking Services',
-  'Poultry',
-  'Utilities'
-];
+    domainOptions = [
+        'Manufacturing', 'Pharma', 'Chemical', 'Automotive', 'Agriculture', 'Engineering Services',
+        'Life Sciences', 'Insurance', 'Financial Services', 'Oil and Gas', 'Retail', 'Banking Services',
+        'Poultry', 'Utilities'
+    ];
 
-filteredDomains: string[] = [];
+    filteredDomains: string[] = [];
 
-moduleOptions = [
-  'FI: Financial Accounting',
-  'CO: Controlling',
-  'MM: Materials Management',
-  'SD: Sales and Distribution',
-  'HCM: Human Capital Management',
-  'PP: Production Planning',
-  'PM: Plant Maintenance',
-  'QM: Quality Management',
-  'PS: Project System',
-  'FSCM: Financial Supply Chain Management',
-  'SRM: Supplier Relationship Management',
-  'CRM: Customer Relationship Management',
-  'LE: Logistics Execution',
-  'EWM: Extended Warehouse Management',
-  'TRM: Treasury and Risk Management',
-  'FM: Funds Management',
-  'IM: Investment Management',
-  'PLM: Product Lifecycle Management',
-  'BI/BW: Business Intelligence / Business Warehouse',
-  'GRC: Governance, Risk, and Compliance',
-  'MDM: Master Data Management',
-  'EHS: Environment, Health, and Safety',
-  'SEM: Strategic Enterprise Management',
-  'BASIS: SAP Basis (technical administration)',
-  'ABAP: Advanced Business Application Programming (development)',
-  'PI/XI: Process Integration / Exchange Infrastructure (middleware)',
-  'EP: Enterprise Portal',
-  'SOLMAN: SAP Solution Manager'
-];
+    moduleOptions = [
+        'FI: Financial Accounting', 'CO: Controlling', 'MM: Materials Management', 'SD: Sales and Distribution',
+        'HCM: Human Capital Management', 'PP: Production Planning', 'PM: Plant Maintenance', 'QM: Quality Management',
+        'PS: Project System', 'FSCM: Financial Supply Chain Management', 'SRM: Supplier Relationship Management',
+        'CRM: Customer Relationship Management', 'LE: Logistics Execution', 'EWM: Extended Warehouse Management',
+        'TRM: Treasury and Risk Management', 'FM: Funds Management', 'IM: Investment Management',
+        'PLM: Product Lifecycle Management', 'BI/BW: Business Intelligence / Business Warehouse',
+        'GRC: Governance, Risk, and Compliance', 'MDM: Master Data Management', 'EHS: Environment, Health, and Safety',
+        'SEM: Strategic Enterprise Management', 'BASIS: SAP Basis (technical administration)',
+        'ABAP: Advanced Business Application Programming (development)',
+        'PI/XI: Process Integration / Exchange Infrastructure (middleware)', 'EP: Enterprise Portal',
+        'SOLMAN: SAP Solution Manager'
+    ];
 
-filteredModules: string[] = [];
+    filteredModules: string[] = [];
 
     editrepodialog: boolean = false;
-business_justification: any;
+    business_justification: any;
     uploadcodeprocessdocdialog: boolean = false;
 
     get isAdmin(): boolean {
@@ -641,14 +560,14 @@ business_justification: any;
             technical_details: new FormControl('', Validators.required),
             customer_benefit: new FormControl('', Validators.required),
             remarks: new FormControl('', Validators.required),
-            
+
         });
         this.approvalForm = new FormGroup({
-        business_justification: new FormControl('', [
-            Validators.required,
-            Validators.minLength(10),
-            Validators.maxLength(250)
-        ])
+            business_justification: new FormControl('', [
+                Validators.required,
+                Validators.minLength(10),
+                Validators.maxLength(250)
+            ])
         });
         this.messages = [];
     }
@@ -676,27 +595,27 @@ business_justification: any;
     }
 
     downloadWorkbook(id: number, filename: string) {
-  this.managereposervice.downloadWorkbook(id).subscribe(
-    (blob: Blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename; // Use real filename, not hardcoded 'workbook.xlsx'
-      a.click();
-      window.URL.revokeObjectURL(url);
-    },
-    (error) => {
-        this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' })
+        this.managereposervice.downloadWorkbook(id).subscribe(
+            (blob: Blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            },
+            (error) => {
+                this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' })
+            }
+        );
     }
-  );
-}
 
-filterModule(event: any) {
-  const query = event.query.toLowerCase();
-  this.filteredModules = this.moduleOptions.filter(option =>
-    option.toLowerCase().includes(query)
-  );
-}
+    filterModule(event: any) {
+        const query = event.query.toLowerCase();
+        this.filteredModules = this.moduleOptions.filter(option =>
+            option.toLowerCase().includes(query)
+        );
+    }
 
 
     loadDemoData(page: number) {
@@ -725,9 +644,13 @@ filterModule(event: any) {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
+    /* NOTE: Because you removed the PrimeNG Table, 'dt.filterGlobal' is no longer available.
+       You must implement a custom pipe or backend filter to handle search. 
+       I have commented this out to prevent errors.
+    */
+    // onGlobalFilter(table: Table, event: Event) {
+    //     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    // }
 
     onFileSelected(event: any) {
         const file: File = event.target.files[0];
@@ -740,38 +663,36 @@ filterModule(event: any) {
     }
 
     Repo_approval(repository: any) {
-    if (this.approvalForm.invalid) {
-      this.approvalForm.markAllAsTouched();
-      return;
+        if (this.approvalForm.invalid) {
+            this.approvalForm.markAllAsTouched();
+            return;
+        }
+
+        const justification = this.approvalForm.get('business_justification')?.value;
+
+        this.managereposervice.SendforApproval(repository.id, justification).subscribe({
+            next: (res) => {
+                this.messageservice.add({ severity: 'success', summary: 'Repository has successfully sent for Approval', detail: 'Via ApprovalService' });
+                this.sendforapprovaldialog = false;
+                this.reloadPage();
+                this.approvalForm.reset();
+            },
+            error: (err) => {
+                this.messageservice.add({ severity: 'error', summary: 'Error Found, Failed Sending for Approval', detail: 'Via ApprovalService' });
+            }
+        });
+
     }
-
-    
-
-    const justification = this.approvalForm.get('business_justification')?.value;
-
-    this.managereposervice.SendforApproval(repository.id, justification).subscribe({
-      next: (res) => {
-        this.messageservice.add({ severity: 'success', summary: 'Repository has successfully sent for Approval', detail: 'Via ApprovalService' });
-        this.sendforapprovaldialog = false;
-        this.reloadPage();
-        this.approvalForm.reset();
-      },
-      error: (err) => {
-        this.messageservice.add({ severity: 'error', summary: 'Error Found, Failed Sending for Approval', detail: 'Via ApprovalService' });
-      }
-    });
-
-  }
 
     delete_Repo(repository: Repository) {
         this.deleteRepoDialog = true;
         this.repository = { ...repository };
-    
+
     }
 
-    upload_ref(repository: Repository){
-        
-        this.repository = {...repository};
+    upload_ref(repository: Repository) {
+
+        this.repository = { ...repository };
         this.uploadcodeprocessdocdialog = true;
         console.log(this.repository);
     }
@@ -789,48 +710,48 @@ filterModule(event: any) {
 
     selectedFiles: File[] = [];
 
-onFilesSelected(event: any) {
-    const files: FileList = event.target.files;
-    this.selectedFiles = Array.from(files);
-}
-
-uploadFiles() {
-    if (!this.selectedFiles.length) return;
-
-    const formData = new FormData();
-    let excelFile: File | null = null;
-    const attachmentFiles: File[] = [];
-
-    this.selectedFiles.forEach(file => {
-        if (file.name.endsWith('.xlsx')) {
-            excelFile = file;
-        } else {
-            attachmentFiles.push(file);
-        }
-    });
-
-    if (!excelFile) {
-        this.messageservice.add({ severity: 'error', summary: 'Please Select an Excel File', detail: 'Via UploadService' });
-        return;
+    onFilesSelected(event: any) {
+        const files: FileList = event.target.files;
+        this.selectedFiles = Array.from(files);
     }
 
-    formData.append('file', excelFile);
-    attachmentFiles.forEach(file => {
-        formData.append('attachments', file, file.name);
-    });
+    uploadFiles() {
+        if (!this.selectedFiles.length) return;
 
-    this.managereposervice.uploadExcel(formData).subscribe({
-        next: (res) => {
-            this.messageservice.add({ severity: 'success', summary: 'Repository has been Uploaded', detail: 'Via UploadService' });
-            this.selectedFiles = [];
-            this.uploaddialog = false;
-            this.reloadPage();
-        },
-        error: (err) => {
-            this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' })
+        const formData = new FormData();
+        let excelFile: File | null = null;
+        const attachmentFiles: File[] = [];
+
+        this.selectedFiles.forEach(file => {
+            if (file.name.endsWith('.xlsx')) {
+                excelFile = file;
+            } else {
+                attachmentFiles.push(file);
+            }
+        });
+
+        if (!excelFile) {
+            this.messageservice.add({ severity: 'error', summary: 'Please Select an Excel File', detail: 'Via UploadService' });
+            return;
         }
-    });
-}
+
+        formData.append('file', excelFile);
+        attachmentFiles.forEach(file => {
+            formData.append('attachments', file, file.name);
+        });
+
+        this.managereposervice.uploadExcel(formData).subscribe({
+            next: (res) => {
+                this.messageservice.add({ severity: 'success', summary: 'Repository has been Uploaded', detail: 'Via UploadService' });
+                this.selectedFiles = [];
+                this.uploaddialog = false;
+                this.reloadPage();
+            },
+            error: (err) => {
+                this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' })
+            }
+        });
+    }
 
 
     isRepoSelected(repo: Repository): boolean {
@@ -873,50 +794,50 @@ uploadFiles() {
         }
     }
 
-   onSubmit() {
-  if (this.repoForm.valid) {
-    const formValue = this.repoForm.value;
-    this.managereposervice.createRepository(formValue).subscribe({
-      next: _ => {
-        this.messageservice.add({severity: 'success', summary: 'Repository has been Created', detail: 'Via CreateService'});
-        this.loadDemoData(this.page);
-        this.createdialog = false;
-        this.repoForm.reset();
-        
-        
-      },
-      error: _ => {
-        this.messageservice.add({severity: 'error', summary: 'Repository Creation is Failed', detail: 'Via CreateService'});
-      }
-    });
-  } else {
-    this.repoForm.markAllAsTouched();
-  }
-}
+    onSubmit() {
+        if (this.repoForm.valid) {
+            const formValue = this.repoForm.value;
+            this.managereposervice.createRepository(formValue).subscribe({
+                next: _ => {
+                    this.messageservice.add({ severity: 'success', summary: 'Repository has been Created', detail: 'Via CreateService' });
+                    this.loadDemoData(this.page);
+                    this.createdialog = false;
+                    this.repoForm.reset();
 
-onUpload(event: any) {
-    this.file = event.target.files[0];
-    console.log(this.file);
 
-  }
+                },
+                error: _ => {
+                    this.messageservice.add({ severity: 'error', summary: 'Repository Creation is Failed', detail: 'Via CreateService' });
+                }
+            });
+        } else {
+            this.repoForm.markAllAsTouched();
+        }
+    }
+
+    onUpload(event: any) {
+        this.file = event.target.files[0];
+        console.log(this.file);
+
+    }
 
     submitData(repository: Repository) {
-    let formData = new FormData();
+        let formData = new FormData();
 
-    formData.set("file", this.file);
-    this.managereposervice.uploadreference(this.repository, formData).subscribe((data: any) => {
-     
-      this.uploadcodeprocessdocdialog = false;
+        formData.set("file", this.file);
+        this.managereposervice.uploadreference(this.repository, formData).subscribe((data: any) => {
 
-      this.messageservice.add({ severity: 'success', summary: 'Uploaded File Successfully', detail: 'Via UploadService' })
+            this.uploadcodeprocessdocdialog = false;
 
-    }, (err) => {
-      if (this.repository.attach_code_or_document == 'Not Attached') {
-        this.messageservice.add({ severity: 'error', summary: ' No Uploaded File Found', detail: 'Via UploadService' });
-      }
-    })
+            this.messageservice.add({ severity: 'success', summary: 'Uploaded File Successfully', detail: 'Via UploadService' })
 
-  }
+        }, (err) => {
+            if (this.repository.attach_code_or_document == 'Not Attached') {
+                this.messageservice.add({ severity: 'error', summary: ' No Uploaded File Found', detail: 'Via UploadService' });
+            }
+        })
+
+    }
 
 
     onPageChange(event: any) {
@@ -931,11 +852,11 @@ onUpload(event: any) {
 
 
     filterDomain(event: any) {
-  const query = event.query.toLowerCase();
-  this.filteredDomains = this.domainOptions.filter(option =>
-    option.toLowerCase().includes(query)
-  );
-}
+        const query = event.query.toLowerCase();
+        this.filteredDomains = this.domainOptions.filter(option =>
+            option.toLowerCase().includes(query)
+        );
+    }
 
     upload_dialog() {
         this.uploaddialog = true;
@@ -951,13 +872,17 @@ onUpload(event: any) {
         this.repository = { ...repository };
     }
 
-    formatDate(dateString: string): string {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+    formatDate(dateString?: string): string {
+    if (!dateString) {
+        return ""; // or any default fallback
     }
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+
 
     Repoapproval(repository: Repository) {
         this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
@@ -983,20 +908,20 @@ onUpload(event: any) {
     }
 
     download_ref(repository: Repository, id: any) {
-    this.repository = { ...repository };
-   
-   
-      window.open('http://127.0.0.1:5000/repos/refdownload/' + id, '_blank');
-    
-    
+        this.repository = { ...repository };
+
+
+        window.open('http://127.0.0.1:5001/repos/refdownload/' + id, '_blank');
+
+
     }
 
-    delete_repo(repository:Repository): void {
-    this.managereposervice.delete_repo(this.repository).subscribe(
-      (data) => {
-        this.deleteRepoDialog = false;
-        this.messageservice.add({ severity: 'success', summary: 'Repository has been Deleted', detail: 'Via DeleteService' });
-        this.reloadPage();
-      });
-  }
+    delete_repo(repository: Repository): void {
+        this.managereposervice.delete_repo(this.repository).subscribe(
+            (data) => {
+                this.deleteRepoDialog = false;
+                this.messageservice.add({ severity: 'success', summary: 'Repository has been Deleted', detail: 'Via DeleteService' });
+                this.reloadPage();
+            });
+    }
 }

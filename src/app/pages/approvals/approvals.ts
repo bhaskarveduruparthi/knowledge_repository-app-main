@@ -74,7 +74,7 @@ interface ExportColumn {
             font-weight: 500;
         }
 
-        .card {
+        /*.card {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 15px;
             backdrop-filter: blur(10px);
@@ -85,7 +85,7 @@ interface ExportColumn {
             color: #222;
             display: flex;
             flex-direction: column;
-        }
+        }*/
 
         .responsive-form .custom-grid {
             display: grid;
@@ -132,6 +132,13 @@ interface ExportColumn {
     /* Adjust as needed */
 }
 
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+
 .error {
     border: 1px solid red;
 }
@@ -166,98 +173,54 @@ interface ExportColumn {
     ],
     template: `
         <p-toast />
+        
         <div class="card">
-            
-            <p-table
-                #dt
-                [value]="repositories() || []"
-                [rows]="10"
-                [loading]="loading"
-                [rowHover]="true"
-                [columns]="cols"
-                dataKey="id"
-                [globalFilterFields]="['customer_name', 'domain', 'sector', 'module_name']"
-                [showCurrentPageReport]="true"
-                [tableStyle]="{ 'min-width': '75rem' }"
-            >
-                <ng-template #caption>
-                    <div class="flex items-center justify-between">
-                        <h5 class="m-0">Manage Approvals</h5>
-                        <p-iconfield>
-                            <p-inputicon styleClass="pi pi-search" />
-                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-                        </p-iconfield>
-                    </div>
+            <p-toolbar styleClass="mb-6">
+                <ng-template #start>
+                    <span><strong><h4>Manage Approvals</h4></strong></span>
                 </ng-template>
-                <ng-template #header>
-                    <tr>
-                        <th></th>
-                        <!-- Checkbox header -->
-                        
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Customer Name</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Domain</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Sector</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Module Name</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Detailed Requirement</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Standard/Custom</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Technical details(Z object name or Process developed/configured)</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Customer Benefit</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Remarks</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Code/Process Document</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Created On</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Business Justification</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Repo Status</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Repo Approver</th>
-                        <th style="white-space: nowrap; font-weight: bold; color: #11224E;">Repo Approval Date</th>
-                        <th style="font-weight: bold; color: #11224E;">Actions</th>
-                    </tr>
+                <ng-template #end>
+                   
                 </ng-template>
-                <ng-template #body let-repo>
-                    <tr>
-                        <td>
-                            <input type="checkbox" [checked]="isRepoSelected(repo)" (change)="onCheckboxChange(repo, $event)" [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
-                        </td>
-                        
-                        <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                        <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                        <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                        <td style="white-space: nowrap;">{{ repo.module_name }}</td>
-                        <td>{{ repo.detailed_requirement }}</td>
-                        <td>{{ repo.standard_custom }}</td>
-                        <td>{{ repo.technical_details }}</td>
-                        <td>{{ repo.customer_benefit }}</td>
-                        <td>{{ repo.remarks }}</td>
-                        <td>
-                        <p-button label="Download" icon="pi pi-download" severity="primary" (click)="download_ref(repo, repo.id)" />
-</td>       
-                        <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
-                        <td>{{repo.business_justification}}</td>
-                        <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
-                        <td style="white-space: nowrap;">{{ repo.Approver }}</td>
-                        <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
-                        <td>
-                            <div class="flex" style="min-width: 100px;">
-                               
-                                <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-info mr-2" *ngIf="isvalid" (click)="approve_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
-                                
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage">
-                    <tr>
-                        <td colspan="17">No Repositories found.</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
+        </p-toolbar>
+            <div class="cards-container">
+  <div *ngFor="let repo of repositories()"
+       class="approval-card"
+       style="width: 300px; margin: 0.5rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: rgba(0,0,0,0.1) 0px 4px 6px;">
+    
+    <h3>{{ repo.module_name }} - {{ repo.domain }}</h3>
+    <p><b>Customer:</b> {{ repo.customer_name }}</p>
+    <p><b>Sector:</b> {{ repo.sector }}</p>
+    <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
+    
+    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+      <button pButton type="button" label="Approve" icon="pi pi-check" 
+              class="p-button-success" (click)="approve_dialog(repo)" 
+              [disabled]="repo.Approval_status === 'Approved'"></button>
+      <button pButton type="button" label="More Info" icon="pi pi-info-circle" 
+              (click)="showDetails(repo)"></button>
+    </div>
+  </div>
+</div>
         </div>
 
 
 
 
 
-        <!-- Your main form can be elsewhere in your template -->
+       <p-dialog header="Repository Details" [(visible)]="dialogVisible" [modal]="true" [style]="{width: '700px'}" (onHide)="closeDetails()">
+  <div *ngIf="selectedRepo">
+    <p><b>Customer Name:</b> {{ selectedRepo.customer_name }}</p>
+    <p><b>Domain:</b> {{ selectedRepo.domain }}</p>
+    <p><b>Sector:</b> {{ selectedRepo.sector }}</p>
+    <p><b>Module Name:</b> {{ selectedRepo.module_name }}</p>
+    <p><b>Detailed Requirement:</b> {{ selectedRepo.detailed_requirement }}</p>
+    <p><b>Standard/Custom:</b> {{ selectedRepo.standard_custom }}</p>
+    <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
+    <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
+    <p><b>Remarks:</b> {{ selectedRepo.remarks }}</p>
+  </div>
+</p-dialog>
 
 
 <p-dialog [(visible)]="approvedialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
@@ -324,6 +287,8 @@ export class ManageApprovals implements OnInit {
     messages: any[] = [];
     CurrentPage!: number;
     page!: number;
+    dialogVisible: boolean = false;
+selectedRepo: any = null;
     first!: number;
     loading: boolean = true;
     repoForm!: FormGroup;
@@ -423,6 +388,16 @@ business_justification: any;
         this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' })
     }
   );
+}
+
+showDetails(repo: any) {
+  this.selectedRepo = repo;
+  this.dialogVisible = true;
+}
+
+closeDetails() {
+  this.dialogVisible = false;
+  this.selectedRepo = null;
 }
 
 

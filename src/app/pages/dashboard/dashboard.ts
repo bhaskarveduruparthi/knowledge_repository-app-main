@@ -1,176 +1,181 @@
+import { HeaderData } from './../../../../node_modules/tar/dist/esm/header.d';
 import { Component, OnInit } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
-import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
-import { AutoCompleteModule } from 'primeng/autocomplete';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { DialogModule } from 'primeng/dialog';
-import { TagModule } from 'primeng/tag';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { PanelModule } from 'primeng/panel';
-import { PasswordModule } from 'primeng/password';
-import { MessageModule } from 'primeng/message';
+import { FieldsetModule } from 'primeng/fieldset';
+
 
 import { ManageReposService } from '../service/managerepos.service';
 import { AuthenticationService } from '../service/authentication.service';
 import { ManageAdminsService } from '../service/manageadmins.service';
+
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    TableModule,
     FormsModule,
     ReactiveFormsModule,
-    ButtonModule,
-    RippleModule,
-    ToastModule,
     RouterModule,
-    ToolbarModule,
-    RatingModule,
-    PanelModule,
-    AutoCompleteModule,
-    InputTextModule,
-    TextareaModule,
-    SelectModule,
-    RadioButtonModule,
-    InputNumberModule,
-    DialogModule,
-    TagModule,
     ChartModule,
-    InputIconModule,
-    IconFieldModule,
-    ConfirmDialogModule,
-    PasswordModule,
-    MessageModule
-  ],
+    FieldsetModule,
+],
   providers: [
     MessageService,
     ManageAdminsService,
     ConfirmationService
-    // No need to add ManageReposService here if its service has `providedIn: 'root'`
   ],
-   styles: `
+  styles: `
+    :host {
+      display: block;
+      padding: 2rem 3rem;
+      color: #222;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      
+      min-height: 100vh;
+    }
+    .header {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #11224E;
+      margin-bottom: 2rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
     .card {
-  background: rgba(255, 255, 255, 0.2);           /* Glassy transparency */
-  border-radius: 15px;                            /* Smooth corners */
-  backdrop-filter: blur(10px);                    /* Glass blur effect */
-  -webkit-backdrop-filter: blur(10px);            /* Safari support */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);      /* Soft glass shadow */
-  border: 1px solid rgba(255, 255, 255, 0.3);     /* Subtle border */
-  padding: 20px;                                  /* Content spacing */
-  color: #222;                                    /* Text color */
-  display: flex;                                  /* Optional for layout */
-  flex-direction: column;                         /* Optional for layout */
-}
-
-    `,
+      background: rgba(255,255,255, 0.96);
+      border-radius: 22px;
+      box-shadow: 0 2px 24px rgba(38,50,56,0.09);
+      padding: 1.5rem 1.4rem 2rem 1.4rem;
+      min-height: 100px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      color: #11224E;
+      transition: box-shadow 0.2s;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header span {
+      font-weight: 700;
+      font-size: 1.11rem;
+      color: #30475f;
+    }
+    .icon-container {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.4rem;
+      margin-left: 0.5rem;
+    }
+    .icon-total { background: #43bfe6; }
+    .icon-approved { background: #ffbd4a; }
+    .icon-unapproved { background: #62738c; }
+    .icon-users { background: #a23ccc; }
+    .count {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #1a2f4b;
+      margin-top: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: .6rem;
+      color: #1a2f4b;
+    }
+    .chart-section {
+      margin-top: 1.2rem;
+      flex: 1 1 auto;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    @media (max-width: 1100px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  `,
   template: `
-    <div class="card">
-        <p-toolbar styleClass="mb-6">
-                <ng-template #start>
-                  <span class="text-lg font-medium"><strong style="color: #11224E;">{{ greetingMessage }}, {{ username }}!</strong></span>
-                </ng-template>
-                <ng-template #end>
-                   
-                </ng-template>
-            </p-toolbar>
-         <div class="bg-surface-50 dark:bg-surface-950 px-6 py-8 md:px-12 lg:px-20">
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-
-        <div class="bg-surface-0 dark:bg-surface-900 shadow-sm p-5 rounded-2xl">
-          <div class="flex justify-between gap-4">
-            <div class="flex flex-col gap-2">
-              <span class="text-surface-700 dark:text-surface-300 font-normal leading-tight">Total Repositories</span>
-            </div>
-            <div class="flex items-center justify-center bg-linear-to-b from-cyan-400 dark:from-cyan-300 to-cyan-600 dark:to-cyan-500 rounded-lg w-10 h-10">
-              <i class="pi pi-book text-surface-0 dark:text-surface-900 text-xl! leading-none!"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!">
-              {{ allReposCount }}
-            </div>
+    <div class="header">{{ greetingMessage }}, {{ username }}!</div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <span>Total Repositories</span>
+          <div class="icon-container icon-total">
+            <i class="pi pi-book"></i>
           </div>
         </div>
-
-        <div class="bg-surface-0 dark:bg-surface-900 shadow-sm p-5 rounded-2xl">
-          <div class="flex justify-between gap-4">
-            <div class="flex flex-col gap-2">
-              <span class="text-surface-700 dark:text-surface-300 font-normal leading-tight">Approved Repositories</span>
-            </div>
-            <div class="flex items-center justify-center bg-linear-to-b from-orange-400 dark:from-orange-300 to-orange-600 dark:to-orange-500 rounded-lg w-10 h-10">
-              <i class="pi pi-file text-surface-0 dark:text-surface-900 text-xl! leading-none!"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!">
-              {{ approvedReposCount }}
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-surface-0 dark:bg-surface-900 shadow-sm p-5 rounded-2xl">
-          <div class="flex justify-between gap-4">
-            <div class="flex flex-col gap-2">
-              <span class="text-surface-700 dark:text-surface-300 font-normal leading-tight">Un Approved Repositories</span>
-            </div>
-            <div class="flex items-center justify-center bg-linear-to-b from-slate-400 dark:from-slate-300 to-slate-600 dark:to-slate-500 rounded-lg w-10 h-10">
-              <i class="pi pi-file text-surface-0 dark:text-surface-900 text-xl! leading-none!"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!">
-              {{ unapprovedReposCount }}
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="isvalid" class="bg-surface-0 dark:bg-surface-900 shadow-sm p-5 rounded-2xl">
-          <div class="flex justify-between gap-4">
-            <div class="flex flex-col gap-2">
-              <span class="text-surface-700 dark:text-surface-300 font-normal leading-tight">Users Present</span>
-            </div>
-            <div class="flex items-center justify-center bg-linear-to-b from-violet-400 dark:from-violet-300 to-violet-600 dark:to-violet-500 rounded-lg w-10 h-10">
-              <i class="pi pi-users text-surface-0 dark:text-surface-900 text-xl! leading-none!"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!">
-              {{ usersCount }}
-            </div>
-          </div>
-        </div>
-
+        <div class="count">{{ allReposCount }}</div>
+        
       </div>
+      <div class="card">
+        <div class="card-header">
+          <span>Approved Repositories</span>
+          <div class="icon-container icon-approved">
+            <i class="pi pi-file"></i>
+          </div>
+        </div>
+        <div class="count">{{ approvedReposCount }}</div>
+      </div>
+      <div  class="card">
+        <div class="card-header">
+          <span>Sent for Approval</span>
+          <div class="icon-container icon-users">
+            <i class="pi pi-file"></i>
+          </div>
+        </div>
+        <div class="count">{{ sentforapprovalcount }}</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span>Unapproved Repositories</span>
+          <div class="icon-container icon-unapproved">
+            <i class="pi pi-file"></i>
+          </div>
+        </div>
+        <div class="count">{{ unapprovedReposCount }}</div>
+        
+      </div>
+      
     </div>
-    <div class="card mt-5">
-  <h4>Module-wise Data</h4>
+    <div class="card">
+       <p-fieldset legend="Module-wise Data" toggleable="true" collapsed="false" >
   <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
-</div>
-
-<div class="card mt-5">
-  <h4>Domain-wise Data</h4>
+</p-fieldset>
+<br>
+<p-fieldset legend="Domain-wise Data" toggleable="true" collapsed="false" >
   <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
-</div>
-
+</p-fieldset>
     </div>
-   
+    
+
+    
   `
 })
 export class Dashboard implements OnInit {
@@ -178,13 +183,12 @@ export class Dashboard implements OnInit {
   allReposCount = 0;
   approvedReposCount = 0;
   unapprovedReposCount = 0;
-  usersCount = 0;
+  sentforapprovalcount = 0;
 
   moduleData: any;
   domainData: any;
 
   isvalid = true;
-
   greetingMessage: string = '';
   username: string = '';
 
@@ -195,13 +199,9 @@ export class Dashboard implements OnInit {
     private confirmationService: ConfirmationService,
     public router: Router
   ) {
-     this.authservice.user.subscribe((x) => {
-            if (x?.type == 'Superadmin') {
-                this.isvalid = true;
-            } else {
-                this.isvalid = false;
-            }
-        });
+    this.authservice.user.subscribe((x) => {
+      this.isvalid = (x?.type === 'Superadmin');
+    });
   }
 
   ngOnInit() {
@@ -223,13 +223,8 @@ export class Dashboard implements OnInit {
   }
 
   getUsername() {
-    // Assuming authservice.user is an observable with user object including username
     this.authservice.user.subscribe(user => {
-      if (user?.name) {
-        this.username = user.name;
-      } else {
-        this.username = 'User';
-      }
+      this.username = user?.name || 'User';
     });
   }
 
@@ -239,14 +234,13 @@ export class Dashboard implements OnInit {
         this.allReposCount = data.all_repos_count;
         this.approvedReposCount = data.approved_repos_count;
         this.unapprovedReposCount = data.unapproved_repos_count;
-        this.usersCount = data.users_count;
+        this.sentforapprovalcount = data.sentforapproval_count;
       },
       error: (err) => {
         console.error('Error loading counts', err);
       }
     });
   }
-
 
   loadChartData() {
     this.managereposervice.getdatabymodule().subscribe(data => {
@@ -261,7 +255,6 @@ export class Dashboard implements OnInit {
         ]
       };
     });
-
     this.managereposervice.getdatabydomain().subscribe(data => {
       this.domainData = {
         labels: Object.keys(data),

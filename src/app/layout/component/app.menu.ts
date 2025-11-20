@@ -23,16 +23,33 @@ export class AppMenu implements OnInit {
     admin_menu: MenuItem[] = [
         {
             label: 'Home',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] }]
+            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
+        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }
+        ],
+
         },
         {
-            label: 'Menu',
+            label: 'Databases',
             icon: 'pi pi-fw pi-briefcase',
             items: [
-                { label: 'Manage Users', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
-                { label: 'Manage Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
-                { label: 'Manage Approvals', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/manageapprovals'] }
+                { label: 'User Database', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
+                { label: 'Repository Database', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
+                
 
+            ]
+        },
+        {
+            label: 'Actions',
+            icon: '',
+            items:[
+                { label: 'Manage Approvals', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
+            ]
+        },
+        {
+            label: 'Support',
+            icon: '',
+            items:[
+                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageapprovals'] }
             ]
         }
     ];
@@ -40,13 +57,21 @@ export class AppMenu implements OnInit {
     user_menu: MenuItem[] = [
         {
             label: 'Home',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] }]
+            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
+        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
         },
         {
             label: 'Menu',
             icon: 'pi pi-fw pi-briefcase',
             items: [
                 { label: 'Manage My Repositories', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
+            ]
+        },
+        {
+            label: 'Support',
+            icon: '',
+            items:[
+                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageapprovals'] }
             ]
         }
     ];
