@@ -53,7 +53,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     .card {
       background: rgba(255,255,255, 0.96);
       border-radius: 22px;
-      box-shadow: 0 2px 24px rgba(38,50,56,0.09);
+      box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
       padding: 1.5rem 1.4rem 2rem 1.4rem;
       min-height: 100px;
       height: 100%;
@@ -102,6 +102,19 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       margin-bottom: .6rem;
       color: #1a2f4b;
     }
+
+    .charts-container {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem; /* space between the two charts */
+  flex-wrap: wrap; /* allow wrapping on smaller screens */
+}
+
+.charts-container p-fieldset {
+  flex: 1 1 45%; /* Take about 45% width each, adjust as needed */
+  min-width: 250px; /* minimum width to keep charts readable */
+}
+
     .chart-section {
       margin-top: 1.2rem;
       flex: 1 1 auto;
@@ -165,14 +178,16 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       
     </div>
     <div class="card">
-       <p-fieldset legend="Module-wise Data" toggleable="true" collapsed="false" >
-  <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
-</p-fieldset>
-<br>
-<p-fieldset legend="Domain-wise Data" toggleable="true" collapsed="false" >
-  <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
-</p-fieldset>
-    </div>
+  <div class="charts-container">
+    <p-fieldset legend="Module-wise Data" toggleable="true" collapsed="false" >
+      <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
+    </p-fieldset>
+    <p-fieldset legend="Domain-wise Data" toggleable="true" collapsed="false" >
+      <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
+    </p-fieldset>
+  </div>
+</div>
+
     
 
     

@@ -104,7 +104,7 @@ import { debounceTime, Subject } from 'rxjs';
       background: white;
       border: 1px solid #e5e7eb;
       border-radius: 50px;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
       padding: 4px 12px;
       width: 100%;
       max-width: 700px;
@@ -285,8 +285,7 @@ import { debounceTime, Subject } from 'rxjs';
       <div class="cards-container" [ngClass]="{'single-card': searchResults.length === 1}" >
         <p-card 
           *ngFor="let repo of searchResults" 
-          header="{{ repo.module_name }} - {{ repo.domain }}" 
-          
+          header="{{ repo.module_name }} - {{ repo.domain }}"
         >
           <ng-template pTemplate="content">
             <div class="card-content">
@@ -317,6 +316,16 @@ import { debounceTime, Subject } from 'rxjs';
           <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
           <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
           <p><b>Remarks:</b> {{ selectedRepo.remarks }}</p>
+        </div>
+        <div style="margin-top: 2rem; text-align: right;"  >
+            <button 
+              pButton 
+              type="button" 
+              label="Open Solution Attachment " 
+              (click)="openAttachment(selectedRepo.id)"
+              *ngIf="selectedRepo?.attach_code_or_document === 'ATTACHED'"
+              >
+            </button>
         </div>
       </p-dialog>
     </div>
@@ -410,5 +419,11 @@ export class Home implements OnInit {
   closeDetails() {
     this.selectedRepo = null;
     this.dialogVisible = false;
+  }
+
+  openAttachment(attachmentId: number) {
+    // use your actual Flask endpoint base URL as needed
+    const url = `http://127.0.0.1:5001/repos/refview/${attachmentId}`;
+    window.open(url, '_blank');
   }
 }

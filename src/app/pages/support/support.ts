@@ -96,6 +96,12 @@ import { AuthenticationService } from '../service/authentication.service';
       align-items: center;
     }
 
+    .p-toolbar{
+      
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+        
+    }
+
     .answer-description {
       flex-grow: 1;
       padding-right: 1rem;

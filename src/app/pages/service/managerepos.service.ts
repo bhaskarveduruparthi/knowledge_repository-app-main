@@ -39,6 +39,22 @@ export class ManageReposService {
     return this.http.get(`${this.url}repos/getallrepos?page=${page}`);
   }
 
+  getallapprovedrepos(page: number){
+    return this.http.get(`${this.url}repos/getallapprovedrepos?page=${page}`);
+  }
+
+  getallpendingrepos(page: number){
+    return this.http.get(`${this.url}repos/getallpendingrepos?page=${page}`);
+  }
+
+  getallunapprovedrepos(page: number){
+    return this.http.get(`${this.url}repos/getallunapprovedrepos?page=${page}`);
+  }
+
+  getallrejectedrepos(page: number){
+    return this.http.get(`${this.url}repos/getallrejectedrepos?page=${page}`);
+  }
+
   uploadExcel(formData: FormData): Observable<any> {
     
     return this.http.post(`${this.url}repos/upload-excel`, formData);
@@ -50,6 +66,10 @@ export class ManageReposService {
 
   RepoApproval(repository: Repository){
     return this.http.put(`${this.url}/repos/repoapproval/${repository.id}`, repository);
+  }
+
+  RepoRejection(repository: Repository){
+    return this.http.put(`${this.url}/repos/reporejection/${repository.id}`, repository);
   }
 
   SendforApproval(id: number, business_justification: string) {
@@ -87,8 +107,24 @@ downloadWorkbook(id: number): Observable<Blob> {
     return this.http.get(`${this.url}/repos/getallreporecords`);
   }
 
-  get_approval_repos(page: number){
-    return this.http.get(`${this.url}repos/getapprovalrepos?page=${page}`);
+  getapproved_repo_records(){
+    return this.http.get(`${this.url}/repos/getallapprovedreporecords`);
+  }
+
+  getpending_repo_records(){
+    return this.http.get(`${this.url}/repos/getallpendingreporecords`);
+  }
+
+  getunapproved_repo_records(){
+    return this.http.get(`${this.url}/repos/getallunapprovedreporecords`);
+  }
+
+  getrejected_repo_records(){
+    return this.http.get(`${this.url}/repos/getallrejectedreporecords`);
+  }
+
+  get_approval_repos(){
+    return this.http.get(`${this.url}repos/getapprovalrepos`);
   }
 
   get_approval_records(){

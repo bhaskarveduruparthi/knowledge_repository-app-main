@@ -29,11 +29,11 @@ export class AppMenu implements OnInit {
 
         },
         {
-            label: 'Databases',
+            label: 'Admin',
             icon: 'pi pi-fw pi-briefcase',
             items: [
-                { label: 'User Database', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
-                { label: 'Repository Database', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
+                { label: 'Manage Users', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
+                { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
                 
 
             ]
@@ -45,6 +45,29 @@ export class AppMenu implements OnInit {
                 { label: 'Manage Approvals', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
             ]
         },
+        {
+            label: 'Reports',
+            icon: 'pi pi-fw pi-file',
+            items: [
+                
+                { label: 'Approved', icon: 'pi pi-fw pi-file-check', routerLink: ['/app/pages/approved'] },
+                {label: 'Unapproved', icon: 'pi pi-fw pi-file-edit', routerLink: ['/app/pages/unapproved'] },
+                {label: 'Pending', icon: 'pi pi-fw pi-file-o', routerLink: ['/app/pages/pending'] },
+                { label: 'Rejected', icon: 'pi pi-fw pi-file-excel', routerLink: ['/app/pages/rejected'] }
+                
+
+            ]
+        },
+        
+        {
+            label: 'Logs',
+            icon: '',
+            items:[
+                { label: 'User History', icon: 'pi pi-fw pi-history', routerLink: ['/app/pages/login-history'] },
+                { label: 'Download History', icon: 'pi pi-fw pi-history', routerLink: [''] }
+            ]
+        },
+        
         {
             label: 'Support',
             icon: '',
@@ -61,10 +84,10 @@ export class AppMenu implements OnInit {
         { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
         },
         {
-            label: 'Menu',
+            label: 'User',
             icon: 'pi pi-fw pi-briefcase',
             items: [
-                { label: 'Manage My Repositories', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
+                { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
             ]
         },
         {

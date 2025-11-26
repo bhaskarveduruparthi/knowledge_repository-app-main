@@ -79,7 +79,7 @@ interface ExportColumn {
         .approval-card {
             background: rgba(255, 255, 255, 0.13);    /* Glass effect */
             border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -112,6 +112,12 @@ interface ExportColumn {
             gap: 0.5rem;
             margin-top: 1rem;
             justify-content: flex-end;
+        }
+
+        .p-toolbar{
+      
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+        
         }
 
         .error {
@@ -185,6 +191,9 @@ interface ExportColumn {
                             <button pButton type="button" label="Approve" icon="pi pi-check"
                                 class="p-button-success" (click)="approve_dialog(repo)"
                                 [disabled]="repo.Approval_status === 'Approved'"></button>
+                            <button pButton type="button" label="Reject" icon="pi pi-times"
+                                class="p-button-danger" (click)="reject_dialog(repo)"
+                                [disabled]="repo.Approval_status === 'Approved'"></button>
                             <button pButton type="button" label="More Info" icon="pi pi-info-circle"
                                 (click)="showDetails(repo)"></button>
                         </div>
@@ -231,6 +240,26 @@ interface ExportColumn {
                     <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Repoapproval(repository)"></button>
                 </ng-template>
             </p-dialog>
+
+            <p-dialog [(visible)]="rejectdialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
+                <div class="flex align-items-c justify-content-c">
+                    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                    <span *ngIf="repository">
+                        Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
+                    </span>
+                </div>
+                <br>
+                <ng-template pTemplate="content">
+                    <label for="business_justification">Business Justification</label>
+                    <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
+                        {{ repository.business_justification }}
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="rejectdialog = false"></button>
+                    <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Reporeject(repository)"></button>
+                </ng-template>
+            </p-dialog>
         
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
@@ -252,7 +281,7 @@ export class ManageApprovals implements OnInit {
     approvedialog: boolean = false;
     createdialog: boolean = false;
     messages: any[] = [];
-    CurrentPage!: number;
+    ApprovalCurrentPage!: number;
     page!: number;
     dialogVisible: boolean = false;
     selectedRepo: any = null;
@@ -266,6 +295,7 @@ export class ManageApprovals implements OnInit {
     sendforapproval:boolean = false;
     sendforapprovaldialog: boolean = false;
     deleteRepoDialog: boolean = false;
+    rejectdialog: boolean = false;
     file: any;
     editrepodialog: boolean = false;
     business_justification: any;
@@ -283,37 +313,7 @@ export class ManageApprovals implements OnInit {
     }
 
     ngOnInit() {
-        const storedPage = localStorage.getItem('CurrentPage');
-        if (storedPage) {
-            this.CurrentPage = parseInt(storedPage);
-            this.loadDemoData(this.CurrentPage);
-            this.first = (this.CurrentPage - 1) * 10;
-        } else {
-            this.CurrentPage = 1;
-            localStorage.setItem('CurrentPage', this.CurrentPage.toString());
-            this.loadDemoData(this.CurrentPage);
-            this.first = (this.CurrentPage - 1) * 10;
-        }
-        this.form_records();
-        this.repoForm = new FormGroup({
-            customer_name: new FormControl('', Validators.required),
-            domain: new FormControl('', Validators.required),
-            sector: new FormControl('', Validators.required),
-            module_name: new FormControl('', Validators.required),
-            detailed_requirement: new FormControl('', Validators.required),
-            standard_custom: new FormControl('', Validators.required),
-            technical_details: new FormControl('', Validators.required),
-            customer_benefit: new FormControl('', Validators.required),
-            remarks: new FormControl('', Validators.required),
-        });
-        this.approvalForm = new FormGroup({
-            business_justification: new FormControl('', [
-                Validators.required,
-                Validators.minLength(10),
-                Validators.maxLength(250)
-            ])
-        });
-        this.messages = [];
+        this.loadDemoData();
     }
 
     constructor(
@@ -338,21 +338,7 @@ export class ManageApprovals implements OnInit {
         });
     }
 
-    downloadWorkbook(id: number, filename: string) {
-        this.managereposervice.downloadWorkbook(id).subscribe(
-            (blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.click();
-                window.URL.revokeObjectURL(url);
-            },
-            (error) => {
-                this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' })
-            }
-        );
-    }
+    
 
     showDetails(repo: any) {
         this.selectedRepo = repo;
@@ -364,14 +350,11 @@ export class ManageApprovals implements OnInit {
         this.selectedRepo = null;
     }
 
-    loadDemoData(page: number) {
-        this.managereposervice.get_approval_repos(page).subscribe((data: any) => {
-            if (Array.isArray(data)) {
-                this.repositories.set(data);
-            } else {
-                console.error('Expected array but received:', data);
-                this.repositories.set([]);
-            }
+    loadDemoData() {
+        this.managereposervice.get_approval_repos().subscribe((data: any) => {
+            
+            this.repositories.set(data);
+           
             this.loading = false;
         });
         this.cols = [
@@ -390,131 +373,19 @@ export class ManageApprovals implements OnInit {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
+    
 
-    onFileSelected(event: any) {
-        const file: File = event.target.files[0];
-        if (file && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            this.selectedFile = file;
-        } else {
-            this.messageservice.add({ severity: 'error', summary: 'Please Select a Valid .xlsx Excel File', detail: 'Via UploadService' })
-            this.selectedFile = null;
-        }
-    }
+    
 
-    Repo_approval(repository: any) {
-        if (this.approvalForm.invalid) {
-            this.approvalForm.markAllAsTouched();
-            return;
-        }
-        const justification = this.approvalForm.get('business_justification')?.value;
-        this.managereposervice.SendforApproval(repository.id, justification).subscribe({
-            next: (res) => {
-                this.messageservice.add({ severity: 'success', summary: 'Repository has successfully sent for Approval', detail: 'Via ApprovalService' });
-                this.sendforapprovaldialog = false;
-                this.reloadPage();
-                this.approvalForm.reset();
-            },
-            error: (err) => {
-                this.messageservice.add({ severity: 'error', summary: 'Error Found, Failed Sending for Approval', detail: 'Via ApprovalService' });
-            }
-        });
-    }
-
-    delete_Repo(repository: Repository) {
-        this.deleteRepoDialog = true;
-        this.repository = { ...repository };
-    }
+    
 
     gotoRepos() {
   this.router.navigate(['/app/pages/managerepos']);
     }
 
-    upload_ref(repository: Repository){
-        this.repository = {...repository};
-        this.uploadcodeprocessdocdialog = true;
-        console.log(this.repository);
-    }
+   
 
-    onCheckboxChange(repo: Repository, event: Event) {
-        const checked = (event.target as HTMLInputElement).checked;
-        this.toggleRepoSelection(repo, checked);
-    }
-
-    editRepo(repository: Repository) {
-        this.repository = { ...repository };
-        this.editrepodialog = true;
-    }
-
-    selectedFiles: File[] = [];
-
-    onFilesSelected(event: any) {
-        const files: FileList = event.target.files;
-        this.selectedFiles = Array.from(files);
-    }
-
-    uploadFiles() {
-        if (!this.selectedFiles.length) return;
-        const formData = new FormData();
-        let excelFile: File | null = null;
-        const attachmentFiles: File[] = [];
-        this.selectedFiles.forEach(file => {
-            if (file.name.endsWith('.xlsx')) {
-                excelFile = file;
-            } else {
-                attachmentFiles.push(file);
-            }
-        });
-        if (!excelFile) {
-            this.messageservice.add({ severity: 'error', summary: 'Please Select an Excel File', detail: 'Via UploadService' });
-            return;
-        }
-        formData.append('file', excelFile);
-        attachmentFiles.forEach(file => {
-            formData.append('attachments', file, file.name);
-        });
-        this.managereposervice.uploadExcel(formData).subscribe({
-            next: (res) => {
-                this.messageservice.add({ severity: 'success', summary: 'Repository has been Uploaded', detail: 'Via UploadService' });
-                this.selectedFiles = [];
-                this.uploaddialog = false;
-                this.reloadPage();
-            },
-            error: (err) => {
-                this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' })
-            }
-        });
-    }
-
-    isRepoSelected(repo: Repository): boolean {
-        return this.selectedrepositories.some((r) => r.id === repo.id);
-    }
-
-    exportCSV() {
-        if (this.selectedrepositories.length === 0) return;
-        // Prepare worksheet data as array of objects
-        const worksheetData = this.selectedrepositories.map((repo) => {
-            const row: any = {};
-            this.exportColumns.forEach((col) => {
-                row[col.title] = (repo as any)[col.dataKey];
-            });
-            return row;
-        });
-        // Create worksheet and workbook
-        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(worksheetData);
-        const workbook: XLSX.WorkBook = {
-            Sheets: { Repositories: worksheet },
-            SheetNames: ['Repositories']
-        };
-        // Generate Excel file buffer
-        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        // Save to file using FileSaver
-        const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-        saveAs(data, 'selected_repositories.xlsx');
-        this.messageservice.add({ severity: 'success', summary: 'Repository has been Exported', detail: 'Via ExportService' });
-    }
+    
 
     toggleRepoSelection(repo: Repository, checked: boolean) {
         if (checked) {
@@ -524,66 +395,25 @@ export class ManageApprovals implements OnInit {
         }
     }
 
-    onSubmit() {
-        if (this.repoForm.valid) {
-            const formValue = this.repoForm.value;
-            this.managereposervice.createRepository(formValue).subscribe({
-                next: _ => {
-                    this.messageservice.add({severity: 'success', summary: 'Repository has been Created', detail: 'Via CreateService'});
-                    this.loadDemoData(this.page);
-                    this.createdialog = false;
-                    this.repoForm.reset();
-                },
-                error: _ => {
-                    this.messageservice.add({severity: 'error', summary: 'Repository Creation is Failed', detail: 'Via CreateService'});
-                }
-            });
-        } else {
-            this.repoForm.markAllAsTouched();
-        }
-    }
+    
 
-    onUpload(event: any) {
-        this.file = event.target.files[0];
-        console.log(this.file);
-    }
+    
 
-    submitData(repository: Repository) {
-        let formData = new FormData();
-        formData.set("file", this.file);
-        this.managereposervice.uploadreference(this.repository, formData).subscribe((data: any) => {
-            this.uploadcodeprocessdocdialog = false;
-            this.messageservice.add({ severity: 'success', summary: 'Uploaded File Successfully', detail: 'Via UploadService' })
-        }, (err) => {
-            if (this.repository.attach_code_or_document == 'Not Attached') {
-                this.messageservice.add({ severity: 'error', summary: ' No Uploaded File Found', detail: 'Via UploadService' });
-            }
-        });
-    }
+    
 
-    onPageChange(event: any) {
-        this.CurrentPage = event.page + 1;
-        this.loadDemoData(this.CurrentPage);
-        localStorage.setItem('CurrentPage', this.CurrentPage.toString());
-    }
-
-    cancelEdit() {
-        this.repoForm.reset();
-    }
-
-    upload_dialog() {
-        this.uploaddialog = true;
-    }
+    
 
     approve_dialog(repository: Repository) {
         this.approvedialog = true;
         this.repository = { ...repository };
     }
 
-    sendforapproval_dialog(repository: Repository) {
-        this.sendforapprovaldialog = true;
+    reject_dialog(repository: Repository) {
+        this.rejectdialog = true;
         this.repository = { ...repository };
     }
+
+    
 
     formatDate(dateString: string): string {
         const date = new Date(dateString);
@@ -597,6 +427,14 @@ export class ManageApprovals implements OnInit {
         this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
             this.approvedialog = false;
             this.messageservice.add({ severity: 'success', summary: 'Repository has been Approved', detail: 'Via ApprovalService' });
+            this.reloadPage();
+        });
+    }
+
+    Reporeject(repository: Repository) {
+        this.managereposervice.RepoRejection(this.repository).subscribe((data: any) => {
+            this.approvedialog = false;
+            this.messageservice.add({ severity: 'success', summary: 'Repository has been Rejected', detail: 'Via ApprovalService' });
             this.reloadPage();
         });
     }
@@ -616,17 +454,7 @@ export class ManageApprovals implements OnInit {
         window.location.reload();
     }
 
-    download_ref(repository: Repository, id: any) {
-        this.repository = { ...repository };
-        window.open('http://127.0.0.1:5000/repos/refdownload/' + id, '_blank');
-    }
+    
 
-    delete_repo(repository:Repository): void {
-        this.managereposervice.delete_repo(this.repository).subscribe(
-            (data) => {
-                this.deleteRepoDialog = false;
-                this.messageservice.add({ severity: 'success', summary: 'Repository has been Deleted', detail: 'Via DeleteService' });
-                this.reloadPage();
-            });
-    }
+    
 }

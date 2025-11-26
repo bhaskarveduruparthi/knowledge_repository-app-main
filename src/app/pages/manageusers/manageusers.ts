@@ -154,9 +154,30 @@ interface ExportColumn {
         width: 100%;
     }
 
+    .glass-table thead th {
+    text-align: left;
+    padding: 1rem;
+    font-weight: bold;
+    color: #11224E;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+    background-color: #cce4f7; /* Add your desired background color here */
+}
+
+
+    .p-toolbar{
+      
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+        
+    }
+
     input[pInputText],
     textarea[pInputTextarea] {
         width: 100%;
+    }
+
+    .card{
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
     }
 
     @media (max-width: 700px) {

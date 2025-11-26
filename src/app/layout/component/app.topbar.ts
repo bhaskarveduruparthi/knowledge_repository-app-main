@@ -227,9 +227,6 @@ styles:`
       </div>
       
     </div>
-    <p-panel>
-        
-    </p-panel>
   </ng-template>
 </p-dialog>
 
@@ -389,6 +386,11 @@ getUserInitials(): string {
   logout() {
     this.authservice.logout();
     localStorage.removeItem('CurrentPage');
-
+    localStorage.removeItem('ApprovalCurrentPage');
+    localStorage.removeItem('LHistoryCurrentPage');
+    localStorage.removeItem('PendingCurrentPage');
+    localStorage.removeItem('RejectedCurrentPage');
+    localStorage.removeItem('UnApprovedCurrentPage');
+    
   }
 }

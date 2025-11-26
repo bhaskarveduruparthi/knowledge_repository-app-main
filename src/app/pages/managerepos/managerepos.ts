@@ -179,8 +179,28 @@ interface ExportColumn {
             margin-left: 5px;
         }
 
+        .glass-table thead th {
+    text-align: left;
+    padding: 1rem;
+    font-weight: bold;
+    color: #11224E;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+    background-color: #cce4f7; /* Add your desired background color here */
+}
+
         .error {
             border: 1px solid red;
+        }
+
+        .p-toolbar{
+      
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+        
+    }
+
+        .card{
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
         }
     `,
     imports: [
@@ -260,7 +280,7 @@ interface ExportColumn {
                     </thead>
                     <tbody>
                         <tr *ngFor="let repo of repositories()" >
-                            <td>
+                            <td >
                                 <input type="checkbox" 
                                     [checked]="isRepoSelected(repo)" 
                                     (change)="onCheckboxChange(repo, $event)" 
@@ -292,8 +312,10 @@ interface ExportColumn {
                             <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                    <button pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-help" *ngIf="sendforapproval" (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
+                                    <button pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-help" *ngIf="sendforapproval" (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved' "></button>
+                                    
                                     <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-info" *ngIf="isvalid" (click)="approve_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
+                                    <button pButton pRipple icon="pi pi-times" class="p-button-rounded p-button-warn" *ngIf="isvalid" (click)="reject_dialog(repo)" [disabled]="repo.Approval_status === 'Rejected'"></button>
                                     <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="attachvalid" (click)="upload_ref(repo)"></button>
                                     <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
                                 </div>
@@ -364,6 +386,26 @@ interface ExportColumn {
             <ng-template pTemplate="footer">
                 <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
                 <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Repoapproval(repository)"></button>
+            </ng-template>
+        </p-dialog>
+
+        <p-dialog [(visible)]="rejectdialog" header="Reject the Repository" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-c justify-content-c">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="repository">
+                    Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
+                </span>
+            </div>
+            <br>
+            <ng-template pTemplate="content">
+                <label for="business_justification">Business Justification</label>
+                <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
+                    {{ repository.business_justification }}
+                </div>
+            </ng-template>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="rejectdialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Reporeject(repository)"></button>
             </ng-template>
         </p-dialog>
 
@@ -500,10 +542,11 @@ export class ManageRepos implements OnInit {
     sendforapproval: boolean = false;
     sendforapprovaldialog: boolean = false;
     deleteRepoDialog: boolean = false;
+    rejectdialog:boolean = false;
 
     file: any;
     domainOptions = [
-        'Manufacturing', 'Pharma', 'Chemical', 'Automotive', 'Agriculture', 'Engineering Services',
+        'Manufacturing', 'Pharma', 'Chemical','Cement','HealthCare','Ports','Logistics','Airline','Media', 'Automotive', 'Agriculture', 'Engineering Services',
         'Life Sciences', 'Insurance', 'Financial Services', 'Oil and Gas', 'Retail', 'Banking Services',
         'Poultry', 'Utilities'
     ];
@@ -511,17 +554,45 @@ export class ManageRepos implements OnInit {
     filteredDomains: string[] = [];
 
     moduleOptions = [
-        'FI: Financial Accounting', 'CO: Controlling', 'MM: Materials Management', 'SD: Sales and Distribution',
-        'HCM: Human Capital Management', 'PP: Production Planning', 'PM: Plant Maintenance', 'QM: Quality Management',
-        'PS: Project System', 'FSCM: Financial Supply Chain Management', 'SRM: Supplier Relationship Management',
-        'CRM: Customer Relationship Management', 'LE: Logistics Execution', 'EWM: Extended Warehouse Management',
-        'TRM: Treasury and Risk Management', 'FM: Funds Management', 'IM: Investment Management',
-        'PLM: Product Lifecycle Management', 'BI/BW: Business Intelligence / Business Warehouse',
-        'GRC: Governance, Risk, and Compliance', 'MDM: Master Data Management', 'EHS: Environment, Health, and Safety',
-        'SEM: Strategic Enterprise Management', 'BASIS: SAP Basis (technical administration)',
-        'ABAP: Advanced Business Application Programming (development)',
-        'PI/XI: Process Integration / Exchange Infrastructure (middleware)', 'EP: Enterprise Portal',
-        'SOLMAN: SAP Solution Manager'
+        'FI: Financial Accounting',
+'CO: Controlling',
+'MM: Materials Management',
+'SD: Sales and Distribution',
+'HCM: Human Capital Management',
+'PP: Production Planning',
+'PM: Plant Maintenance',
+'QM: Quality Management',
+'PS: Project System',
+'FSCM: Financial Supply Chain Management',
+'SRM: Supplier Relationship Management',
+'CRM: Customer Relationship Management',
+'LE: Logistics Execution',
+'WM: Warehouse Management',
+'EWM: Extended Warehouse Management',
+'TRM: Treasury and Risk Management',
+'FM: Funds Management',
+'IM: Investment Management',
+'PLM: Product Lifecycle Management',
+'BI/BW: Business Intelligence / Business Warehouse',
+'GRC: Governance, Risk, and Compliance',
+'MDM: Master Data Management',
+'EHS: Environment, Health, and Safety',
+'SEM: Strategic Enterprise Management',
+'BASIS: SAP Basis (technical administration)',
+'ABAP: Advanced Business Application Programming (development)',
+'PI/XI: Process Integration / Exchange Infrastructure (middleware)',
+'EP: Enterprise Portal',
+'SOLMAN: SAP Solution Manager',
+'Fiori: SAP Fiori (UX and apps)',
+'FLM: File Lifecycle Management',
+'CPI: Cloud Platform Integration',
+'BTP: Business Technology Platform',
+'AI: Artificial Intelligence',
+'Cloud ALM: Cloud Application Lifecycle Management',
+'API: Application Programming Interface',
+'SAC: SAP Analytics Cloud',
+'Python: Python Programming Language',
+'Salesforce: Salesforce Customer 360 Platform'
     ];
 
     filteredModules: string[] = [];
@@ -684,6 +755,14 @@ export class ManageRepos implements OnInit {
         }
     }
 
+    Reporeject(repository: Repository) {
+        this.managereposervice.RepoRejection(this.repository).subscribe((data: any) => {
+            this.approvedialog = false;
+            this.messageservice.add({ severity: 'success', summary: 'Repository has been Rejected', detail: 'Via ApprovalService' });
+            this.reloadPage();
+        });
+    }
+
     Repo_approval(repository: any) {
         if (this.approvalForm.invalid) {
             this.approvalForm.markAllAsTouched();
@@ -710,6 +789,11 @@ export class ManageRepos implements OnInit {
         this.deleteRepoDialog = true;
         this.repository = { ...repository };
 
+    }
+
+    reject_dialog(repository: Repository) {
+        this.rejectdialog = true;
+        this.repository = { ...repository };
     }
 
     upload_ref(repository: Repository) {
