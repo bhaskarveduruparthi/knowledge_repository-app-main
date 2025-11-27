@@ -9,7 +9,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
 import { Toolbar } from "primeng/toolbar";
-
+import { TagModule } from 'primeng/tag';
 import { ManageReposService } from '../service/managerepos.service';
 import { AuthenticationService } from '../service/authentication.service';
 
@@ -21,6 +21,7 @@ import { AuthenticationService } from '../service/authentication.service';
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
+    TagModule,
     ChartModule,
     FieldsetModule,
     DialogModule,
@@ -40,6 +41,7 @@ import { AuthenticationService } from '../service/authentication.service';
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #eef2f7;
     }
+    
 
     .card {
       
@@ -166,6 +168,35 @@ import { AuthenticationService } from '../service/authentication.service';
   margin-bottom: 0.5rem;
 }
 
+.question-status-tag {
+  display: inline-block;
+  padding: 0.25em 0.8em;
+  font-size: 0.93rem;
+  border-radius: 1em;
+  margin-left: 0.7em;
+  font-weight: 600;
+  vertical-align: middle;
+  background-color: #eef2f7;
+  color: #007ad9;
+  border: 1px solid #b1d6fa;
+}
+.question-status-tag.closed {
+  background-color: #f5c6cb;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+.question-status-tag.in-progress {
+  background-color: #ffeeba;
+  color: #856404;
+  border-color: #ffeeba;
+}
+.question-status-tag.open {
+  background-color: #c3e6cb;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+
 .question-title {
   font-weight: 700;
   font-size: 1.3rem;
@@ -204,6 +235,13 @@ import { AuthenticationService } from '../service/authentication.service';
   margin-right: 1rem;
   user-select: none;
 }
+
+.question-header {
+  display: flex;
+  justify-content: space-between; /* Spread the content to left and right */
+  align-items: center;
+}
+
 .answer-main {
   flex: 1;
 }
@@ -254,10 +292,21 @@ import { AuthenticationService } from '../service/authentication.service';
   
   <div class="card" *ngFor="let question of questions">
   <div class="question-header">
-    
+  <div class="left-content">
     <div class="question-title">{{ question.question }}</div>
-    <div class="question-username">{{ question.username }} • {{question.created_at | date:'short'}}</div>
+    <p-tag
+      [value]="question.question_status"
+      [severity]="getStatusSeverity(question.question_status)"
+      [rounded]="true"
+      class="p-mr-2"
+    ></p-tag>
   </div>
+  <div class="right-content">
+    <span class="question-username">{{ question.username }} • {{question.created_at | date:'short'}}</span>
+  </div>
+</div>
+
+
   <div class="business-justification" *ngIf="question.business_justification">
     {{ question.business_justification }}
   </div>
@@ -290,7 +339,7 @@ import { AuthenticationService } from '../service/authentication.service';
   
 </div>
 <div class="answer-button">
-  <button pButton type="button" label="Add Answer" icon="pi pi-plus" (click)="showAnswerDialog(question.id)"></button>
+  <button pButton type="button" label="Add Solution" icon="pi pi-plus" (click)="showAnswerDialog(question.id)"></button>
 </div>
 
 
@@ -390,6 +439,20 @@ export class Support implements OnInit {
     this.newQuestion = { question: '', description: '', business_justification: '' };
   }
 
+  getStatusSeverity(status: string): string {
+  switch (status) {
+    case 'Open':
+      return 'success';   // Green tag
+    case 'Pending':
+      return 'warning';   // Yellow/amber tag
+    case 'Closed':
+      return 'danger';    // Red tag
+    default:
+      return 'info';      // Blue tag for other statuses
+  }
+}
+
+
   postQuestion() {
     if (!this.newQuestion.question || !this.newQuestion.description) {
       this.messageservice.add({ severity: 'warn', summary: 'Validation', detail: 'Question and description are required' });
@@ -445,6 +508,7 @@ export class Support implements OnInit {
   this.managereposervice.upvoteAnswer(answer.id).subscribe({
     next: (res: any) => {
       answer.upvotes = res.upvotes;
+      
     },
     error: () => {
       this.messageservice.add({severity:'error', summary:'Error', detail:'Failed to upvote'});

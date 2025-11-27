@@ -64,7 +64,7 @@ export class AppMenu implements OnInit {
             icon: '',
             items:[
                 { label: 'User History', icon: 'pi pi-fw pi-history', routerLink: ['/app/pages/login-history'] },
-                { label: 'Download History', icon: 'pi pi-fw pi-history', routerLink: [''] }
+                { label: 'Download History', icon: 'pi pi-fw pi-history', routerLink: ['/app/pages/download-history'] }
             ]
         },
         

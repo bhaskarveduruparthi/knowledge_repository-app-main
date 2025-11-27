@@ -387,13 +387,8 @@ export class ManageRejectedReport implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
-                this.downloadvalid = true;
-                this.attachvalid = false
             } else {
-                this.isvalid = false;
-                this.downloadvalid = false;
-                
-                this.attachvalid = true;
+                this.router.navigate(['/auth/access']);
             }
         });
     }
@@ -474,13 +469,17 @@ export class ManageRejectedReport implements OnInit {
     }
 
     download_ref(repository: Repository, id: any) {
-        this.repository = { ...repository };
+  this.repository = { ...repository };
 
+  const raw = localStorage.getItem('token');          // e.g. '{"access_token":"eyJhbGciOi..."}'
+  if (!raw) { return; }
 
-        window.open('http://127.0.0.1:5001/repos/refdownload/' + id, '_blank');
+  const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
+  const jwt = parsed.access_token;                    // <-- actual JWT string
 
-
-    }
+  const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
+  window.open(url, '_blank');
+}
 
     
 }

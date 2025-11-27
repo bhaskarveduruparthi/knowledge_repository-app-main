@@ -9,6 +9,7 @@ import { ManagePendingReport } from './managepending/managepending';
 import { ManageUnapprovedReport } from './manageunapproved/manageunapproved';
 import { ManageRejectedReport } from './managerejected/managerejected';
 import { LoginHistory } from './loginhistory/loginhistory';
+import { DownloadHistory } from './downloadhistory/downloadhistory';
 
 
 export default [
@@ -22,5 +23,6 @@ export default [
      {path: 'support', component: Support},
      {path: 'home', component: Home},
      {path:'login-history', component: LoginHistory},
+     {path: 'download-history', component: DownloadHistory},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

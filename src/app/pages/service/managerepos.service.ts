@@ -24,6 +24,28 @@ export interface Repository {
   business_justification?:string;
 }
 
+export interface LoginLog {
+    id?: number;
+    yash_id?: string | null;
+    ip_address?: string | null;
+    user_agent?: string | null;
+    success?: boolean;
+    message?: string | null;
+    timestamp?: string;  // ISO string from backend
+}
+
+export interface DownloadLog {
+  id?: number;
+  yash_id?: string | null;
+  username?: string;
+  file_id?: number;
+  filename?: string;
+  timestamp?: string;
+  ip_address?: string | null;
+  user_agent?: string | null;
+}
+
+
 
 @Injectable({
   providedIn: 'root'  // This registers the service app-wide automatically
@@ -37,6 +59,16 @@ export class ManageReposService {
 
   getallrepos(page: number){
     return this.http.get(`${this.url}repos/getallrepos?page=${page}`);
+  }
+
+  getalllogs(page:number){
+    return this.http.get(`${this.url}repos/getlogs?page=${page}`);
+  
+  }
+
+  getalldownloadlogs(page:number){
+    return this.http.get(`${this.url}repos/getdownloadlogs?page=${page}`);
+  
   }
 
   getallapprovedrepos(page: number){
@@ -105,6 +137,14 @@ downloadWorkbook(id: number): Observable<Blob> {
 
   get_repo_records(){
     return this.http.get(`${this.url}/repos/getallreporecords`);
+  }
+
+  get_log_records(){
+    return this.http.get(`${this.url}/repos/getlogrecords`);
+  }
+
+  get_downloadlog_records(){
+    return this.http.get(`${this.url}/repos/getdownloadlogrecords`);
   }
 
   getapproved_repo_records(){

@@ -25,7 +25,7 @@ import { AuthenticationService } from '../service/authentication.service';
 import { PanelModule } from 'primeng/panel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
-import { ManageReposService, Repository } from '../service/managerepos.service';
+import { LoginLog, ManageReposService, Repository } from '../service/managerepos.service';
 import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -261,18 +261,23 @@ interface ExportColumn {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let repo of repositories()" >
+                        <tr *ngFor="let log of logs()" >
                            
-                            <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                            <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                            <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                            <td style="white-space: nowrap;">{{ repo.module_name }}</td>
-                            <td>{{ repo.detailed_requirement }}</td>
-                            <td>{{ repo.standard_custom }}</td>
+                             <td style="white-space: nowrap;">{{ log.yash_id || '-' }}</td>
+          <td style="white-space: nowrap;">{{ log.ip_address || '-' }}</td>
+          <td style="white-space: nowrap;">{{ log.user_agent || '-' }}</td>
+          <td style="white-space: nowrap;">
+            <p-tag
+              [severity]="log.success ? 'success' : 'danger'"
+              [value]="log.success ? 'Success' : 'Failed'">
+            </p-tag>
+          </td>
+          <td>{{ log.message || '-' }}</td>
+          <td style="white-space: nowrap;">{{ formatDate(log.timestamp) }}</td>
                             
                             
                         </tr>
-                        <tr *ngIf="repositories().length === 0 && !loading">
+                        <tr *ngIf="logs().length === 0 && !loading">
                             <td colspan="17" style="text-align:center; padding: 2rem;">No Logs found.</td>
                         </tr>
                          <tr *ngIf="loading">
@@ -290,9 +295,9 @@ interface ExportColumn {
 })
 export class LoginHistory implements OnInit {
     adminDialog: boolean = false;
-    repositories = signal<Repository[]>([]);
-    repository!: Repository;
-    selectedrepositories: Repository[] = [];
+    logs= signal<LoginLog[]>([]);
+    log!: LoginLog;
+    selectedlogs: LoginLog[] = [];
     submitted: boolean = false;
     selectedFile: File | null = null;
     searchTerm: string = '';
@@ -327,16 +332,9 @@ export class LoginHistory implements OnInit {
     business_justification: any;
    
 
-    get isAdmin(): boolean {
-        return this.downloadvalid === true;
-    }
+    
 
-    get isExportEnabled(): boolean {
-        if (this.isAdmin) {
-            return this.selectedrepositories.length > 0;
-        }
-        return this.selectedrepositories.length > 0 && this.selectedrepositories.every((repo) => repo.Approval_status === 'Approved');
-    }
+    
 
     ngOnInit() {
         const storedPage = localStorage.getItem('LHistoryCurrentPage');
@@ -363,13 +361,10 @@ export class LoginHistory implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
-                this.downloadvalid = true;
-                this.attachvalid = false
+                
             } else {
                 this.isvalid = false;
-                this.downloadvalid = false;
-                
-                this.attachvalid = true;
+                this.router.navigate(['/auth/access']);
             }
         });
     }
@@ -381,29 +376,16 @@ export class LoginHistory implements OnInit {
 
 
     loadDemoData(page: number) {
-        this.managereposervice.getallunapprovedrepos(page).subscribe((data: any) => {
+        this.managereposervice.getalllogs(page).subscribe((data: any) => {
             if (Array.isArray(data)) {
-                this.repositories.set(data);
+                this.logs.set(data);
             } else {
                 console.error('Expected array but received:', data);
-                this.repositories.set([]);
+                this.logs.set([]);
             }
             this.loading = false;
         });
-        this.cols = [
-            
-            { field: 'yash_id', header: 'Yash Id' },
-            { field: 'domain', header: 'Domain' },
-            { field: 'sector', header: 'Sector' },
-            { field: 'module_name', header: 'Module Name' },
-            { field: 'detailed_requirement', header: 'Detailed Requirement' },
-            { field: 'standard_custom', header: 'Standard/Custom' },
-            { field: 'technical_details', header: 'Technical Details / Z Object Name' },
-            { field: 'customer_benefit', header: 'Customer Benefit' },
-            { field: 'remarks', header: 'Remarks' },
-            { field: 'attach_code_or_document', header: 'Code/Process Document' }
-        ];
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        
     }
 
     
@@ -439,7 +421,7 @@ export class LoginHistory implements OnInit {
     
 
     form_records() {
-        this.managereposervice.getunapproved_repo_records().subscribe((data: any) => {
+        this.managereposervice.get_log_records().subscribe((data: any) => {
             this.totalitems = data.length;
             this.totalrecords = data.totalrecords;
         });
@@ -449,14 +431,7 @@ export class LoginHistory implements OnInit {
         window.location.reload();
     }
 
-    download_ref(repository: Repository, id: any) {
-        this.repository = { ...repository };
-
-
-        window.open('http://127.0.0.1:5001/repos/refdownload/' + id, '_blank');
-
-
-    }
+    
 
     
 }

@@ -25,7 +25,7 @@ import { AuthenticationService } from '../service/authentication.service';
 import { PanelModule } from 'primeng/panel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
-import { ManageReposService, Repository } from '../service/managerepos.service';
+import { DownloadLog, LoginLog, ManageReposService, Repository } from '../service/managerepos.service';
 import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -47,7 +47,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-manageunapprovedreport',
+    selector: 'app-downloadhistory',
     standalone: true,
     styles: `
         /* --- Existing Styles --- */
@@ -237,7 +237,7 @@ interface ExportColumn {
             
 
             <div class="flex items-center justify-between mb-3">
-                <h5 class="m-0">Un-Approved</h5>
+                <h5 class="m-0">Download History</h5>
                 <!--<p-iconfield>
                     <p-inputicon styleClass="pi pi-search" />
                     <input pInputText type="text" (input)="onSearch($event)" placeholder="Search..." />
@@ -249,55 +249,33 @@ interface ExportColumn {
                     <thead>
                         <tr>
                            
-                            <th>Customer Name</th>
-                            <th>Domain</th>
-                            <th>Sector</th>
-                            <th>Module Name</th>
-                            <th>Detailed Requirement</th>
-                            <th>Standard/Custom</th>
-                            <th>Technical details</th>
-                            <th>Customer Benefit</th>
-                            <th>Remarks</th>
-                            <th>Code/Process Document</th>
-                            <th>Created On</th>
-                            <th>Business Justification</th>
-                            <th>Repo Status</th>
-                            <th>Repo Approver</th>
-                            <th>Repo Approval Date</th>
+                            <th>Yash Id</th>
+                            <th>User name</th>
+                            <th>Repository Id</th>
+                            <th>File Name</th>
+                            <th>IP Address</th>
+                            <th>User Agent</th>
+                            <th>TimeStamp</th>
+                            
                             
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let repo of repositories()" >
+                        <tr *ngFor="let log of logs()" >
                            
-                            <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                            <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                            <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                            <td style="white-space: nowrap;">{{ repo.module_name }}</td>
-                            <td>{{ repo.detailed_requirement }}</td>
-                            <td>{{ repo.standard_custom }}</td>
-                            <td>{{ repo.technical_details }}</td>
-                            <td>{{ repo.customer_benefit }}</td>
-                            <td>{{ repo.remarks }}</td>
-                            <td>
-  <p-button 
-    label="Download" 
-    icon="pi pi-download" 
-    severity="primary" 
-    (click)="download_ref(repo, repo.id)" 
-    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-  </p-button>
-</td>
-
-                            <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
-                            <td>{{ repo.business_justification }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approver }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
+                           <td style="white-space: nowrap;">{{ log.yash_id || '-' }}</td>
+    <td style="white-space: nowrap;">{{ log.username || '-' }}</td>
+    <td style="white-space: nowrap;">{{ log.file_id || '-' }}</td>
+    <td style="white-space: nowrap;">{{ log.filename || '-' }}</td>
+    <td style="white-space: nowrap;">{{ log.ip_address || '-' }}</td>
+    <td style="white-space: nowrap;">{{ log.user_agent || '-' }}</td>
+    <td style="white-space: nowrap;">{{ formatDate(log.timestamp) }}</td>
+          
+                            
                             
                         </tr>
-                        <tr *ngIf="repositories().length === 0 && !loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">No Repositories found.</td>
+                        <tr *ngIf="logs().length === 0 && !loading">
+                            <td colspan="17" style="text-align:center; padding: 2rem;">No Logs found.</td>
                         </tr>
                          <tr *ngIf="loading">
                             <td colspan="17" style="text-align:center; padding: 2rem;">Loading Data...</td>
@@ -305,18 +283,18 @@ interface ExportColumn {
                     </tbody>
                 </table>
             </div>
-            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
+            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Logs" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
         
         </div>
         
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
-export class ManageUnapprovedReport implements OnInit {
+export class DownloadHistory implements OnInit {
     adminDialog: boolean = false;
-    repositories = signal<Repository[]>([]);
-    repository!: Repository;
-    selectedrepositories: Repository[] = [];
+    logs= signal<DownloadLog[]>([]);
+    log!: DownloadLog;
+    selectedlogs: DownloadLog[] = [];
     submitted: boolean = false;
     selectedFile: File | null = null;
     searchTerm: string = '';
@@ -331,7 +309,7 @@ export class ManageUnapprovedReport implements OnInit {
     approvedialog: boolean = false;
     createdialog: boolean = false;
     messages: any[] = [];
-    UnApprovedCurrentPage!: number;
+    DHistoryCurrentPage!: number;
     page!: number;
     first!: number;
     loading: boolean = true;
@@ -351,28 +329,21 @@ export class ManageUnapprovedReport implements OnInit {
     business_justification: any;
    
 
-    get isAdmin(): boolean {
-        return this.downloadvalid === true;
-    }
+    
 
-    get isExportEnabled(): boolean {
-        if (this.isAdmin) {
-            return this.selectedrepositories.length > 0;
-        }
-        return this.selectedrepositories.length > 0 && this.selectedrepositories.every((repo) => repo.Approval_status === 'Approved');
-    }
+    
 
     ngOnInit() {
-        const storedPage = localStorage.getItem('UnApprovedCurrentPage');
+        const storedPage = localStorage.getItem('DHistoryCurrentPage');
         if (storedPage) {
-            this.UnApprovedCurrentPage = parseInt(storedPage);
-            this.loadDemoData(this.UnApprovedCurrentPage);
-            this.first = (this.UnApprovedCurrentPage - 1) * 10;
+            this.DHistoryCurrentPage = parseInt(storedPage);
+            this.loadDemoData(this.DHistoryCurrentPage);
+            this.first = (this.DHistoryCurrentPage - 1) * 10;
         } else {
-            this.UnApprovedCurrentPage = 1;
-            localStorage.setItem('UnApprovedCurrentPage', this.UnApprovedCurrentPage.toString());
-            this.loadDemoData(this.UnApprovedCurrentPage);
-            this.first = (this.UnApprovedCurrentPage - 1) * 10;
+            this.DHistoryCurrentPage = 1;
+            localStorage.setItem('DHistoryCurrentPage', this.DHistoryCurrentPage.toString());
+            this.loadDemoData(this.DHistoryCurrentPage);
+            this.first = (this.DHistoryCurrentPage - 1) * 10;
         }
         this.form_records();
         
@@ -387,7 +358,9 @@ export class ManageUnapprovedReport implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
+                
             } else {
+                this.isvalid = false;
                 this.router.navigate(['/auth/access']);
             }
         });
@@ -400,29 +373,16 @@ export class ManageUnapprovedReport implements OnInit {
 
 
     loadDemoData(page: number) {
-        this.managereposervice.getallunapprovedrepos(page).subscribe((data: any) => {
+        this.managereposervice.getalldownloadlogs(page).subscribe((data: any) => {
             if (Array.isArray(data)) {
-                this.repositories.set(data);
+                this.logs.set(data);
             } else {
                 console.error('Expected array but received:', data);
-                this.repositories.set([]);
+                this.logs.set([]);
             }
             this.loading = false;
         });
-        this.cols = [
-            { field: 'id', header: 'S.No.' },
-            { field: 'customer_name', header: 'Customer Name' },
-            { field: 'domain', header: 'Domain' },
-            { field: 'sector', header: 'Sector' },
-            { field: 'module_name', header: 'Module Name' },
-            { field: 'detailed_requirement', header: 'Detailed Requirement' },
-            { field: 'standard_custom', header: 'Standard/Custom' },
-            { field: 'technical_details', header: 'Technical Details / Z Object Name' },
-            { field: 'customer_benefit', header: 'Customer Benefit' },
-            { field: 'remarks', header: 'Remarks' },
-            { field: 'attach_code_or_document', header: 'Code/Process Document' }
-        ];
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        
     }
 
     
@@ -431,9 +391,9 @@ export class ManageUnapprovedReport implements OnInit {
 
 
     onPageChange(event: any) {
-        this.UnApprovedCurrentPage = event.page + 1;
-        this.loadDemoData(this.UnApprovedCurrentPage);
-        localStorage.setItem('UnApprovedCurrentPage', this.UnApprovedCurrentPage.toString());
+        this.DHistoryCurrentPage = event.page + 1;
+        this.loadDemoData(this.DHistoryCurrentPage);
+        localStorage.setItem('DHistoryCurrentPage', this.DHistoryCurrentPage.toString());
     }
 
     cancelEdit() {
@@ -458,7 +418,7 @@ export class ManageUnapprovedReport implements OnInit {
     
 
     form_records() {
-        this.managereposervice.getunapproved_repo_records().subscribe((data: any) => {
+        this.managereposervice.get_downloadlog_records().subscribe((data: any) => {
             this.totalitems = data.length;
             this.totalrecords = data.totalrecords;
         });
@@ -468,18 +428,7 @@ export class ManageUnapprovedReport implements OnInit {
         window.location.reload();
     }
 
-    download_ref(repository: Repository, id: any) {
-  this.repository = { ...repository };
-
-  const raw = localStorage.getItem('token');          // e.g. '{"access_token":"eyJhbGciOi..."}'
-  if (!raw) { return; }
-
-  const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
-  const jwt = parsed.access_token;                    // <-- actual JWT string
-
-  const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
-  window.open(url, '_blank');
-}
+    
 
     
 }

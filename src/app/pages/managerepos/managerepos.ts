@@ -265,7 +265,7 @@ interface ExportColumn {
                             <th>Sector</th>
                             <th>Module Name</th>
                             <th>Detailed Requirement</th>
-                            <th>Standard/Custom</th>
+                            <th>Object Type</th>
                             <th>Technical details</th>
                             <th>Customer Benefit</th>
                             <th>Remarks</th>
@@ -307,9 +307,13 @@ interface ExportColumn {
 
                             <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
                             <td>{{ repo.business_justification }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
+                            <td style="white-space: nowrap; text-align: center"><p-tag 
+    [value]="repo.Approval_status ?? 'Not Approved'" 
+    [severity]="getTagSeverity(repo.Approval_status)">
+  </p-tag>
+</td>
                             <td style="white-space: nowrap;">{{ repo.Approver }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
+                            <td style="white-space: nowrap;">{{ formatDate(repo.Approval_date) }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
                                     <button pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-help" *ngIf="sendforapproval" (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved' "></button>
@@ -703,6 +707,20 @@ export class ManageRepos implements OnInit {
         );
     }
 
+    getTagSeverity(status: string | undefined): string {
+  const safeStatus = status ?? 'Not Approved';
+  
+  switch(safeStatus) {
+    case 'Approved': return 'success';     // Green tag
+    case 'Rejected': return 'danger';      // Red tag
+    case 'Sent for Approval': return 'warn';  // Orange/yellow tag
+    case 'Not Approved': return 'info';    // Blue tag (default)
+    default: return 'info';
+  }
+}
+
+
+
     filterModule(event: any) {
         const query = event.query.toLowerCase();
         this.filteredModules = this.moduleOptions.filter(option =>
@@ -1014,13 +1032,19 @@ export class ManageRepos implements OnInit {
     }
 
     download_ref(repository: Repository, id: any) {
-        this.repository = { ...repository };
+  this.repository = { ...repository };
+
+  const raw = localStorage.getItem('token');          // e.g. '{"access_token":"eyJhbGciOi..."}'
+  if (!raw) { return; }
+
+  const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
+  const jwt = parsed.access_token;                    // <-- actual JWT string
+
+  const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
+  window.open(url, '_blank');
+}
 
 
-        window.open('http://127.0.0.1:5001/repos/refdownload/' + id, '_blank');
-
-
-    }
 
     delete_repo(repository: Repository): void {
         this.managereposervice.delete_repo(this.repository).subscribe(
