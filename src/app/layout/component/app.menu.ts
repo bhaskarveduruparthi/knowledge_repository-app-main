@@ -33,6 +33,7 @@ export class AppMenu implements OnInit {
             icon: 'pi pi-fw pi-briefcase',
             items: [
                 { label: 'Manage Users', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
+                { label: 'Manage Managers', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manage-managers'] },
                 { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
                 
 
@@ -99,6 +100,28 @@ export class AppMenu implements OnInit {
         }
     ];
 
+    manager_menu: MenuItem[] = [
+        {
+            label: 'Home',
+            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
+        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
+        },
+        {
+            label: 'Manager',
+            icon: 'pi pi-fw pi-briefcase',
+            items: [
+                { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
+            ]
+        },
+        {
+            label: 'Support',
+            icon: '',
+            items:[
+                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
+            ]
+        }
+    ];
+
     // The menu currently displayed
     display_menu: MenuItem[] = [];
 
@@ -109,13 +132,19 @@ export class AppMenu implements OnInit {
     ngOnInit() {
         this.authenticationService.user.subscribe(user => {
             this.user = user;
-            if (user?.type === 'Superadmin' || user?.type === 'manager') {
+            if (user?.type === 'Superadmin') {
                 // Show admin menu for Superadmin and manager
                 this.display_menu = this.admin_menu;
-            } else {
+            } 
+            else if(user?.type === 'manager'){
+                this.display_menu = this.manager_menu;
+            }
+            else {
                 // Show user menu for other users
                 this.display_menu = this.user_menu;
             }
         });
     }
 }
+
+

@@ -210,6 +210,10 @@ downloadWorkbook(id: number): Observable<Blob> {
     return this.http.post<any>(`${this.url}support/createanswer`, payload);
   }
 
+  getTopUsersVotes(): Observable<any> {
+    return this.http.get<any>(`${this.url}support/top-users-votes`);
+  }
+
   
 
 

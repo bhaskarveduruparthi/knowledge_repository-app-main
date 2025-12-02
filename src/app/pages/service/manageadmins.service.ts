@@ -28,6 +28,10 @@ export class ManageAdminsService {
     return this.http.get(`${this.url}users/getallusers`);
   }
 
+  getManagers() {
+    return this.http.get(`${this.url}users/getallmanagers`);
+  }
+
   
 
   add_user(user: User): Observable<User> {

@@ -236,7 +236,7 @@ interface ExportColumn {
         <div class="card">
             <p-toolbar styleClass="mb-6">
                 <ng-template #start>
-                    <p-button label="Add" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
+                    <p-button label="Add Task" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
                 </ng-template>
                 <ng-template #end>
                     <p-button label="Upload" icon="pi pi-upload" severity="help" (click)="upload_dialog()" />

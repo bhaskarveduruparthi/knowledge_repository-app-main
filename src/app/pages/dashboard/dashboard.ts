@@ -186,6 +186,11 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
     </p-fieldset>
   </div>
+  <div class="charts-container">
+    <p-fieldset legend="Top Users by Votes" toggleable="true">
+          <p-chart type="bar" [data]="chartData" *ngIf="chartData"></p-chart>
+        </p-fieldset>
+  </div>
 </div>
 
     
@@ -207,6 +212,10 @@ export class Dashboard implements OnInit {
   greetingMessage: string = '';
   username: string = '';
 
+  chartData: any; // Top users votes chart data
+  chartOptions: any;
+
+
   constructor(
     private managereposervice: ManageReposService,
     public messageservice: MessageService,
@@ -214,9 +223,18 @@ export class Dashboard implements OnInit {
     private confirmationService: ConfirmationService,
     public router: Router
   ) {
-    this.authservice.user.subscribe((x) => {
-      this.isvalid = (x?.type === 'Superadmin');
-    });
+    this.chartOptions = {
+      plugins: {
+        legend: {
+          labels: { usePointStyle: true }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    };
   }
 
   ngOnInit() {
@@ -224,6 +242,21 @@ export class Dashboard implements OnInit {
     this.setGreetingMessage();
     this.getUsername();
     this.loadChartData();
+    this.fetchtopvotes();
+  }
+
+  fetchtopvotes() {
+    this.managereposervice.getTopUsersVotes().subscribe({
+      next: (data: any) => {
+        this.chartData = {
+          labels: data.labels,
+          datasets: data.datasets
+        };
+      },
+      error: (err) => {
+        console.error('Error loading top votes chart', err);
+      }
+    });
   }
 
   setGreetingMessage() {
