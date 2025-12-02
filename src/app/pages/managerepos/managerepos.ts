@@ -236,17 +236,17 @@ interface ExportColumn {
         <div class="card">
             <p-toolbar styleClass="mb-6">
                 <ng-template #start>
-                    <p-button label="Create Repository" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
+                    <p-button label="Add" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
                 </ng-template>
                 <ng-template #end>
-                    <p-button label="Upload Repos" icon="pi pi-upload" severity="help" (click)="upload_dialog()" />
+                    <p-button label="Upload" icon="pi pi-upload" severity="help" (click)="upload_dialog()" />
                     <span style="margin-left: 1rem;"></span>
                     <p-button label="Export to Excel" icon="pi pi-download" severity="success" (onClick)="exportCSV()" [disabled]="!isExportEnabled" />
                 </ng-template>
             </p-toolbar>
 
             <div class="flex items-center justify-between mb-3">
-                <h5 class="m-0">Manage Repositories</h5>
+                <h5 class="m-0">Manage Solutions</h5>
                 <!--<p-iconfield>
                     <p-inputicon styleClass="pi pi-search" />
                     <input pInputText type="text" (input)="onSearch($event)" placeholder="Search..." />

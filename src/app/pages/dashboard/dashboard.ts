@@ -139,7 +139,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     <div class="grid">
       <div class="card">
         <div class="card-header">
-          <span>Total Repositories</span>
+          <span>Total Tasks</span>
           <div class="icon-container icon-total">
             <i class="pi pi-book"></i>
           </div>
@@ -149,7 +149,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       </div>
       <div class="card">
         <div class="card-header">
-          <span>Approved Repositories</span>
+          <span>Approved Tasks</span>
           <div class="icon-container icon-approved">
             <i class="pi pi-file"></i>
           </div>
@@ -158,7 +158,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       </div>
       <div  class="card">
         <div class="card-header">
-          <span>Sent for Approval</span>
+          <span>Sent for Approval(To Download)</span>
           <div class="icon-container icon-users">
             <i class="pi pi-file"></i>
           </div>
@@ -167,7 +167,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       </div>
       <div class="card">
         <div class="card-header">
-          <span>Unapproved Repositories</span>
+          <span>Unapproved Tasks</span>
           <div class="icon-container icon-unapproved">
             <i class="pi pi-file"></i>
           </div>
@@ -179,10 +179,10 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     </div>
     <div class="card">
   <div class="charts-container">
-    <p-fieldset legend="Module-wise Data" toggleable="true" collapsed="false" >
+    <p-fieldset legend="Solutions by Module" toggleable="true" collapsed="false" >
       <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
     </p-fieldset>
-    <p-fieldset legend="Domain-wise Data" toggleable="true" collapsed="false" >
+    <p-fieldset legend="Solutions by Domain" toggleable="true" collapsed="false" >
       <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
     </p-fieldset>
   </div>

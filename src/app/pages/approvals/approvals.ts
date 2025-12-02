@@ -172,7 +172,7 @@ interface ExportColumn {
                     </ng-template>
                     <ng-template #end>
                         <p-button 
-  label="Go to Repository Database" 
+  label="Go to Repository" 
   icon="pi pi-arrow-right" 
   severity="help"
   (onClick)="gotoRepos()">
