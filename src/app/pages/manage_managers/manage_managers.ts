@@ -225,7 +225,7 @@ interface ExportColumn {
                             <th>Email</th>
                             <th>Business Unit</th>
                             <th>Type</th>
-                            <th>Active</th>
+                            
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -238,7 +238,7 @@ interface ExportColumn {
                             <td style="min-width: 200px;">{{user.email}}</td>
                             <td style="min-width: 100px;">{{user.b_unit}}</td>
                             <td style="min-width: 40px;"><b>{{user.type}}</b></td>
-                            <td style="min-width: 40px; text-align: center;">{{user.active}}</td>
+                            
                             <td>
                                 <div class="flex" style="min-width: 100px;">
                                     <button pButton pRipple icon="pi pi-user-edit" class="p-button-rounded p-button-success mr-2"

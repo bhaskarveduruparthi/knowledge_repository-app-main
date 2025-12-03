@@ -392,7 +392,7 @@ interface Answer {
             icon="pi pi-plus-circle" 
             size="large"
             (onClick)="showNewQuestionDialog()"
-            class="p-button-success p-button-raised p-button-lg"
+            class="p-button-text"
           ></p-button>
         </div>
 
