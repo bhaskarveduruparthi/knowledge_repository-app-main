@@ -139,7 +139,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     <div class="grid">
       <div class="card">
         <div class="card-header">
-          <span>Total Tasks</span>
+          <span>Total Solutions</span>
           <div class="icon-container icon-total">
             <i class="pi pi-book"></i>
           </div>
@@ -149,7 +149,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       </div>
       <div class="card">
         <div class="card-header">
-          <span>Approved Tasks</span>
+          <span>Approved Solutions</span>
           <div class="icon-container icon-approved">
             <i class="pi pi-file"></i>
           </div>
@@ -158,7 +158,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       </div>
       <div  class="card">
         <div class="card-header">
-          <span>Sent for Approval(To Download)</span>
+          <span>Pending for Approval</span>
           <div class="icon-container icon-users">
             <i class="pi pi-file"></i>
           </div>
@@ -167,7 +167,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
       </div>
       <div class="card">
         <div class="card-header">
-          <span>Unapproved Tasks</span>
+          <span>Rejected Solutions</span>
           <div class="icon-container icon-unapproved">
             <i class="pi pi-file"></i>
           </div>
@@ -187,7 +187,10 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     </p-fieldset>
   </div>
   <div class="charts-container">
-    <p-fieldset legend="Top Users by Votes" toggleable="true">
+    <p-fieldset legend="Top Contributors by Solutions" toggleable="true">
+          <p-chart type="bar" [data]="chartData" *ngIf="chartData"></p-chart>
+        </p-fieldset>
+    <p-fieldset legend="Top Contributors by Community" toggleable="true">
           <p-chart type="bar" [data]="chartData" *ngIf="chartData"></p-chart>
         </p-fieldset>
   </div>

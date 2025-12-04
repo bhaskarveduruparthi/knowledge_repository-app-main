@@ -51,10 +51,10 @@ export class AppMenu implements OnInit {
             icon: 'pi pi-fw pi-file',
             items: [
                 
-                { label: 'Approved', icon: 'pi pi-fw pi-file-check', routerLink: ['/app/pages/approved'] },
-                {label: 'Unapproved', icon: 'pi pi-fw pi-file-edit', routerLink: ['/app/pages/unapproved'] },
-                {label: 'Pending', icon: 'pi pi-fw pi-file-o', routerLink: ['/app/pages/pending'] },
-                { label: 'Rejected', icon: 'pi pi-fw pi-file-excel', routerLink: ['/app/pages/rejected'] }
+                { label: 'Approved Solutions', icon: 'pi pi-fw pi-file-check', routerLink: ['/app/pages/approved'] },
+                
+                {label: 'Pending for Approval', icon: 'pi pi-fw pi-file-o', routerLink: ['/app/pages/pending'] },
+                { label: 'Rejected Solutions', icon: 'pi pi-fw pi-file-excel', routerLink: ['/app/pages/rejected'] }
                 
 
             ]
@@ -73,7 +73,7 @@ export class AppMenu implements OnInit {
             label: 'Support',
             icon: '',
             items:[
-                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
+                { label: 'Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
             ]
         }
     ];

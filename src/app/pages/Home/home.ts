@@ -289,7 +289,7 @@ import { debounceTime, Subject } from 'rxjs';
         >
           <ng-template pTemplate="content">
             <div class="card-content">
-              <p><b>Customer:</b> {{ repo.customer_name }}</p>
+              <p><b>Domain:</b> {{ repo.domain }}</p>
               <p><b>Sector:</b> {{ repo.sector }}</p>
               <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
               <div class="more-info-row">
@@ -307,7 +307,7 @@ import { debounceTime, Subject } from 'rxjs';
         (onHide)="closeDetails()"
       >
         <div *ngIf="selectedRepo">
-          <p><b>Customer Name:</b> {{ selectedRepo.customer_name }}</p>
+
           <p><b>Domain:</b> {{ selectedRepo.domain }}</p>
           <p><b>Sector:</b> {{ selectedRepo.sector }}</p>
           <p><b>Module Name:</b> {{ selectedRepo.module_name }}</p>
@@ -338,7 +338,6 @@ export class Home implements OnInit {
   filterOptions: string[] = [
     'Domain',
     'Module',
-    'Customer Name',
     'Sector',
     'Standard/Custom'
   ];

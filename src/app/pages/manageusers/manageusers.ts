@@ -201,7 +201,7 @@ interface ExportColumn {
         <div class="card">
             <p-toolbar styleClass="mb-6">
                 <ng-template #start>
-                  <p-button label="Create User" icon="pi pi-plus" severity="primary" (onClick)="openNew()"  />
+                  <p-button label="Add User" icon="pi pi-plus" severity="primary" (onClick)="openNew()"  />
                 </ng-template>
                 <ng-template #end>
                     <p-button label="Export to Excel" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
@@ -224,6 +224,10 @@ interface ExportColumn {
                             <th>User Name</th>
                             <th>Email</th>
                             <th>Business Unit</th>
+                            <th>IRM</th>
+                            <th>SRM</th>
+                            <th>BUH</th>
+                            <th>BGH</th>
                             <th>Type</th>
                             
                             <th>Actions</th>
@@ -237,6 +241,10 @@ interface ExportColumn {
                             <td style="min-width: 200px;">{{user.name}}</td>
                             <td style="min-width: 200px;">{{user.email}}</td>
                             <td style="min-width: 100px;">{{user.b_unit}}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                             <td style="min-width: 40px;"><b>{{user.type}}</b></td>
                             
                             <td>

@@ -260,7 +260,7 @@ interface ExportColumn {
                             <th>
                                 Select
                             </th>
-                            <th>Customer Name</th>
+                            <th *ngIf="customervalid">Customer Name</th>
                             <th>Domain</th>
                             <th>Sector</th>
                             <th>Module Name</th>
@@ -286,7 +286,7 @@ interface ExportColumn {
                                     (change)="onCheckboxChange(repo, $event)" 
                                     [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
                             </td>
-                            <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
+                            <td *ngIf="customervalid" style="white-space: nowrap;">{{ repo.customer_name }}</td>
                             <td style="white-space: nowrap;">{{ repo.domain }}</td>
                             <td style="white-space: nowrap;">{{ repo.sector }}</td>
                             <td style="white-space: nowrap;">{{ repo.module_name }}</td>
@@ -537,6 +537,7 @@ export class ManageRepos implements OnInit {
     CurrentPage!: number;
     page!: number;
     first!: number;
+    customervalid: boolean = false;
     loading: boolean = true;
     repoForm!: FormGroup;
     approvalForm!: FormGroup;
@@ -661,11 +662,13 @@ export class ManageRepos implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
+                this.customervalid = true;
                 this.downloadvalid = true;
                 this.sendforapproval = false;
                 this.attachvalid = false
             } else {
                 this.isvalid = false;
+                this.customervalid = false;
                 this.downloadvalid = false;
                 this.sendforapproval = true;
                 this.attachvalid = true;
