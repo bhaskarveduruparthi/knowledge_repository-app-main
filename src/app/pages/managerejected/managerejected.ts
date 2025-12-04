@@ -260,6 +260,11 @@ interface ExportColumn {
                             <th>Remarks</th>
                             <th>Code/Process Document</th>
                             <th>Created On</th>
+                            <th>Created User</th>
+                            <th>Immediate Response Manager(IRM)</th>
+                            <th>Secondary Response Manager(SRM)</th>
+                            <th>Business Unit Head(BUH)</th>
+                            <th>Business Group Head(BGH)</th>
                             <th>Business Justification</th>
                             <th>Repo Status</th>
                             <th>Repo Approver</th>
@@ -290,6 +295,11 @@ interface ExportColumn {
 </td>
 
                             <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
+                            <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
+                            <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>
+                            <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
+                            <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
+                            <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
                             <td>{{ repo.business_justification }}</td>
                             <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
                             <td style="white-space: nowrap;">{{ repo.Approver }}</td>

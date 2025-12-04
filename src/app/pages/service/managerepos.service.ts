@@ -21,6 +21,11 @@ export interface Repository {
   Approval_status?:string;
   Approval_date?:string;
   created_at?:string;
+  username?:string;
+  irm ?:string;
+  srm ?:string;
+  buh ?:string;
+  bgh?:string;
   business_justification?:string;
 }
 
@@ -212,6 +217,14 @@ downloadWorkbook(id: number): Observable<Blob> {
 
   getTopUsersVotes(): Observable<any> {
     return this.http.get<any>(`${this.url}support/top-users-votes`);
+  }
+
+  getTopUsersSolutions(): Observable<any> {
+    return this.http.get<any>(`${this.url}repos/top-users-solutions`);
+  }
+  
+  getUsers() {
+    return this.http.get(`${this.url}users/getallusers`);
   }
 
   

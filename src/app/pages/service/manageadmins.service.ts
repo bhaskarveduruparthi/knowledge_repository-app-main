@@ -9,7 +9,10 @@ export interface User {
   yash_id?:number;
   name?: string;
   password?:string;
-  
+  irm ?:string;
+  srm ?:string;
+  buh ?:string;
+  bgh?:string;
   email?: string;
   b_unit?: string;
   active?:string;

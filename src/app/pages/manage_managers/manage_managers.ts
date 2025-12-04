@@ -241,10 +241,10 @@ interface ExportColumn {
                             <td style="min-width: 200px;">{{user.name}}</td>
                             <td style="min-width: 200px;">{{user.email}}</td>
                             <td style="min-width: 100px;">{{user.b_unit}}</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td style="min-width: 100px;">{{user.irm}}</td>
+                            <td style="min-width: 100px;">{{user.srm}}</td>
+                            <td style="min-width: 100px;">{{user.buh}}</td>
+                            <td style="min-width: 100px;">{{user.bgh}}</td>
                             <td style="min-width: 40px;"><b>{{user.type}}</b></td>
                             
                             <td>

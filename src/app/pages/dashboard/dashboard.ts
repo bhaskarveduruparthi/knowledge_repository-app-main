@@ -187,12 +187,13 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     </p-fieldset>
   </div>
   <div class="charts-container">
+    <p-fieldset legend="Top Contributors by Community" toggleable="true">
+          <p-chart type="bar" [data]="s_chartData" *ngIf="s_chartData"></p-chart>
+        </p-fieldset>
     <p-fieldset legend="Top Contributors by Solutions" toggleable="true">
           <p-chart type="bar" [data]="chartData" *ngIf="chartData"></p-chart>
         </p-fieldset>
-    <p-fieldset legend="Top Contributors by Community" toggleable="true">
-          <p-chart type="bar" [data]="chartData" *ngIf="chartData"></p-chart>
-        </p-fieldset>
+    
   </div>
 </div>
 
@@ -216,7 +217,9 @@ export class Dashboard implements OnInit {
   username: string = '';
 
   chartData: any; // Top users votes chart data
+  s_chartData:any;
   chartOptions: any;
+  s_chartOptions: any;
 
 
   constructor(
@@ -238,6 +241,18 @@ export class Dashboard implements OnInit {
         }
       }
     };
+    this.s_chartOptions = {
+      plugins: {
+        legend: {
+          labels: { usePointStyle: true }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    };
   }
 
   ngOnInit() {
@@ -246,12 +261,27 @@ export class Dashboard implements OnInit {
     this.getUsername();
     this.loadChartData();
     this.fetchtopvotes();
+    this.fetchtopusers();
   }
 
   fetchtopvotes() {
     this.managereposervice.getTopUsersVotes().subscribe({
       next: (data: any) => {
         this.chartData = {
+          labels: data.labels,
+          datasets: data.datasets
+        };
+      },
+      error: (err) => {
+        console.error('Error loading top votes chart', err);
+      }
+    });
+  }
+
+  fetchtopusers() {
+    this.managereposervice.getTopUsersSolutions().subscribe({
+      next: (data: any) => {
+        this.s_chartData = {
           labels: data.labels,
           datasets: data.datasets
         };

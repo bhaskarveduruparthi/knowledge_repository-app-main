@@ -69,16 +69,16 @@ import { debounceTime, Subject } from 'rxjs';
   ],
   styles: [`
     .center-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 80vh;
-      width: 100%;
-      background-color: #ECF4E8;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;        /* horizontal center */
+    justify-content: flex-start;/* push content to top */
+    min-height: 100vh;
+    width: 100%;
+    background-color: #ECF4E8;
+    padding: 20px;
+    box-sizing: border-box;
+  }
     .greeting {
       font-size: 2.5rem;
       font-weight: 600;
@@ -93,23 +93,23 @@ import { debounceTime, Subject } from 'rxjs';
       to { opacity: 1; transform: translateY(0); }
     }
     .search-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
+    width: 100%;
+    display: flex;
+    justify-content: center;    /* center search bar */
+    margin-bottom: 2rem;
+  }
     .search-container {
-      display: flex;
-      align-items: center;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 50px;
-      box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-      padding: 4px 12px;
-      width: 100%;
-      max-width: 700px;
-      transition: all 0.3s ease;
-    }
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 50px;
+    box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+    padding: 4px 12px;
+    width: 100%;
+    max-width: 700px;
+    transition: all 0.3s ease;
+  }
     .filter-dropdown {
       appearance: none;
       background-color: transparent;
@@ -224,11 +224,17 @@ import { debounceTime, Subject } from 'rxjs';
     .card-content p {
       margin: 0.25rem 0;
     }
+
+    .content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 1.5rem;
+  }
   `],
   template: `
     <p-toast></p-toast>
     <div class="center-wrapper">
-      <div class="greeting">Hello, {{ username }}!</div>
+      <div class="greeting">Search Solutions</div>
       <div class="search-wrapper">
         <div class="search-container">
           <select 
@@ -244,7 +250,7 @@ import { debounceTime, Subject } from 'rxjs';
           <input 
             type="text" 
             [(ngModel)]="searchText" 
-            placeholder="Search Repository..." 
+            placeholder="Search Knowledge Repository..." 
             (ngModelChange)="onSearchInputChange($event)"
             class="search-input"
           />
@@ -292,6 +298,7 @@ import { debounceTime, Subject } from 'rxjs';
               <p><b>Domain:</b> {{ repo.domain }}</p>
               <p><b>Sector:</b> {{ repo.sector }}</p>
               <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
+              <p><b>User Created:</b> {{ repo.username }}</p>
               <div class="more-info-row">
                 <button pButton type="button" label="More Info" (click)="showDetails(repo)"></button>
               </div>
@@ -316,6 +323,7 @@ import { debounceTime, Subject } from 'rxjs';
           <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
           <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
           <p><b>Remarks:</b> {{ selectedRepo.remarks }}</p>
+          
         </div>
         <div style="margin-top: 2rem; text-align: right;"  >
             <button 
@@ -333,7 +341,7 @@ import { debounceTime, Subject } from 'rxjs';
 })
 export class Home implements OnInit {
   greetingMessage: string = '';
-  username: string = '';
+  
 
   filterOptions: string[] = [
     'Domain',
@@ -355,9 +363,7 @@ export class Home implements OnInit {
     public messageservice: MessageService,
     private managereposervice: ManageReposService
   ) {
-    this.authservice.user.subscribe(x => {
-      this.username = x?.name || 'User';
-    });
+   
   }
 
   ngOnInit() {
