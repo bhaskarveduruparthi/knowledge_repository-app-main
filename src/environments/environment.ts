@@ -2,5 +2,5 @@ export const environment = {
   production: false,
   envName: 'test',
   protocol: 'http',
-  apiBaseHost: '127.0.0.1:5001',
+  apiBaseHost: '10.6.108.195:5001',
 };

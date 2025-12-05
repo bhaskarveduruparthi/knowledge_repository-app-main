@@ -187,10 +187,10 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     </p-fieldset>
   </div>
   <div class="charts-container">
-    <p-fieldset legend="Top Contributors by Community" toggleable="true">
+    <p-fieldset legend="Top Contributors by Solutions" toggleable="true">
           <p-chart type="bar" [data]="s_chartData" *ngIf="s_chartData"></p-chart>
         </p-fieldset>
-    <p-fieldset legend="Top Contributors by Solutions" toggleable="true">
+    <p-fieldset legend="Top Contributors by Community" toggleable="true">
           <p-chart type="bar" [data]="chartData" *ngIf="chartData"></p-chart>
         </p-fieldset>
     
