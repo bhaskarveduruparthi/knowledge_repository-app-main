@@ -357,7 +357,7 @@ interface Answer {
         <ng-template pTemplate="end">
           <div class="flex align-items-center gap-2">
             <p-button 
-              label="Ask Question" 
+              label="Post Question" 
               icon="pi pi-plus-circle" 
               size="large"
               (onClick)="showNewQuestionDialog()"
@@ -483,7 +483,7 @@ interface Answer {
               <!-- Answer Button -->
               <div class="flex justify-content-center pt-4 border-top-1 surface-border">
                 <p-button 
-                  label="Add Solution" 
+                  label="Reply" 
                   icon="pi pi-plus-circle" 
                   (onClick)="openAnswerDialog(question.id)"
                   class="p-button-text"
@@ -494,7 +494,7 @@ interface Answer {
               <!-- View All Answers Button -->
               <div class="text-center pt-4">
                 <p-button 
-                  label="View All Answers" 
+                  label="View All Replies" 
                   severity="secondary"
                   icon="pi pi-comments"
                   (onClick)="openAnswersDialog(question)"

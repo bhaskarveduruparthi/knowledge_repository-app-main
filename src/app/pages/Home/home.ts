@@ -428,7 +428,7 @@ export class Home implements OnInit {
 
   openAttachment(attachmentId: number) {
     // use your actual Flask endpoint base URL as needed
-    const url = `http://127.0.0.1:5001/repos/refview/${attachmentId}`;
+    const url = `http://10.6.108.195:5001/repos/refview/${attachmentId}`;
     window.open(url, '_blank');
   }
 }

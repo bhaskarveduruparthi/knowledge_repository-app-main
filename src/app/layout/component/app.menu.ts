@@ -33,7 +33,7 @@ export class AppMenu implements OnInit {
             icon: 'pi pi-fw pi-briefcase',
             items: [
                 { label: 'Manage Users', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
-                { label: 'Manage Managers', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manage-managers'] },
+                
                 { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
                 
 

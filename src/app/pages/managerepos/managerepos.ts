@@ -236,10 +236,10 @@ interface ExportColumn {
         <div class="card">
             <p-toolbar styleClass="mb-6">
                 <ng-template #start>
-                    <p-button label="Add Task" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
+                    <p-button label="Upload Solution" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
                 </ng-template>
                 <ng-template #end>
-                    <p-button label="Upload" icon="pi pi-upload" severity="help" (click)="upload_dialog()" />
+                    <p-button label="Upload(Bulk)" icon="pi pi-upload" severity="help" (click)="upload_dialog()" />
                     <span style="margin-left: 1rem;"></span>
                     <p-button label="Export to Excel" icon="pi pi-download" severity="success" (onClick)="exportCSV()" [disabled]="!isExportEnabled" />
                 </ng-template>
@@ -277,9 +277,7 @@ interface ExportColumn {
                             <th>Business Unit Head(BUH)</th>
                             <th>Business Group Head(BGH)</th>
                             <th>Business Justification</th>
-                            <th>Repo Status</th>
-                            <th>Repo Approver</th>
-                            <th>Repo Approval Date</th>
+                            
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -317,13 +315,7 @@ interface ExportColumn {
                             <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
                             <td>{{ repo.business_justification }}</td>
-                            <td style="white-space: nowrap; text-align: center"><p-tag 
-    [value]="repo.Approval_status ?? 'Not Approved'" 
-    [severity]="getTagSeverity(repo.Approval_status)">
-  </p-tag>
-</td>
-                            <td style="white-space: nowrap;">{{ repo.Approver }}</td>
-                            <td style="white-space: nowrap;">{{ formatDate(repo.Approval_date) }}</td>
+                            
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
                                     <button pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-help" *ngIf="sendforapproval" (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved' "></button>
@@ -1053,7 +1045,7 @@ export class ManageRepos implements OnInit {
   const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
   const jwt = parsed.access_token;                    // <-- actual JWT string
 
-  const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
+  const url = `http://10.6.108.195:5001/repos/refdownload/${id}?access_token=${jwt}`;
   window.open(url, '_blank');
 }
 

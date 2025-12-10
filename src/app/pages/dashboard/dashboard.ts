@@ -135,7 +135,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     }
   `,
   template: `
-    <div class="header">{{ greetingMessage }}, {{ username }}!</div>
+    <div class="header"></div>
     <div class="grid">
       <div class="card">
         <div class="card-header">
