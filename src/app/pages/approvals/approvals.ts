@@ -191,6 +191,9 @@ interface ExportColumn {
                             <button pButton type="button" label="Approve" icon="pi pi-check"
                                 class="p-button-success" (click)="approve_dialog(repo)"
                                 [disabled]="repo.Approval_status === 'Approved'"></button>
+                            <button pButton type="button" label="Delegate" icon="pi pi-forward"
+                                class="p-button-info" (click)="approve_dialog(repo)"
+                                [disabled]="repo.Approval_status === 'Approved'"></button>
                             <button pButton type="button" label="Reject" icon="pi pi-times"
                                 class="p-button-danger" (click)="reject_dialog(repo)"
                                 [disabled]="repo.Approval_status === 'Approved'"></button>
@@ -329,7 +332,14 @@ export class ManageApprovals implements OnInit {
                 this.downloadvalid = true;
                 this.sendforapproval = false;
                 this.attachvalid = false
-            } else {
+            }
+            else if(x?.type == 'manager'){
+                this.isvalid = true;
+                this.downloadvalid = true;
+                this.sendforapproval = false;
+                this.attachvalid = false
+            }
+             else {
                 this.isvalid = false;
                 this.downloadvalid = false;
                 this.sendforapproval = true;

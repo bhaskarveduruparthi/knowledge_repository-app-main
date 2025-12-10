@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 
 
 export interface Repository {
-  id?: number; // Serial Number
+  id: number; // Serial Number
   customer_name?: string; // Customer Name
   domain?: string; // Domain
   sector?: string; // Sector
@@ -27,6 +27,19 @@ export interface Repository {
   buh ?:string;
   bgh?:string;
   business_justification?:string;
+  download_approved?: boolean;
+}
+
+export interface DownloadRequest {
+  id: number;
+  knr_id: number;
+  repo_customer_name: string;
+  repo_module_name: string;
+  requested_by_name: string;
+  requested_by_email: string;
+  justification: string;
+  status: string;           // Pending / Approved / Rejected
+  requested_at: string;     // ISO string
 }
 
 export interface LoginLog {
@@ -226,6 +239,25 @@ downloadWorkbook(id: number): Observable<Blob> {
   getUsers() {
     return this.http.get(`${this.url}users/getallusers`);
   }
+
+  requestDownload(id: number, justification: string) {
+  return this.http.post(`${this.url}repos/download-request/${id}`, {
+    justification
+  });
+}
+
+// optionally for a Superadmin approval screen:
+getDownloadRequests() {
+  return this.http.get<DownloadRequest[]>(`${this.url}repos/download-requests`);
+}
+
+approveDownloadRequest(id: number) {
+  return this.http.post(`${this.url}repos/download-requests/${id}/approve`, {});
+}
+
+rejectDownloadRequest(id: number) {
+  return this.http.post(`${this.url}repos/download-requests/${id}/reject`, {});
+}
 
   
 

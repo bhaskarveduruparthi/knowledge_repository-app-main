@@ -397,6 +397,9 @@ export class ManagePendingReport implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
+            }
+            else if(x?.type == 'manager'){
+                this.isvalid = true;
             } else {
                 this.router.navigate(['/auth/access']);
             }

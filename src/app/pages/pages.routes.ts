@@ -11,12 +11,14 @@ import { ManageRejectedReport } from './managerejected/managerejected';
 import { LoginHistory } from './loginhistory/loginhistory';
 import { DownloadHistory } from './downloadhistory/downloadhistory';
 import { ManageManagers } from './manage_managers/manage_managers';
+import { ManageDownloads } from './downloads/downloads';
 
 
 export default [
      {path: 'manageusers', component: ManageUsers},  
      {path: 'managerepos', component: ManageRepos},
      {path: 'manageapprovals', component: ManageApprovals},
+     {path: 'managedownloads', component: ManageDownloads},
      {path: 'approved', component: ManageApprovalsReport},
      {path: 'pending', component: ManagePendingReport},
      {path: 'unapproved', component: ManageUnapprovedReport},

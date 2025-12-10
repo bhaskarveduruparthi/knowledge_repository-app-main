@@ -406,7 +406,8 @@ export class ManageUsers implements OnInit {
     userTypes = [
         
         
-        { label: 'user', value: 'user' }
+        { label: 'User', value: 'user' },
+        {label: 'Manager', value: 'manager'}
     ];
     filteredTypes: any[] = [];
 

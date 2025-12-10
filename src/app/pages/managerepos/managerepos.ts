@@ -276,7 +276,7 @@ interface ExportColumn {
                             <th>Secondary Response Manager(SRM)</th>
                             <th>Business Unit Head(BUH)</th>
                             <th>Business Group Head(BGH)</th>
-                            <th>Business Justification</th>
+                            
                             
                             <th>Actions</th>
                         </tr>
@@ -299,14 +299,51 @@ interface ExportColumn {
                             <td>{{ repo.customer_benefit }}</td>
                             <td>{{ repo.remarks }}</td>
                             <td>
-  <p-button 
-    label="Download" 
-    icon="pi pi-download" 
-    severity="primary" 
-    (click)="download_ref(repo, repo.id)" 
-    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-  </p-button>
+                                <div class="flex" style="min-width: 100px; gap: 0.5rem;">
+                                     <p-button 
+              severity="info"
+              label="View" 
+              (click)="openAttachment(repo.id)"
+              *ngIf="repo?.attach_code_or_document === 'ATTACHED'"
+              >
+            </p-button>
+  <ng-container *ngIf="isAdmin; else normalUserBlock">
+    <p-button
+      label="Download"
+      icon="pi pi-download"
+      severity="primary"
+      (click)="download_ref(repo, repo.id)"
+      [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+    </p-button>
+  </ng-container>
+
+  <ng-template #normalUserBlock>
+    <ng-container *ngIf="repo.download_approved; else requestBlock">
+      <p-button
+        label="Download"
+        icon="pi pi-download"
+        severity="primary"
+        (click)="download_ref(repo, repo.id)"
+        [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+      </p-button>
+    </ng-container>
+
+    <ng-template #requestBlock>
+      <p-button
+        label="Request Download"
+        icon="pi pi-send"
+        severity="help"
+        (click)="openDownloadRequestDialog(repo)"
+        [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+      </p-button>
+    </ng-template>
+  </ng-template>
+                                </div>
+
+  
+
 </td>
+
 
                             <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
@@ -314,14 +351,12 @@ interface ExportColumn {
                             <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
-                            <td>{{ repo.business_justification }}</td>
                             
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                    <button pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-help" *ngIf="sendforapproval" (click)="sendforapproval_dialog(repo)" [disabled]="repo.Approval_status === 'Approved' "></button>
                                     
-                                    <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-info" *ngIf="isvalid" (click)="approve_dialog(repo)" [disabled]="repo.Approval_status === 'Approved'"></button>
-                                    <button pButton pRipple icon="pi pi-times" class="p-button-rounded p-button-warn" *ngIf="isvalid" (click)="reject_dialog(repo)" [disabled]="repo.Approval_status === 'Rejected'"></button>
+                                    
+                                   
                                     <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="attachvalid" (click)="upload_ref(repo)"></button>
                                     <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
                                 </div>
@@ -514,6 +549,41 @@ interface ExportColumn {
                 <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="delete_repo(repository)"></button>
             </ng-template>
         </p-dialog>
+
+        <p-dialog
+  [(visible)]="downloadRequestDialog"
+  header="Request Download Access"
+  [modal]="true"
+  [style]="{ width: '450px' }">
+
+  <form [formGroup]="downloadRequestForm">
+    <label class="required" for="justification">Business Justification</label>
+    <textarea
+      id="justification"
+      pInputTextarea
+      rows="3"
+      formControlName="justification">
+    </textarea>
+
+    <p-message
+      *ngIf="downloadRequestForm.controls['justification'].errors?.['required'] &&
+             downloadRequestForm.controls['justification'].touched"
+      severity="error"
+      text="Business Justification is required">
+    </p-message>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <button pButton type="button" class="p-button-text"
+            label="Cancel"
+            (click)="downloadRequestDialog = false"></button>
+    <button pButton type="button" class="p-button-text"
+            label="Send Request"
+            (click)="submitDownloadRequest()"
+            [disabled]="downloadRequestForm.invalid"></button>
+  </ng-template>
+</p-dialog>
+
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
@@ -526,7 +596,9 @@ export class ManageRepos implements OnInit {
     selectedFile: File | null = null;
     searchTerm: string = '';
     filteredRepoList: Repository[] = [];
-    
+    downloadRequestDialog: boolean = false;
+    downloadRequestForm!: FormGroup;
+    selectedDownloadRepo!: Repository;
     exportColumns!: ExportColumn[];
     isvalid: boolean = false;
     issent: boolean = false;
@@ -652,6 +724,14 @@ export class ManageRepos implements OnInit {
             ])
         });
         this.messages = [];
+
+        this.downloadRequestForm = new FormGroup({
+    justification: new FormControl('', [
+      Validators.required,
+      Validators.minLength(10),
+      Validators.maxLength(250)
+    ])
+  });
     }
 
     constructor(
@@ -667,6 +747,13 @@ export class ManageRepos implements OnInit {
                 this.customervalid = true;
                 this.downloadvalid = true;
                 this.sendforapproval = false;
+                this.attachvalid = false
+            }
+            else if (x?.type == 'manager') {
+                this.isvalid = true;
+                
+                
+                
                 this.attachvalid = false
             } else {
                 this.isvalid = false;
@@ -696,6 +783,43 @@ export class ManageRepos implements OnInit {
         }
     }
 
+    openDownloadRequestDialog(repo: Repository) {
+  if (repo.id == null) return;
+  this.selectedDownloadRepo = repo;
+  this.downloadRequestDialog = true;
+}
+
+
+submitDownloadRequest() {
+  if (this.downloadRequestForm.invalid) {
+    this.downloadRequestForm.markAllAsTouched();
+    return;
+  }
+
+  const justification = this.downloadRequestForm.get('justification')?.value;
+
+  this.managereposervice
+    .requestDownload(this.selectedDownloadRepo.id, justification)
+    .subscribe({
+      next: _ => {
+        this.messageservice.add({
+          severity: 'success',
+          summary: 'Download request submitted',
+          detail: 'Waiting for Superadmin approval'
+        });
+        this.downloadRequestDialog = false;
+        this.downloadRequestForm.reset();
+      },
+      error: _ => {
+        this.messageservice.add({
+          severity: 'error',
+          summary: 'Failed to submit request',
+          detail: 'Please try again later'
+        });
+      }
+    });
+}
+
     downloadWorkbook(id: number, filename: string) {
         this.managereposervice.downloadWorkbook(id).subscribe(
             (blob: Blob) => {
@@ -711,6 +835,12 @@ export class ManageRepos implements OnInit {
             }
         );
     }
+
+    openAttachment(attachmentId: number) {
+    // use your actual Flask endpoint base URL as needed
+    const url = `http://127.0.0.1:5001/repos/refview/${attachmentId}`;
+    window.open(url, '_blank');
+  }
 
     getTagSeverity(status: string | undefined): string {
   const safeStatus = status ?? 'Not Approved';
@@ -882,6 +1012,8 @@ export class ManageRepos implements OnInit {
         });
     }
 
+   
+
 
     isRepoSelected(repo: Repository): boolean {
         return this.selectedrepositories.some((r) => r.id === repo.id);
@@ -1045,7 +1177,7 @@ export class ManageRepos implements OnInit {
   const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
   const jwt = parsed.access_token;                    // <-- actual JWT string
 
-  const url = `http://10.6.108.195:5001/repos/refdownload/${id}?access_token=${jwt}`;
+  const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
   window.open(url, '_blank');
 }
 

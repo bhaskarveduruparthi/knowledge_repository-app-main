@@ -43,6 +43,7 @@ export class AppMenu implements OnInit {
             label: 'Actions',
             icon: '',
             items:[
+                { label: 'Manage Downloads', icon: 'pi pi-fw pi-download', routerLink: ['/app/pages/managedownloads'] },
                 { label: 'Manage Approvals', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
             ]
         },
@@ -111,6 +112,27 @@ export class AppMenu implements OnInit {
             icon: 'pi pi-fw pi-briefcase',
             items: [
                 { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
+            ]
+        },
+        {
+            label: 'Actions',
+            icon: '',
+            items:[
+                
+                { label: 'Manage Approvals', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
+            ]
+        },
+        {
+            label: 'Reports',
+            icon: 'pi pi-fw pi-file',
+            items: [
+                
+                { label: 'Approved Solutions', icon: 'pi pi-fw pi-file-check', routerLink: ['/app/pages/approved'] },
+                
+                {label: 'Pending for Approval', icon: 'pi pi-fw pi-file-o', routerLink: ['/app/pages/pending'] },
+                { label: 'Rejected Solutions', icon: 'pi pi-fw pi-file-excel', routerLink: ['/app/pages/rejected'] }
+                
+
             ]
         },
         {

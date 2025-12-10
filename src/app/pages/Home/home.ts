@@ -344,13 +344,14 @@ export class Home implements OnInit {
   
 
   filterOptions: string[] = [
+    'Any',
     'Domain',
     'Module',
     'Sector',
     'Standard/Custom'
   ];
   searchText: string = '';
-  selectedFilter: string = '';
+  selectedFilter: string = 'Any';
 
   searchResults: any[] = [];
   dialogVisible: boolean = false;
@@ -407,7 +408,7 @@ export class Home implements OnInit {
   }
 
   clearSearch() {
-    this.selectedFilter = '';
+    this.selectedFilter = 'Any';
     this.searchText = '';
     this.searchResults = [];
   }
