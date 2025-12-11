@@ -24,6 +24,7 @@ export class AppMenu implements OnInit {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
+            { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
         { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }
         ],
 
@@ -33,20 +34,15 @@ export class AppMenu implements OnInit {
             icon: 'pi pi-fw pi-briefcase',
             items: [
                 { label: 'Manage Users', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
+                { label: 'Approve Downloads', icon: 'pi pi-fw pi-download', routerLink: ['/app/pages/managedownloads'] },
+                { label: 'Validate Solutions', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
+            
                 
-                { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
                 
 
             ]
         },
-        {
-            label: 'Actions',
-            icon: '',
-            items:[
-                { label: 'Manage Downloads', icon: 'pi pi-fw pi-download', routerLink: ['/app/pages/managedownloads'] },
-                { label: 'Manage Approvals', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
-            ]
-        },
+       
         {
             label: 'Reports',
             icon: 'pi pi-fw pi-file',
@@ -65,7 +61,7 @@ export class AppMenu implements OnInit {
             label: 'Logs',
             icon: '',
             items:[
-                { label: 'User History', icon: 'pi pi-fw pi-history', routerLink: ['/app/pages/login-history'] },
+                { label: 'Login History', icon: 'pi pi-fw pi-history', routerLink: ['/app/pages/login-history'] },
                 { label: 'Download History', icon: 'pi pi-fw pi-history', routerLink: ['/app/pages/download-history'] }
             ]
         },

@@ -232,19 +232,14 @@ interface ExportColumn {
                     </span>
                 </div>
                 <br>
-                <ng-template pTemplate="content">
-                    <label for="business_justification">Business Justification</label>
-                    <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
-                        {{ repository.business_justification }}
-                    </div>
-                </ng-template>
+                
                 <ng-template pTemplate="footer">
                     <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
                     <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Repoapproval(repository)"></button>
                 </ng-template>
             </p-dialog>
 
-            <p-dialog [(visible)]="rejectdialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
+            <p-dialog [(visible)]="rejectdialog" header="Reject the Repository" [modal]="true" [style]="{ width: '450px' }">
                 <div class="flex align-items-c justify-content-c">
                     <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                     <span *ngIf="repository">
@@ -252,12 +247,7 @@ interface ExportColumn {
                     </span>
                 </div>
                 <br>
-                <ng-template pTemplate="content">
-                    <label for="business_justification">Business Justification</label>
-                    <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
-                        {{ repository.business_justification }}
-                    </div>
-                </ng-template>
+                
                 <ng-template pTemplate="footer">
                     <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="rejectdialog = false"></button>
                     <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Reporeject(repository)"></button>

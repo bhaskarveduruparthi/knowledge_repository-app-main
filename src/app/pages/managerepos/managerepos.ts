@@ -276,7 +276,7 @@ interface ExportColumn {
                             <th>Secondary Response Manager(SRM)</th>
                             <th>Business Unit Head(BUH)</th>
                             <th>Business Group Head(BGH)</th>
-                            
+                            <th>Approval Status</th>
                             
                             <th>Actions</th>
                         </tr>
@@ -351,7 +351,7 @@ interface ExportColumn {
                             <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
-                            
+                             <td style="white-space: nowrap; text-align: center">{{ repo.Approval_status  }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
                                     
