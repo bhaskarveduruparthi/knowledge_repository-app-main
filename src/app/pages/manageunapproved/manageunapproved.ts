@@ -257,7 +257,7 @@ interface ExportColumn {
                             <th>Standard/Custom</th>
                             <th>Technical details</th>
                             <th>Customer Benefit</th>
-                            <th>Remarks</th>
+                            
                             <th>Code/Process Document</th>
                             <th>Created On</th>
                             <th>Business Justification</th>
@@ -278,7 +278,7 @@ interface ExportColumn {
                             <td>{{ repo.standard_custom }}</td>
                             <td>{{ repo.technical_details }}</td>
                             <td>{{ repo.customer_benefit }}</td>
-                            <td>{{ repo.remarks }}</td>
+                            
                             <td>
   <p-button 
     label="Download" 

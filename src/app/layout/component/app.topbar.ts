@@ -23,14 +23,13 @@ import { Panel } from "primeng/panel";
     RouterModule,
     CommonModule,
     StyleClassModule,
-    AppConfigurator,
     DialogModule,
     PasswordModule,
     ButtonModule,
     FormsModule,
     Menu,
     Toast,
-    Panel
+    
 ],
 styles:`
   .profile-initials-circle {
@@ -52,6 +51,18 @@ styles:`
   font-weight: bold;
   color: #11224E;
 }
+.profile-initials-circle.text-sm {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1rem;
+}
+
+.layout-topbar-menu-content span {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 `,
 
@@ -100,7 +111,12 @@ styles:`
               <i class="pi pi-user"></i>
               <span>Profile</span>
             </button>-->
-            
+             <div class="flex align-items-center gap-3 mr-3" *ngIf="userName">
+    <div class="profile-initials-circle text-sm">
+      {{ getUserInitials() }}
+    </div>
+    <span class="text-900 font-semibold hidden lg:inline whitespace-nowrap">{{ userName }}</span>
+  </div>
     <p-menu #menu [model]="items" [popup]="true" />
     <button  type="button" class="layout-topbar-action"  (click)="menu.toggle($event)">
       <i class="pi pi-cog"></i>

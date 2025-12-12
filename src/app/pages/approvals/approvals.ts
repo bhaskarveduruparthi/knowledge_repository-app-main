@@ -29,6 +29,7 @@ import { ManageReposService, Repository } from '../service/managerepos.service';
 import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { User } from '../service/manageadmins.service';
 
 interface Column {
     field: string;
@@ -192,7 +193,7 @@ interface ExportColumn {
                                 class="p-button-success" (click)="approve_dialog(repo)"
                                 [disabled]="repo.Approval_status === 'Approved'"></button>
                             <button pButton type="button" label="Delegate" icon="pi pi-forward"
-                                class="p-button-info" (click)="approve_dialog(repo)"
+                                class="p-button-info" (click)="delegate_dialog(repo)"
                                 [disabled]="repo.Approval_status === 'Approved'"></button>
                             <button pButton type="button" label="Reject" icon="pi pi-times"
                                 class="p-button-danger" (click)="reject_dialog(repo)"
@@ -206,7 +207,7 @@ interface ExportColumn {
         </div>
             
 
-            <p-dialog header="Repository Details"
+            <p-dialog header="Solution Details"
                 [(visible)]="dialogVisible"
                 [modal]="true"
                 [style]="{width: '700px'}"
@@ -224,11 +225,11 @@ interface ExportColumn {
                 </div>
             </p-dialog>
 
-            <p-dialog [(visible)]="approvedialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
+            <p-dialog [(visible)]="approvedialog" header="Approve Solution" [modal]="true" [style]="{ width: '450px' }">
                 <div class="flex align-items-c justify-content-c">
                     <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                     <span *ngIf="repository">
-                        Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
+                        Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Solution?
                     </span>
                 </div>
                 <br>
@@ -239,11 +240,104 @@ interface ExportColumn {
                 </ng-template>
             </p-dialog>
 
-            <p-dialog [(visible)]="rejectdialog" header="Reject the Repository" [modal]="true" [style]="{ width: '450px' }">
+           <!-- REPLACE your delegatedialog section with this -->
+<p-dialog
+  [(visible)]="delegatedialog"
+  header="Delegate Solution"
+  [modal]="true"
+  [style]="{ width: '1020px' }"
+>
+  <div class="flex flex-column" style="gap: 1rem">
+    <!-- Warning + title row -->
+    <div class="flex align-items-center" style="gap: 0.75rem">
+      <i class="pi pi-exclamation-triangle" style="font-size: 1.8rem"></i>
+      <span>
+        Delegate
+        <b>{{ repository?.customer_name }}'s - {{ repository?.module_name }}</b>
+        to a user?
+      </span>
+    </div>
+
+    <!-- Solution details block -->
+    <div
+      class="flex flex-column"
+      style="gap: 0.25rem; padding: 0.75rem 1rem; border-radius: 8px; background: #f5f7fb"
+    >
+      <div class="flex">
+        <span class="font-bold" style="width: 130px">Domain:</span>
+        <span>{{ repository?.domain }}</span>
+      </div>
+      <div class="flex">
+        <span class="font-bold" style="width: 130px">Sector:</span>
+        <span>{{ repository?.sector }}</span>
+      </div>
+      <div class="flex">
+        <span class="font-bold" style="width: 130px">Technical Details:</span>
+        <span>{{ repository?.technical_details }}</span>
+      </div>
+      <div class="flex">
+        <span class="font-bold" style="width: 130px">Created by:</span>
+        <span>{{ repository?.username }}</span>
+      </div>
+    </div>
+
+    <!-- User selection -->
+    <div class="flex flex-column" style="gap: 0.25rem">
+      <label for="delegateUser" class="font-bold">Select User</label>
+      <p-select
+  id="delegateUser"
+  [(ngModel)]="selectedDelegateUserId"
+  [options]="delegateUsers"
+  optionLabel="name"
+  optionValue="id"
+  placeholder="Click to select user..."
+  class="w-full"
+  showClear="true"
+  filter="false"
+></p-select>
+
+      <small *ngIf="!selectedDelegateUserId" class="p-error">
+        User selection is required.
+      </small>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end align-items-center w-full" style="gap: 0.75rem">
+      <button
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-times"
+        class="p-button-text"
+        label="Cancel"
+        (click)="delegatedialog = false"
+      ></button>
+
+      <button
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-share"
+        class="p-button-info"
+        label="Delegate"
+        [disabled]="!selectedDelegateUserId"
+        (click)="delegateRepository()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+
+
+
+
+
+            <p-dialog [(visible)]="rejectdialog" header="Reject Solution" [modal]="true" [style]="{ width: '450px' }">
                 <div class="flex align-items-c justify-content-c">
                     <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                     <span *ngIf="repository">
-                        Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
+                        Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Solution?
                     </span>
                 </div>
                 <br>
@@ -255,7 +349,7 @@ interface ExportColumn {
             </p-dialog>
         
     `,
-    providers: [MessageService, ManageReposService, ConfirmationService]
+    providers: [MessageService, ManageReposService, ConfirmationService, FormBuilder]
 })
 export class ManageApprovals implements OnInit {
     adminDialog: boolean = false;
@@ -274,13 +368,16 @@ export class ManageApprovals implements OnInit {
     approvedialog: boolean = false;
     createdialog: boolean = false;
     messages: any[] = [];
+    selectedDelegateUserId: number | null = null;
     ApprovalCurrentPage!: number;
     page!: number;
     dialogVisible: boolean = false;
     selectedRepo: any = null;
     first!: number;
+    
     loading: boolean = true;
     repoForm!: FormGroup;
+    
     approvalForm!: FormGroup;
     totalitems!: number;
     totalrecords: any;
@@ -293,6 +390,12 @@ export class ManageApprovals implements OnInit {
     editrepodialog: boolean = false;
     business_justification: any;
     uploadcodeprocessdocdialog: boolean = false;
+    delegatedialog: boolean = false;
+    users = signal<User[]>([]);
+    delegateUsers: User[] = [];
+
+    
+    
 
     get isAdmin(): boolean {
         return this.downloadvalid === true;
@@ -307,9 +410,13 @@ export class ManageApprovals implements OnInit {
 
     ngOnInit() {
         this.loadDemoData();
+        
+        this.loadUsers();
+        
     }
 
     constructor(
+        
         private managereposervice: ManageReposService,
         public messageservice: MessageService,
         private authservice: AuthenticationService,
@@ -339,6 +446,10 @@ export class ManageApprovals implements OnInit {
     }
 
     
+
+
+
+
 
     showDetails(repo: any) {
         this.selectedRepo = repo;
@@ -408,10 +519,100 @@ export class ManageApprovals implements OnInit {
         this.repository = { ...repository };
     }
 
+    delegate_dialog(repository: Repository) {
+  this.repository = { ...repository };
+  console.log('delegateUsers at open:', Array.isArray(this.delegateUsers), this.delegateUsers);
+  this.selectedDelegateUserId = null;
+  this.delegatedialog = true;
+}
+
     reject_dialog(repository: Repository) {
         this.rejectdialog = true;
         this.repository = { ...repository };
     }
+
+    loadUsers() {
+  this.managereposervice.getUsers().subscribe({
+    next: (data: any) => {
+      console.log('RAW getUsers response:', data);
+
+      // Adjust this based on what the log shows
+      let usersArray: User[] = [];
+
+      if (Array.isArray(data)) {
+        usersArray = data as User[];
+      } else if (Array.isArray(data?.data)) {
+        usersArray = data.data as User[];
+      } else if (Array.isArray(data?.users)) {
+        usersArray = data.users as User[];
+      } else if (Array.isArray(data?.results)) {
+        usersArray = data.results as User[];
+      } else {
+        // last fallback: single object
+        usersArray = data ? [data as User] : [];
+      }
+
+      console.log('Resolved usersArray:', usersArray);
+
+      this.users.set(usersArray);
+      this.delegateUsers = [...usersArray];
+
+      console.log('delegateUsers final:', this.delegateUsers);
+    },
+    error: (error: any) => {
+      console.error('getUsers error:', error);
+      this.messageservice.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Failed to load users: ${error.message || 'Unknown error'}`
+      });
+    }
+  });
+}
+
+
+delegateRepository() {
+    if (!this.selectedDelegateUserId || !this.repository?.id) {
+      this.messageservice.add({
+        severity: 'warn',
+        summary: 'Missing data',
+        detail: 'Please select a user to delegate.'
+      });
+      return;
+    }
+
+    const selectedUser = this.delegateUsers.find(u => u.id === this.selectedDelegateUserId);
+    const payload = {
+      id: this.repository.id,
+      delegateUserId: this.selectedDelegateUserId,
+      delegateUserName: selectedUser?.name
+    };
+
+    this.managereposervice.delegateRepository(payload).subscribe({
+      next: () => {
+        this.delegatedialog = false;
+        this.selectedDelegateUserId = null;
+        this.messageservice.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Delegated to ${selectedUser?.name}`
+        });
+        this.reloadPage();
+      },
+      error: (error: any) => {
+        console.error('Delegate error:', error);
+        this.messageservice.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error?.error?.message || 'Failed to delegate repository'
+        });
+      }
+    });
+  }
+
+
+
+
 
     
 

@@ -79,20 +79,21 @@ export class AppMenu implements OnInit {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
+            { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
         { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
         },
         {
             label: 'User',
             icon: 'pi pi-fw pi-briefcase',
             items: [
-                { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
+                { label: 'Validate Solutions', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
             ]
         },
         {
             label: 'Support',
             icon: '',
             items:[
-                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
+                { label: 'Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
             ]
         }
     ];
@@ -101,23 +102,18 @@ export class AppMenu implements OnInit {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
+            { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
         { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
         },
         {
             label: 'Manager',
             icon: 'pi pi-fw pi-briefcase',
             items: [
-                { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] }
+                { label: 'Validate Solutions', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
+            
             ]
         },
-        {
-            label: 'Actions',
-            icon: '',
-            items:[
-                
-                { label: 'Manage Approvals', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
-            ]
-        },
+        
         {
             label: 'Reports',
             icon: 'pi pi-fw pi-file',
@@ -135,7 +131,7 @@ export class AppMenu implements OnInit {
             label: 'Support',
             icon: '',
             items:[
-                { label: 'Ask Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
+                { label: 'Community', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/support'] }
             ]
         }
     ];

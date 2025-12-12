@@ -348,7 +348,6 @@ export class Home implements OnInit {
     'Domain',
     'Module',
     'Sector',
-    'Standard/Custom'
   ];
   searchText: string = '';
   selectedFilter: string = 'Any';

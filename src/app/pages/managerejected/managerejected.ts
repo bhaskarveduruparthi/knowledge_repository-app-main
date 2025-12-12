@@ -257,8 +257,8 @@ interface ExportColumn {
                             <th>Standard/Custom</th>
                             <th>Technical details</th>
                             <th>Customer Benefit</th>
-                            <th>Remarks</th>
-                            <th>Code/Process Document</th>
+                            
+                            
                             <th>Created On</th>
                             <th>Created User</th>
                             <th>Immediate Response Manager(IRM)</th>
@@ -283,17 +283,8 @@ interface ExportColumn {
                             <td>{{ repo.standard_custom }}</td>
                             <td>{{ repo.technical_details }}</td>
                             <td>{{ repo.customer_benefit }}</td>
-                            <td>{{ repo.remarks }}</td>
-                            <td>
-  <p-button 
-    label="Download" 
-    icon="pi pi-download" 
-    severity="primary" 
-    (click)="download_ref(repo, repo.id)" 
-    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-  </p-button>
-</td>
-
+                            
+                            
                             <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>

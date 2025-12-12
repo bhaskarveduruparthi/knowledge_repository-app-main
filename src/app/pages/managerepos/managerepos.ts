@@ -268,7 +268,6 @@ interface ExportColumn {
                             <th>Object Type</th>
                             <th>Technical details</th>
                             <th>Customer Benefit</th>
-                            <th>Remarks</th>
                             <th>Code/Process Document</th>
                             <th>Created On</th>
                             <th>Created User</th>
@@ -276,8 +275,8 @@ interface ExportColumn {
                             <th>Secondary Response Manager(SRM)</th>
                             <th>Business Unit Head(BUH)</th>
                             <th>Business Group Head(BGH)</th>
-                            <th>Approval Status</th>
-                            
+                            <th>Status</th>
+                            <th>By User</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -297,7 +296,6 @@ interface ExportColumn {
                             <td>{{ repo.standard_custom }}</td>
                             <td>{{ repo.technical_details }}</td>
                             <td>{{ repo.customer_benefit }}</td>
-                            <td>{{ repo.remarks }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
                                      <p-button 
@@ -351,7 +349,23 @@ interface ExportColumn {
                             <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
-                             <td style="white-space: nowrap; text-align: center">{{ repo.Approval_status  }}</td>
+                             <td style="white-space: nowrap; text-align: center">
+  <p-tag
+    [value]="repo.Approval_status"
+    [severity]="getApprovalSeverity(repo.Approval_status)"
+    [rounded]="true"
+  ></p-tag>
+</td>
+
+                            <td style="white-space: nowrap; text-align: center">
+  <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">
+    Solution with {{ repo.username }}
+  </ng-container>
+  <ng-template #validated>
+    Validated by {{ repo.Approver }}
+  </ng-template>
+</td>
+
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
                                     
@@ -374,7 +388,7 @@ interface ExportColumn {
             <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
         
         </div>
-        <p-dialog [(visible)]="uploaddialog" header="Upload Repositories" [modal]="true" [style]="{ width: '450px' }">
+        <p-dialog [(visible)]="uploaddialog" header="Upload Solutions" [modal]="true" [style]="{ width: '450px' }">
             <div class="flex align-items-c justify-content-c">
                 <div>
                     <label class="custom-file-label">Choose Excel and Attachments</label>
@@ -461,12 +475,32 @@ interface ExportColumn {
                         </div>
                         <div class="form-field">
                             <label class="required" for="domain">Domain</label>
-                            <p-autoComplete inputId="domain" formControlName="domain" [suggestions]="filteredDomains" (completeMethod)="filterDomain($event)" [forceSelection]="true" [dropdown]="true" [minLength]="1" placeholder="Select Domain"></p-autoComplete>
+                            <p-autoComplete 
+            inputId="domain" 
+            formControlName="domain" 
+            [suggestions]="filteredDomains" 
+            (completeMethod)="filterDomain($event)" 
+            forceSelection="true" 
+            dropdown="true" 
+            minLength="1" 
+            placeholder="Select Domain"
+            (onSelect)="onDomainSelect($event)">
+          </p-autoComplete>
                             <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
                         </div>
                         <div class="form-field">
                             <label class="required" for="sector">Sector</label>
-                            <input id="sector" pInputText formControlName="sector" />
+                            <p-autoComplete 
+            inputId="sector" 
+            formControlName="sector" 
+            [suggestions]="filteredSectors" 
+            (completeMethod)="filterSector($event)" 
+            forceSelection="true" 
+            dropdown="true" 
+            minLength="1" 
+            placeholder="Select Sector"
+            [disabled]="!selectedDomain">
+          </p-autoComplete>
                             <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
                         </div>
                         <div class="form-field">
@@ -494,11 +528,7 @@ interface ExportColumn {
                             <input id="customer_benefit" pInputText formControlName="customer_benefit" />
                             <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
                         </div>
-                        <div class="form-field">
-                            <label class="required" for="remarks">Remarks</label>
-                            <input id="remarks" pInputText formControlName="remarks" />
-                            <p-message *ngIf="repoForm.controls['remarks'].invalid && repoForm.controls['remarks'].touched" severity="error" text="Remarks is required"></p-message>
-                        </div>
+                        
                     </div>
                 </form>
             </ng-template>
@@ -622,16 +652,14 @@ export class ManageRepos implements OnInit {
     sendforapprovaldialog: boolean = false;
     deleteRepoDialog: boolean = false;
     rejectdialog:boolean = false;
+    domainOptions: string[] = [];
+  sectorOptions: { [key: string]: string[] } = {};
+  filteredDomains: string[] = [];
+  filteredSectors: string[] = [];
+  selectedDomain: string = '';
 
     file: any;
-    domainOptions = [
-        'Manufacturing', 'Pharma', 'Chemical','Cement','HealthCare','Ports','Logistics','Airline','Media', 'Automotive', 'Agriculture', 'Engineering Services',
-        'Life Sciences', 'Insurance', 'Financial Services', 'Oil and Gas', 'Retail', 'Banking Services',
-        'Poultry', 'Utilities'
-    ];
-
-    filteredDomains: string[] = [];
-
+    
     moduleOptions = [
         'FI: Financial Accounting',
 'CO: Controlling',
@@ -692,6 +720,7 @@ export class ManageRepos implements OnInit {
     }
 
     ngOnInit() {
+        this.loadDomainsAndSectors();
         const storedPage = localStorage.getItem('CurrentPage');
         if (storedPage) {
             this.CurrentPage = parseInt(storedPage);
@@ -713,7 +742,7 @@ export class ManageRepos implements OnInit {
             standard_custom: new FormControl('', Validators.required),
             technical_details: new FormControl('', Validators.required),
             customer_benefit: new FormControl('', Validators.required),
-            remarks: new FormControl('', Validators.required),
+            
 
         });
         this.approvalForm = new FormGroup({
@@ -842,7 +871,9 @@ submitDownloadRequest() {
     window.open(url, '_blank');
   }
 
-    getTagSeverity(status: string | undefined): string {
+  
+
+    getApprovalSeverity(status: string | undefined): string {
   const safeStatus = status ?? 'Not Approved';
   
   switch(safeStatus) {
@@ -1112,12 +1143,7 @@ submitDownloadRequest() {
     }
 
 
-    filterDomain(event: any) {
-        const query = event.query.toLowerCase();
-        this.filteredDomains = this.domainOptions.filter(option =>
-            option.toLowerCase().includes(query)
-        );
-    }
+    
 
     upload_dialog() {
         this.uploaddialog = true;
@@ -1191,4 +1217,83 @@ submitDownloadRequest() {
                 this.reloadPage();
             });
     }
+
+    loadDomainsAndSectors() {
+    // Extract unique domains and their sectors from Excel data [file:2]
+    const excelData = [
+      { domain: 'Technology', sectors: ['Software', 'Hardware', 'IT Services', 'AI Data Science'] },
+      { domain: 'Healthcare', sectors: ['Hospitals', 'Pharmaceuticals', 'Biotechnology', 'Medical Devices'] },
+      { domain: 'Finance', sectors: ['Banking', 'Insurance', 'Investment', 'FinTech'] },
+      { domain: 'Education', sectors: ['Schools', 'Universities', 'EdTech', 'Vocational Training'] },
+      { domain: 'Manufacturing', sectors: ['Automotive', 'Electronics', 'Textiles', 'Machinery'] },
+      { domain: 'Energy', sectors: ['Oil Gas', 'Renewables', 'Utilities', 'Mining'] },
+      { domain: 'Retail', sectors: ['E-commerce', 'FMCG', 'Luxury Goods', 'Consumer Electronics'] },
+      { domain: 'Agriculture', sectors: ['Farming', 'AgriTech', 'Food Processing', 'Dairy'] },
+      { domain: 'Transport', sectors: ['Aviation', 'Shipping', 'Railways', 'Logistics'] },
+      { domain: 'Media Entertainment', sectors: ['Film', 'Television', 'Gaming', 'Publishing'] },
+      { domain: 'Government', sectors: ['Public Sector Defense', 'Administration', 'Infrastructure', 'Policy'] },
+      { domain: 'Telecommunications', sectors: ['Mobile Networks', 'Broadband', 'Satellite', 'IoT'] },
+      { domain: 'Real Estate', sectors: ['Residential', 'Commercial', 'Industrial', 'Smart Cities'] },
+      { domain: 'Hospitality', sectors: ['Hotels', 'Restaurants', 'Travel Agencies', 'Tourism'] },
+      { domain: 'Legal', sectors: ['Law Firms', 'Corporate Law', 'Intellectual Property', 'Compliance'] },
+      { domain: 'Environmental Services', sectors: ['Waste Management', 'Recycling', 'Water Treatment', 'Sustainability'] },
+      { domain: 'Consulting', sectors: ['Construction Civil Engineering', 'Urban Development', 'Smart Infrastructure', 'Housing Projects'] },
+      { domain: 'Fashion', sectors: ['Apparel', 'Footwear', 'Accessories', 'Luxury Brands'] },
+      { domain: 'Sports', sectors: ['Professional Teams', 'Sportswear', 'Events Management', 'Fitness'] },
+      { domain: 'Food Beverage', sectors: ['Restaurants', 'Packaged Foods', 'Beverages', 'Nutrition'] },
+      { domain: 'Aerospace Defense', sectors: ['Aviation', 'Commercial Airlines', 'Space Exploration', 'Drones'] },
+      { domain: 'Chemicals', sectors: ['Industrial Chemicals', 'Petrochemicals', 'Agrochemicals', 'Specialty Chemicals'] },
+      { domain: 'Logistics', sectors: ['Supply Chain Warehousing', 'Distribution', 'Freight Forwarding', 'Cold Chain'] },
+      { domain: 'Non-Profit', sectors: ['NGOs Charities', 'Foundations', 'Social Work', 'Community Development'] },
+      { domain: 'Cybersecurity', sectors: ['Network Security', 'Data Protection', 'Cloud Security', 'Risk Management'] },
+      { domain: 'Human Resources', sectors: ['Recruitment', 'Training', 'Payroll', 'Employee Engagement'] },
+      { domain: 'Art Culture', sectors: ['Museums', 'Performing Arts', 'Heritage Conservation', 'Design'] }
+    ];
+
+    // Populate domains and sectors
+    this.domainOptions = [...new Set(excelData.map(item => item.domain))];
+    excelData.forEach(item => {
+      this.sectorOptions[item.domain] = item.sectors;
+    });
+  }
+
+  // Domain autocomplete filter
+  filterDomain(event: any) {
+    const query = event.query.toLowerCase();
+    this.filteredDomains = this.domainOptions.filter(option => 
+      option.toLowerCase().includes(query)
+    );
+  }
+
+  // Update form controls to watch domain changes
+  ngAfterViewInit() {
+    // Watch domain changes to update sector options
+    this.repoForm.get('domain')?.valueChanges.subscribe(domain => {
+      this.selectedDomain = domain || '';
+      this.filteredSectors = [];
+      this.repoForm.patchValue({ sector: '' });
+      if (domain && this.sectorOptions[domain]) {
+        this.filteredSectors = this.sectorOptions[domain];
+      }
+    });
+  }
+
+  // Sector autocomplete filter
+  filterSector(event: any) {
+    const query = event.query.toLowerCase();
+    if (this.selectedDomain && this.sectorOptions[this.selectedDomain]) {
+      this.filteredSectors = this.sectorOptions[this.selectedDomain].filter(option => 
+        option.toLowerCase().includes(query)
+      );
+    }
+  }
+
+  // Add this method to handle domain selection
+onDomainSelect(event: any) {
+  this.selectedDomain = event.value;
+  this.repoForm.patchValue({ sector: '' });
+  this.filteredSectors = this.sectorOptions[this.selectedDomain] || [];
+}
+
+
 }

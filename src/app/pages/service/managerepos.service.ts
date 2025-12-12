@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { UrlService } from './url.service';
 import { Observable } from 'rxjs';
+import { User } from './manageadmins.service';
 
 
 export interface Repository {
@@ -15,7 +16,6 @@ export interface Repository {
   standard_custom?: string; // Standard/Custom
   technical_details?: string; // Technical Details / Z Object Name
   customer_benefit?: string; // Customer Benefit
-  remarks?: string; // Remarks
   attach_code_or_document?: string; // Code or Process Document
   Approver?:string;
   Approval_status?:string;
@@ -258,6 +258,14 @@ approveDownloadRequest(id: number) {
 rejectDownloadRequest(id: number) {
   return this.http.post(`${this.url}repos/download-requests/${id}/reject`, {});
 }
+
+delegateRepository(payload: {
+    id: number;
+    delegateUserId: number;
+    delegateUserName?: string;
+  }): Observable<any> {
+    return this.http.post<any>(`${this.url}repos/delegate`, payload);
+  }
 
   
 
