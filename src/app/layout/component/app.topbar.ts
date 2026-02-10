@@ -208,7 +208,7 @@ styles:`
             </div>
             <div class="flex items-center flex-wrap gap-8">
               <div>
-                <span class="text-surface-500 dark:text-surface-300">Yash Id</span>
+                <span class="text-surface-500 dark:text-surface-300">Employee Id</span>
                 <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ userYashId }}</div>
               </div>
               <div>

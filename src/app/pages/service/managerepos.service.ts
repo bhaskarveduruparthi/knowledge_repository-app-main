@@ -313,7 +313,7 @@ getManagerStatsChartData(year?: number, month?: number, groupBy: string = 'month
  * Get available years that have repository data
  */
 getAvailableYears(): Observable<any> {
-  return this.http.get(`${this.url}/manager-stats/years`);
+  return this.http.get(`${this.url}repos/manager-stats/years`);
 }
   
 

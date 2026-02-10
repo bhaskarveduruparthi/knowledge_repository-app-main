@@ -377,6 +377,7 @@ export class Dashboard implements OnInit {
     private confirmationService: ConfirmationService,
     public router: Router
   ) {
+    // your existing chart options unchanged
     this.chartOptions = {
       plugins: {
         legend: {
@@ -425,15 +426,15 @@ export class Dashboard implements OnInit {
     this.loadChartData();
     this.fetchtopvotes();
     this.fetchtopusers();
-    this.loadAvailableYears();
     
     // Set default group by
     this.selectedGroupBy = this.groupByOptions[0];
     
-    this.loadManagerStats();
+    // Load years FIRST, then manager stats
+    this.loadAvailableYears();
   }
 
-  // AutoComplete filter methods
+  // ================= FIXED: AutoComplete Filter Methods =================
   filterYears(event: any) {
     const query = event.query.toLowerCase();
     if (!query) {
@@ -480,8 +481,9 @@ export class Dashboard implements OnInit {
     this.filteredGroupByOptions = [...this.groupByOptions];
   }
 
-  // Selection handlers
+  // ================= FIXED: Selection handlers =================
   onYearSelect(event: any) {
+    console.log('Year selected:', event); // debug
     this.onFilterChange();
   }
 
@@ -491,6 +493,7 @@ export class Dashboard implements OnInit {
   }
 
   onMonthSelect(event: any) {
+    console.log('Month selected:', event); // debug
     this.onFilterChange();
   }
 
@@ -500,6 +503,7 @@ export class Dashboard implements OnInit {
   }
 
   onGroupBySelect(event: any) {
+    console.log('GroupBy selected:', event); // debug
     this.onFilterChange();
   }
 
@@ -508,6 +512,75 @@ export class Dashboard implements OnInit {
     return this.selectedGroupBy?.value || 'month';
   }
 
+  // ================= FIXED: Years loading =================
+  loadAvailableYears() {
+    this.managereposervice.getAvailableYears().subscribe({
+      next: (response: any) => {
+        console.log('Years API response:', response); // debug
+        if (response.success && response.years && Array.isArray(response.years)) {
+          this.yearOptions = response.years.map((year: number) => ({
+            label: year.toString(),
+            value: year
+          }));
+          // Ensure filteredYears also has data
+          this.filteredYears = [...this.yearOptions];
+          // Load manager stats AFTER years are loaded
+          this.loadManagerStats();
+        } else {
+          console.warn('Invalid years response:', response);
+          // Load stats anyway for default view
+          this.loadManagerStats();
+        }
+      },
+      error: (err) => {
+        console.error('Error loading available years', err);
+        // Load stats anyway for default view
+        this.loadManagerStats();
+      }
+    });
+  }
+
+  // ================= FIXED: Manager stats with filters =================
+  loadManagerStats() {
+    const yearValue = this.selectedYear?.value;
+    const monthValue = this.selectedMonth?.value;
+    const groupByValue = this.getSelectedGroupByValue();
+
+    console.log('Loading stats with filters:', { year: yearValue, month: monthValue, groupBy: groupByValue });
+
+    // Load table data with year/month filters
+    this.managereposervice.getManagerStatsMonthly(yearValue, monthValue).subscribe({
+      next: (response: any) => {
+        console.log('Manager stats response:', response);
+        if (response.success && response.data && Array.isArray(response.data)) {
+          this.managerStatsTableData = response.data.map((item: any) => {
+            const monthName = new Date(item.year, item.month - 1).toLocaleString('default', { month: 'short' });
+            return {
+              manager_name: item.manager_name,
+              period: `${monthName} ${item.year}`,
+              approved: item.approved || 0,
+              pending: item.pending || 0,
+              rejected: item.rejected || 0,
+              total: item.total || 0
+            };
+          });
+        } else {
+          this.managerStatsTableData = [];
+        }
+      },
+      error: (err) => {
+        console.error('Error loading manager stats table', err);
+        this.managerStatsTableData = [];
+      }
+    });
+  }
+
+  onFilterChange() {
+    console.log('Filter changed - reloading stats'); // debug
+    this.loadManagerStats();
+  }
+
+  // ================= Your existing methods unchanged =================
   fetchtopvotes() {
     this.managereposervice.getTopUsersVotes().subscribe({
       next: (data: any) => {
@@ -568,82 +641,44 @@ export class Dashboard implements OnInit {
   }
 
   loadChartData() {
-    this.managereposervice.getdatabymodule().subscribe(data => {
-      this.moduleData = {
-        labels: Object.keys(data),
-        datasets: [
-          {
-            label: 'Modules',
-            data: Object.values(data),
-            backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#26A69A', '#AB47BC']
-          }
-        ]
-      };
-    });
-    this.managereposervice.getdatabydomain().subscribe(data => {
-      this.domainData = {
-        labels: Object.keys(data),
-        datasets: [
-          {
-            label: 'Domains',
-            data: Object.values(data),
-            backgroundColor: ['#FFA726', '#26A69A', '#AB47BC', '#42A5F5', '#66BB6A']
-          }
-        ]
-      };
-    });
-  }
+  const truncateName = (name: string): string => {
+    return name.split(/[:,\s]/)[0].trim();
+  };
 
-  loadAvailableYears() {
-    this.managereposervice.getAvailableYears().subscribe({
-      next: (response: any) => {
-        if (response.success && response.years) {
-          this.yearOptions = response.years.map((year: number) => ({
-            label: year.toString(),
-            value: year
-          }));
-        }
-      },
-      error: (err) => {
-        console.error('Error loading available years', err);
-      }
-    });
-  }
-
-  loadManagerStats() {
-    const yearValue = this.selectedYear?.value || undefined;
-    const monthValue = this.selectedMonth?.value || undefined;
-    const groupByValue = this.getSelectedGroupByValue();
-
+  this.managereposervice.getdatabymodule().subscribe(data => {
+    const truncatedData: { [key: string]: number } = {};
     
-
-    // Load table data
-    this.managereposervice.getManagerStatsMonthly(
-      yearValue,
-      monthValue
-    ).subscribe({
-      next: (response: any) => {
-        if (response.success && response.data) {
-          this.managerStatsTableData = response.data.map((item: any) => {
-            const monthName = new Date(item.year, item.month - 1).toLocaleString('default', { month: 'short' });
-            return {
-              manager_name: item.manager_name,
-              period: `${monthName} ${item.year}`,
-              approved: item.approved,
-              pending: item.pending,
-              rejected: item.rejected,
-              total: item.total
-            };
-          });
-        }
-      },
-      error: (err) => {
-        console.error('Error loading manager stats table', err);
-      }
+    // Object.entries handles any safely
+    Object.entries(data).forEach(([key, value]) => {
+      const shortName = truncateName(key);
+      truncatedData[shortName] = (truncatedData[shortName] || 0) + (value as number);
     });
-  }
+    
+    this.moduleData = {
+      labels: Object.keys(truncatedData),
+      datasets: [
+        {
+          label: 'Modules',
+          data: Object.values(truncatedData),
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#26A69A', '#AB47BC']
+        }
+      ]
+    };
+  });
 
-  onFilterChange() {
-    this.loadManagerStats();
-  }
+  this.managereposervice.getdatabydomain().subscribe(data => {
+    this.domainData = {
+      labels: Object.keys(data),
+      datasets: [
+        {
+          label: 'Domains',
+          data: Object.values(data),
+          backgroundColor: ['#FFA726', '#26A69A', '#AB47BC', '#42A5F5', '#66BB6A']
+        }
+      ]
+    };
+  });
+}
+
+
 }

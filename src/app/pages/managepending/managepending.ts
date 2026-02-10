@@ -486,5 +486,7 @@ export class ManagePendingReport implements OnInit {
   window.open(url, '_blank');
 }
 
+
+
     
 }

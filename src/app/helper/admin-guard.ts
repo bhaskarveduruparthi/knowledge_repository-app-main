@@ -20,8 +20,8 @@ export class AdminGuard implements CanActivate {
     console.log('CanActivate called');
 
    this.routeService.user.subscribe((x)=>{
-        if(x?.type == 'admin' || 'Superadmin'){
-            this.router.navigate(['/app']);
+        if(x?.type == 'admin'){
+            this.router.navigate(['']);
         }
         else if(x?.type == 'user'){
           this.router.navigate(['/app']);
