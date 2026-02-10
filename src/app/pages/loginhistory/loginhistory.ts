@@ -1,6 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core'; // Removed ViewChild
+import { Component, OnInit, signal } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-// Removed Table, TableModule imports
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -75,23 +74,9 @@ interface ExportColumn {
             font-weight: 500;
         }
 
-        /*.card {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 20px;
-            color: #222;
-            display: flex;
-            flex-direction: column;
-        }*/
-
-        /* --- NEW CUSTOM TABLE STYLES --- */
         .custom-table-container {
             width: 100%;
-            overflow-x: auto; /* Horizontal scroll for small screens */
+            overflow-x: auto;
             margin-bottom: 1rem;
             border-radius: 8px;
         }
@@ -99,7 +84,7 @@ interface ExportColumn {
         .glass-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 75rem; /* Match previous tableStyle min-width */
+            min-width: 75rem;
             font-size: 0.95rem;
         }
 
@@ -110,6 +95,7 @@ interface ExportColumn {
             color: #11224E;
             border-bottom: 2px solid rgba(255, 255, 255, 0.4);
             white-space: nowrap;
+            background-color: #cce4f7;
         }
 
         .glass-table tbody td {
@@ -123,12 +109,10 @@ interface ExportColumn {
             transition: background-color 0.2s;
         }
 
-        /* Hover effect matching glass theme */
         .glass-table tbody tr:hover {
             background-color: rgba(255, 255, 255, 0.3);
         }
 
-        /* Checkbox styling */
         .glass-table input[type="checkbox"] {
             accent-color: #11224E;
             width: 16px;
@@ -136,7 +120,6 @@ interface ExportColumn {
             cursor: pointer;
         }
 
-        /* --- Form Styles --- */
         .responsive-form .custom-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -179,33 +162,24 @@ interface ExportColumn {
             margin-left: 5px;
         }
 
-        .glass-table thead th {
-    text-align: left;
-    padding: 1rem;
-    font-weight: bold;
-    color: #11224E;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    white-space: nowrap;
-    background-color: #cce4f7; /* Add your desired background color here */
-}
-
         .error {
             border: 1px solid red;
         }
 
-        .p-toolbar{
-      
+        .p-toolbar {
             box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        
-    }
+        }
 
-        .card{
+        .card {
             box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+        }
+
+        .download-btn {
+            margin-left: auto;
         }
     `,
     imports: [
         CommonModule,
-        // TableModule, // REMOVED
         FormsModule,
         ReactiveFormsModule,
         ButtonModule,
@@ -234,75 +208,74 @@ interface ExportColumn {
     template: `
         <p-toast />
         <div class="card">
-            
-
             <div class="flex items-center justify-between mb-3">
                 <h5 class="m-0">User Login-History</h5>
-                <!--<p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onSearch($event)" placeholder="Search..." />
-                </p-iconfield>-->
+                <p-button 
+                    label="Download All Data" 
+                    icon="pi pi-download" 
+                    severity="success"
+                    (onClick)="downloadAllData()"
+                    [loading]="isDownloading"
+                    class="download-btn">
+                </p-button>
             </div>
 
             <div class="custom-table-container">
                 <table class="glass-table">
                     <thead>
                         <tr>
-                           
                             <th>Yash Id</th>
-                            
                             <th>IP Address</th>
                             <th>User Agent</th>
                             <th>Success</th>
                             <th>Message</th>
                             <th>TimeStamp</th>
-                            
-                            
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let log of logs()" >
-                           
-                             <td style="white-space: nowrap;">{{ log.yash_id || '-' }}</td>
-          <td style="white-space: nowrap;">{{ log.ip_address || '-' }}</td>
-          <td style="white-space: nowrap;">{{ log.user_agent || '-' }}</td>
-          <td style="white-space: nowrap;">
-            <p-tag
-              [severity]="log.success ? 'success' : 'danger'"
-              [value]="log.success ? 'Success' : 'Failed'">
-            </p-tag>
-          </td>
-          <td>{{ log.message || '-' }}</td>
-          <td style="white-space: nowrap;">{{ formatDate(log.timestamp) }}</td>
-                            
-                            
+                        <tr *ngFor="let log of logs()">
+                            <td style="white-space: nowrap;">{{ log.yash_id || '-' }}</td>
+                            <td style="white-space: nowrap;">{{ log.ip_address || '-' }}</td>
+                            <td style="white-space: nowrap;">{{ log.user_agent || '-' }}</td>
+                            <td style="white-space: nowrap;">
+                                <p-tag
+                                    [severity]="log.success ? 'success' : 'danger'"
+                                    [value]="log.success ? 'Success' : 'Failed'">
+                                </p-tag>
+                            </td>
+                            <td>{{ log.message || '-' }}</td>
+                            <td style="white-space: nowrap;">{{ formatDate(log.timestamp) }}</td>
                         </tr>
                         <tr *ngIf="logs().length === 0 && !loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">No Logs found.</td>
+                            <td colspan="6" style="text-align:center; padding: 2rem;">No Logs found.</td>
                         </tr>
-                         <tr *ngIf="loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">Loading Data...</td>
+                        <tr *ngIf="loading">
+                            <td colspan="6" style="text-align:center; padding: 2rem;">Loading Data...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Logs" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
-        
+            <p-paginator 
+                [totalRecords]="totalitems" 
+                [first]="first" 
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Logs" 
+                [showCurrentPageReport]="true" 
+                [rows]="10" 
+                (onPageChange)="onPageChange($event)">
+            </p-paginator>
         </div>
-        
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
 export class LoginHistory implements OnInit {
     adminDialog: boolean = false;
-    logs= signal<LoginLog[]>([]);
+    logs = signal<LoginLog[]>([]);
     log!: LoginLog;
     selectedlogs: LoginLog[] = [];
     submitted: boolean = false;
     selectedFile: File | null = null;
     searchTerm: string = '';
     filteredRepoList: Repository[] = [];
-    
     exportColumns!: ExportColumn[];
     isvalid: boolean = false;
     issent: boolean = false;
@@ -316,25 +289,14 @@ export class LoginHistory implements OnInit {
     page!: number;
     first!: number;
     loading: boolean = true;
+    isDownloading: boolean = false;
     repoForm!: FormGroup;
     approvalForm!: FormGroup;
     totalitems!: number;
     totalrecords: any;
     attachvalid: boolean = false;
-   
-
     file: any;
-    
-
-    
-
-    
     business_justification: any;
-   
-
-    
-
-    
 
     ngOnInit() {
         const storedPage = localStorage.getItem('LHistoryCurrentPage');
@@ -349,7 +311,6 @@ export class LoginHistory implements OnInit {
             this.first = (this.LHistoryCurrentPage - 1) * 10;
         }
         this.form_records();
-        
     }
 
     constructor(
@@ -361,19 +322,12 @@ export class LoginHistory implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
-                
             } else {
                 this.isvalid = false;
                 this.router.navigate(['/auth/access']);
             }
         });
     }
-
-
-    
-
-    
-
 
     loadDemoData(page: number) {
         this.managereposervice.getalllogs(page).subscribe((data: any) => {
@@ -385,13 +339,7 @@ export class LoginHistory implements OnInit {
             }
             this.loading = false;
         });
-        
     }
-
-    
-
-    
-
 
     onPageChange(event: any) {
         this.LHistoryCurrentPage = event.page + 1;
@@ -403,22 +351,16 @@ export class LoginHistory implements OnInit {
         this.repoForm.reset();
     }
 
-
-    
-
     formatDate(dateString?: string): string {
-    if (!dateString) {
-        return ""; // or any default fallback
+        if (!dateString) {
+            return "";
+        }
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
     }
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-}
-
-
-    
 
     form_records() {
         this.managereposervice.get_log_records().subscribe((data: any) => {
@@ -431,7 +373,88 @@ export class LoginHistory implements OnInit {
         window.location.reload();
     }
 
-    
+    /**
+     * Download all login history data as Excel file
+     */
+    downloadAllData() {
+        this.isDownloading = true;
+        
+        // Call the service method to get all logs data
+        this.managereposervice.downloadAllLogs().subscribe({
+            next: (data: any) => {
+                if (Array.isArray(data) && data.length > 0) {
+                    this.exportToExcel(data);
+                    this.messageservice.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Data downloaded successfully'
+                    });
+                } else {
+                    this.messageservice.add({
+                        severity: 'warn',
+                        summary: 'Warning',
+                        detail: 'No data available to download'
+                    });
+                }
+                this.isDownloading = false;
+            },
+            error: (error:any) => {
+                console.error('Error downloading data:', error);
+                this.messageservice.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to download data'
+                });
+                this.isDownloading = false;
+            }
+        });
+    }
 
-    
+    /**
+     * Export data to Excel file
+     */
+    private exportToExcel(data: LoginLog[]) {
+        // Prepare data for export
+        const exportData = data.map(log => ({
+            'Yash ID': log.yash_id || '-',
+            'IP Address': log.ip_address || '-',
+            'User Agent': log.user_agent || '-',
+            'Success': log.success ? 'Success' : 'Failed',
+            'Message': log.message || '-',
+            'Timestamp': this.formatDate(log.timestamp)
+        }));
+
+        // Create worksheet
+        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportData);
+
+        // Set column widths
+        const columnWidths = [
+            { wch: 15 }, // Yash ID
+            { wch: 20 }, // IP Address
+            { wch: 40 }, // User Agent
+            { wch: 10 }, // Success
+            { wch: 30 }, // Message
+            { wch: 15 }  // Timestamp
+        ];
+        worksheet['!cols'] = columnWidths;
+
+        // Create workbook
+        const workbook: XLSX.WorkBook = {
+            Sheets: { 'Login History': worksheet },
+            SheetNames: ['Login History']
+        };
+
+        // Generate Excel file
+        const excelBuffer: any = XLSX.write(workbook, {
+            bookType: 'xlsx',
+            type: 'array'
+        });
+
+        // Save file
+        const fileName = `Login_History_${new Date().toISOString().split('T')[0]}.xlsx`;
+        const blob = new Blob([excelBuffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        saveAs(blob, fileName);
+    }
 }

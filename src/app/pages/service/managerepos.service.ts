@@ -259,6 +259,10 @@ rejectDownloadRequest(id: number) {
   return this.http.post(`${this.url}repos/download-requests/${id}/reject`, {});
 }
 
+downloadAllLogs(): Observable<LoginLog[]> {
+    return this.http.get<LoginLog[]>(`${this.url}repos/download-all-logs`);
+}
+
 delegateRepository(payload: {
     id: number;
     delegateUserId: number;
@@ -267,6 +271,50 @@ delegateRepository(payload: {
     return this.http.post<any>(`${this.url}repos/delegate`, payload);
   }
 
+
+  getManagerStatsMonthly(year?: number, month?: number): Observable<any> {
+  let params = new HttpParams();
+  if (year) {
+    params = params.set('year', year.toString());
+  }
+  if (month) {
+    params = params.set('month', month.toString());
+  }
+  
+  return this.http.get(`${this.url}repos/manager-stats/monthly`, { params });
+}
+
+/**
+ * Get aggregated summary of manager statistics
+ */
+getManagerStatsSummary(): Observable<any> {
+  return this.http.get(`${this.url}/manager-stats/summary`);
+}
+
+/**
+ * Get manager statistics formatted for charts
+ * @param year Optional year filter
+ * @param month Optional month filter
+ * @param groupBy Group by 'month' or 'manager'
+ */
+getManagerStatsChartData(year?: number, month?: number, groupBy: string = 'month'): Observable<any> {
+  let params = new HttpParams().set('group_by', groupBy);
+  if (year) {
+    params = params.set('year', year.toString());
+  }
+  if (month) {
+    params = params.set('month', month.toString());
+  }
+  
+  return this.http.get(`${this.url}/manager-stats/chart-data`, { params });
+}
+
+/**
+ * Get available years that have repository data
+ */
+getAvailableYears(): Observable<any> {
+  return this.http.get(`${this.url}/manager-stats/years`);
+}
   
 
 
