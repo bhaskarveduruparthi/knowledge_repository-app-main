@@ -581,7 +581,7 @@ export class Home implements OnInit, OnDestroy {
   
 
 openAttachment(repo: any) {
-  const base    = 'http://127.0.0.1:5001'; 
+  const base    = 'http://10.6.102.245:5002'; 
   const fileUrl = `${base}/repos/refview/${repo.id}`;
 
   // Read JWT from wherever your app stores it (adjust key name if different)
