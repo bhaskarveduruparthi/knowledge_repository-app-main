@@ -303,6 +303,7 @@ interface ExportColumn {
                         <p><b>Customer:</b> {{ repo.customer_name }}</p>
                         <p><b>Sector:</b> {{ repo.sector }}</p>
                         <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
+                        <p><b>Created by:</b> {{ repo.username }}</p>
                         <div class="approval-actions">
                             <button pButton type="button" label="Approve" icon="pi pi-check"
                                 class="p-button-success" (click)="approve_dialog(repo)"
@@ -336,6 +337,7 @@ interface ExportColumn {
                 <p><b>Standard/Custom:</b> {{ selectedRepo.standard_custom }}</p>
                 <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
                 <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
+                <p><b>Created by:</b> {{ selectedRepo.username }}</p>
             </div>
         </p-dialog>
 
