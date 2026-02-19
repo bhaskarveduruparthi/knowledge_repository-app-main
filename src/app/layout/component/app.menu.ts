@@ -86,6 +86,7 @@ export class AppMenu implements OnInit {
             label: 'User',
             icon: 'pi pi-fw pi-briefcase',
             items: [
+                { label: 'Add Solutions', icon: 'pi pi-fw pi-plus', routerLink: ['/app/pages/addsolutions'] },
                 { label: 'Validate Solutions', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
             ]
         },
@@ -109,6 +110,7 @@ export class AppMenu implements OnInit {
             label: 'Manager',
             icon: 'pi pi-fw pi-briefcase',
             items: [
+                { label: 'Add Solutions', icon: 'pi pi-fw pi-plus', routerLink: ['/app/pages/addsolutions'] },
                 { label: 'Validate Solutions', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
             
             ]

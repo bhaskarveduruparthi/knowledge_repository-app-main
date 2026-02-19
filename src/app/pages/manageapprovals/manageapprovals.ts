@@ -1,8 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core'; // Removed ViewChild
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-// Removed Table, TableModule imports
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
@@ -30,225 +29,97 @@ import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
-}
-
-export interface Type {
-    id?: number;
-    type?: string;
-}
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
+interface Column { field: string; header: string; customExportHeader?: string; }
+export interface Type { id?: number; type?: string; }
+interface ExportColumn { title: string; dataKey: string; }
 
 @Component({
     selector: 'app-manageapprovalsreport',
     standalone: true,
     styles: `
-        /* --- Existing Styles --- */
         .custom-file-input {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-            padding: 8px 12px;
-            width: 100%;
-            color: #333;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            border: 1px solid #ced4da; border-radius: 6px; background-color: #f8f9fa;
+            padding: 8px 12px; width: 100%; color: #333; font-size: 1rem; transition: border-color 0.2s;
         }
-
-        .custom-file-input:hover {
-            border-color: #007ad9;
-            background-color: #e9ecef;
-        }
-
-        .custom-file-label {
-            display: inline-block;
-            margin-bottom: 4px;
-            font-size: 0.95em;
-            color: #5a5a5a;
-            font-weight: 500;
-        }
-
-        /*.card {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 20px;
-            color: #222;
-            display: flex;
-            flex-direction: column;
-        }*/
-
-        /* --- NEW CUSTOM TABLE STYLES --- */
-        .custom-table-container {
-            width: 100%;
-            overflow-x: auto; /* Horizontal scroll for small screens */
-            margin-bottom: 1rem;
-            border-radius: 8px;
-        }
-
-        .glass-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 75rem; /* Match previous tableStyle min-width */
-            font-size: 0.95rem;
-        }
-
+        .custom-file-input:hover { border-color: #007ad9; background-color: #e9ecef; }
+        .custom-file-label { display: inline-block; margin-bottom: 4px; font-size: 0.95em; color: #5a5a5a; font-weight: 500; }
+        .custom-table-container { width: 100%; overflow-x: auto; margin-bottom: 1rem; border-radius: 8px; }
+        .glass-table { width: 100%; border-collapse: collapse; min-width: 75rem; font-size: 0.95rem; }
         .glass-table thead th {
-            text-align: left;
-            padding: 1rem;
-            font-weight: bold;
-            color: #11224E;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-            white-space: nowrap;
+            text-align: left; padding: 1rem; font-weight: bold; color: #11224E;
+            border-bottom: 2px solid rgba(255,255,255,0.4); white-space: nowrap;
+            background-color: #cce4f7;
         }
+        .glass-table tbody td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); vertical-align: middle; color: #222; }
+        .glass-table tbody tr { transition: background-color 0.2s; }
+        .glass-table tbody tr:hover { background-color: rgba(255,255,255,0.3); }
+        .glass-table input[type="checkbox"] { accent-color: #11224E; width: 16px; height: 16px; cursor: pointer; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
+        .form-field { display: flex; flex-direction: column; width: 100%; }
+        @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+        label.required:after { content: "*"; color: red; margin-left: 5px; }
+        .error { border: 1px solid red; }
+        .p-toolbar { box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5); }
+        .card { box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5); }
 
-        .glass-table tbody td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            vertical-align: middle;
-            color: #222;
+        /* ── Search styles ── */
+        .search-bar-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 0.75rem; gap: 1rem; flex-wrap: wrap;
         }
-
-        .glass-table tbody tr {
-            transition: background-color 0.2s;
+        .search-input-container { position: relative; display: flex; align-items: center; }
+        .search-input-container .pi-search {
+            position: absolute; left: 0.75rem; color: #6c757d; pointer-events: none; z-index: 1;
         }
-
-        /* Hover effect matching glass theme */
-        .glass-table tbody tr:hover {
-            background-color: rgba(255, 255, 255, 0.3);
+        .search-input-container input {
+            padding-left: 2.25rem; padding-right: 2rem; border-radius: 20px;
+            border: 1px solid #c8e6c9; background: rgba(255,255,255,0.8);
+            width: 300px; height: 36px; font-size: 0.92rem; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-
-        /* Checkbox styling */
-        .glass-table input[type="checkbox"] {
-            accent-color: #11224E;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
+        .search-input-container input:focus { border-color: #4caf50; box-shadow: 0 0 0 2px rgba(76,175,80,0.15); }
+        .search-clear-btn {
+            position: absolute; right: 0.5rem; background: none; border: none;
+            cursor: pointer; color: #6c757d; padding: 0; font-size: 0.78rem; display: flex; align-items: center;
         }
-
-        /* --- Form Styles --- */
-        .responsive-form .custom-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 700px) {
-            .responsive-form .custom-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            width: 100%;
-        }
-
-        .form-field {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        input[pInputText],
-        textarea[pInputTextarea] {
-            width: 100%;
-        }
-
-        @media (max-width: 700px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        label.required:after {
-            content: "*";
-            color: red;
-            margin-left: 5px;
-        }
-
-        .glass-table thead th {
-    text-align: left;
-    padding: 1rem;
-    font-weight: bold;
-    color: #11224E;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    white-space: nowrap;
-    background-color: #cce4f7; /* Add your desired background color here */
-}
-
-        .error {
-            border: 1px solid red;
-        }
-
-        .p-toolbar{
-      
-            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        
-    }
-
-        .card{
-            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        }
+        .search-clear-btn:hover { color: #333; }
+        .search-result-count { font-size: 0.82rem; color: #6c757d; white-space: nowrap; }
     `,
     imports: [
-        CommonModule,
-        // TableModule, // REMOVED
-        FormsModule,
-        ReactiveFormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        RouterModule,
-        ToolbarModule,
-        RatingModule,
-        FluidModule,
-        PanelModule,
-        AutoCompleteModule,
-        PaginatorModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        PasswordModule,
-        MessageModule
+        CommonModule, FormsModule, ReactiveFormsModule, ButtonModule, RippleModule, ToastModule,
+        RouterModule, ToolbarModule, RatingModule, FluidModule, PanelModule, AutoCompleteModule,
+        PaginatorModule, InputTextModule, TextareaModule, SelectModule, RadioButtonModule,
+        InputNumberModule, DialogModule, TagModule, InputIconModule, IconFieldModule,
+        ConfirmDialogModule, PasswordModule, MessageModule
     ],
     template: `
         <p-toast />
         <div class="card">
-            
-
-            <div class="flex items-center justify-between mb-3">
+            <div class="search-bar-row">
                 <h5 class="m-0">Approved</h5>
-                <!--<p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onSearch($event)" placeholder="Search..." />
-                </p-iconfield>-->
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <div class="search-input-container">
+                        <i class="pi pi-search"></i>
+                        <input
+                            type="text"
+                            [value]="searchQuery()"
+                            placeholder="Search current page..."
+                            (input)="onSearchChange($event)"
+                        />
+                        <button *ngIf="searchQuery()" class="search-clear-btn" (click)="clearSearch()" title="Clear">
+                            <i class="pi pi-times"></i>
+                        </button>
+                    </div>
+                    <span class="search-result-count" *ngIf="searchQuery()">
+                        {{ filteredRepositories().length }} / {{ repositories().length }} rows
+                    </span>
+                </div>
             </div>
 
             <div class="custom-table-container">
                 <table class="glass-table">
                     <thead>
                         <tr>
-                           
                             <th>Customer Name</th>
                             <th>Domain</th>
                             <th>Sector</th>
@@ -257,8 +128,6 @@ interface ExportColumn {
                             <th>Standard/Custom</th>
                             <th>Technical details</th>
                             <th>Customer Benefit</th>
-                            
-                            
                             <th>Created On</th>
                             <th>Created User</th>
                             <th>Immediate Response Manager(IRM)</th>
@@ -269,48 +138,54 @@ interface ExportColumn {
                             <th>Repo Status</th>
                             <th>Repo Approver</th>
                             <th>Repo Approval Date</th>
-                            
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let repo of repositories()" >
-                           
-                            <td style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                            <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                            <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                            <td style="white-space: nowrap;">{{ repo.module_name }}</td>
+                        <tr *ngFor="let repo of filteredRepositories()">
+                            <td style="white-space:nowrap">{{ repo.customer_name }}</td>
+                            <td style="white-space:nowrap">{{ repo.domain }}</td>
+                            <td style="white-space:nowrap">{{ repo.sector }}</td>
+                            <td style="white-space:nowrap">{{ repo.module_name }}</td>
                             <td>{{ repo.detailed_requirement }}</td>
                             <td>{{ repo.standard_custom }}</td>
                             <td>{{ repo.technical_details }}</td>
                             <td>{{ repo.customer_benefit }}</td>
-                            
-                            
-
-                            <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
+                            <td style="white-space:nowrap">{{ formatDate(repo.created_at) }}</td>
+                            <td style="white-space:nowrap;text-align:center">{{ repo.username }}</td>
+                            <td style="white-space:nowrap;text-align:center">{{ repo.irm }}</td>
+                            <td style="white-space:nowrap;text-align:center">{{ repo.srm }}</td>
+                            <td style="white-space:nowrap;text-align:center">{{ repo.buh }}</td>
+                            <td style="white-space:nowrap;text-align:center">{{ repo.bgh }}</td>
                             <td>{{ repo.business_justification }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approval_status }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approver }}</td>
-                            <td style="white-space: nowrap;">{{ repo.Approval_date }}</td>
-                            
+                            <td style="white-space:nowrap">{{ repo.Approval_status }}</td>
+                            <td style="white-space:nowrap">{{ repo.Approver }}</td>
+                            <td style="white-space:nowrap">{{ repo.Approval_date }}</td>
                         </tr>
-                        <tr *ngIf="repositories().length === 0 && !loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">No Repositories found.</td>
+                        <tr *ngIf="filteredRepositories().length === 0 && searchQuery() && !loading">
+                            <td colspan="18" style="text-align:center;padding:2rem;color:#888">
+                                <i class="pi pi-search" style="font-size:1.5rem;display:block;margin-bottom:0.5rem"></i>
+                                No rows match <b>"{{ searchQuery() }}"</b> on this page.
+                                <button pButton type="button" label="Clear" icon="pi pi-times"
+                                    class="p-button-text p-button-sm" style="margin-left:0.5rem"
+                                    (click)="clearSearch()"></button>
+                            </td>
                         </tr>
-                         <tr *ngIf="loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">Loading Data...</td>
+                        <tr *ngIf="repositories().length === 0 && !searchQuery() && !loading">
+                            <td colspan="18" style="text-align:center;padding:2rem">No Repositories found.</td>
+                        </tr>
+                        <tr *ngIf="loading">
+                            <td colspan="18" style="text-align:center;padding:2rem">Loading Data...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
-        
+            <p-paginator
+                [totalRecords]="totalitems" [first]="first"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
+                [showCurrentPageReport]="true" [rows]="10"
+                (onPageChange)="onPageChange($event)">
+            </p-paginator>
         </div>
-        
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
@@ -321,9 +196,6 @@ export class ManageApprovalsReport implements OnInit {
     selectedrepositories: Repository[] = [];
     submitted: boolean = false;
     selectedFile: File | null = null;
-    searchTerm: string = '';
-    filteredRepoList: Repository[] = [];
-    
     exportColumns!: ExportColumn[];
     isvalid: boolean = false;
     issent: boolean = false;
@@ -342,42 +214,59 @@ export class ManageApprovalsReport implements OnInit {
     totalitems!: number;
     totalrecords: any;
     attachvalid: boolean = false;
-   
-
     file: any;
-    
-
-    
-
-    
     business_justification: any;
-   
 
-    get isAdmin(): boolean {
-        return this.downloadvalid === true;
+    // ── Search ──────────────────────────────────────────────────────────────
+    searchQuery = signal<string>('');
+
+    filteredRepositories = computed(() => {
+        const q = this.searchQuery().trim().toLowerCase();
+        if (!q) return this.repositories();
+        return this.repositories().filter(r =>
+            r.customer_name?.toLowerCase().includes(q) ||
+            r.module_name?.toLowerCase().includes(q) ||
+            r.domain?.toLowerCase().includes(q) ||
+            r.sector?.toLowerCase().includes(q) ||
+            r.standard_custom?.toLowerCase().includes(q) ||
+            r.technical_details?.toLowerCase().includes(q) ||
+            r.username?.toLowerCase().includes(q) ||
+            r.Approval_status?.toLowerCase().includes(q) ||
+            r.Approver?.toLowerCase().includes(q)
+        );
+    });
+
+    onSearchChange(event: Event): void {
+        this.searchQuery.set((event.target as HTMLInputElement).value);
     }
 
+    clearSearch(): void {
+        this.searchQuery.set('');
+        const input = document.querySelector('.search-input-container input') as HTMLInputElement;
+        if (input) input.value = '';
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
+    get isAdmin(): boolean { return this.downloadvalid === true; }
+
     get isExportEnabled(): boolean {
-        if (this.isAdmin) {
-            return this.selectedrepositories.length > 0;
-        }
-        return this.selectedrepositories.length > 0 && this.selectedrepositories.every((repo) => repo.Approval_status === 'Approved');
+        if (this.isAdmin) return this.selectedrepositories.length > 0;
+        return this.selectedrepositories.length > 0 &&
+            this.selectedrepositories.every(r => r.Approval_status === 'Approved');
     }
 
     ngOnInit() {
         const storedPage = localStorage.getItem('ApprovalCurrentPage');
         if (storedPage) {
             this.ApprovalCurrentPage = parseInt(storedPage);
-            this.loadDemoData(this.ApprovalCurrentPage);
             this.first = (this.ApprovalCurrentPage - 1) * 10;
         } else {
             this.ApprovalCurrentPage = 1;
-            localStorage.setItem('ApprovalCurrentPage', this.ApprovalCurrentPage.toString());
-            this.loadDemoData(this.ApprovalCurrentPage);
-            this.first = (this.ApprovalCurrentPage - 1) * 10;
+            localStorage.setItem('ApprovalCurrentPage', '1');
+            this.first = 0;
         }
+        this.loadDemoData(this.ApprovalCurrentPage);
         this.form_records();
-        
     }
 
     constructor(
@@ -387,10 +276,7 @@ export class ManageApprovalsReport implements OnInit {
         public router: Router
     ) {
         this.authservice.user.subscribe((x) => {
-            if (x?.type == 'Superadmin') {
-                this.isvalid = true;
-            }
-            else if(x?.type == 'manager'){
+            if (x?.type == 'Superadmin' || x?.type == 'manager') {
                 this.isvalid = true;
             } else {
                 this.router.navigate(['/auth/access']);
@@ -398,69 +284,37 @@ export class ManageApprovalsReport implements OnInit {
         });
     }
 
-
-    
-
-    
-
-
     loadDemoData(page: number) {
+        this.loading = true;
         this.managereposervice.getallapprovedrepos(page).subscribe((data: any) => {
-            if (Array.isArray(data)) {
-                this.repositories.set(data);
-            } else {
-                console.error('Expected array but received:', data);
-                this.repositories.set([]);
-            }
+            this.repositories.set(Array.isArray(data) ? data : []);
             this.loading = false;
         });
         this.cols = [
-            { field: 'id', header: 'S.No.' },
-            { field: 'customer_name', header: 'Customer Name' },
-            { field: 'domain', header: 'Domain' },
-            { field: 'sector', header: 'Sector' },
-            { field: 'module_name', header: 'Module Name' },
-            { field: 'detailed_requirement', header: 'Detailed Requirement' },
-            { field: 'standard_custom', header: 'Standard/Custom' },
-            { field: 'technical_details', header: 'Technical Details / Z Object Name' },
-            { field: 'customer_benefit', header: 'Customer Benefit' },
-            { field: 'remarks', header: 'Remarks' },
+            { field: 'id', header: 'S.No.' }, { field: 'customer_name', header: 'Customer Name' },
+            { field: 'domain', header: 'Domain' }, { field: 'sector', header: 'Sector' },
+            { field: 'module_name', header: 'Module Name' }, { field: 'detailed_requirement', header: 'Detailed Requirement' },
+            { field: 'standard_custom', header: 'Standard/Custom' }, { field: 'technical_details', header: 'Technical Details / Z Object Name' },
+            { field: 'customer_benefit', header: 'Customer Benefit' }, { field: 'remarks', header: 'Remarks' },
             { field: 'attach_code_or_document', header: 'Code/Process Document' }
         ];
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
     }
-
-    
-
-    
-
 
     onPageChange(event: any) {
         this.ApprovalCurrentPage = event.page + 1;
+        this.searchQuery.set(''); // reset search on page change
         this.loadDemoData(this.ApprovalCurrentPage);
         localStorage.setItem('ApprovalCurrentPage', this.ApprovalCurrentPage.toString());
     }
 
-    cancelEdit() {
-        this.repoForm.reset();
-    }
-
-
-    
+    cancelEdit() { this.repoForm.reset(); }
 
     formatDate(dateString?: string): string {
-    if (!dateString) {
-        return ""; // or any default fallback
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return `${String(date.getDate()).padStart(2,'0')}-${String(date.getMonth()+1).padStart(2,'0')}-${date.getFullYear()}`;
     }
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-}
-
-
-    
 
     form_records() {
         this.managereposervice.getapproved_repo_records().subscribe((data: any) => {
@@ -469,22 +323,13 @@ export class ManageApprovalsReport implements OnInit {
         });
     }
 
-    reloadPage() {
-        window.location.reload();
-    }
+    reloadPage() { window.location.reload(); }
 
     download_ref(repository: Repository, id: any) {
-  this.repository = { ...repository };
-
-  const raw = localStorage.getItem('token');          // e.g. '{"access_token":"eyJhbGciOi..."}'
-  if (!raw) { return; }
-
-  const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
-  const jwt = parsed.access_token;                    // <-- actual JWT string
-
-  const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
-  window.open(url, '_blank');
-}
-
-    
+        this.repository = { ...repository };
+        const raw = localStorage.getItem('token');
+        if (!raw) return;
+        const jwt = JSON.parse(raw).access_token;
+        window.open(`http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`, '_blank');
+    }
 }

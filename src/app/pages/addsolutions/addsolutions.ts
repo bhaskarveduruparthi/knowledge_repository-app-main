@@ -47,7 +47,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-managerepos',
+    selector: 'app-addsolutions',
     standalone: true,
     styles: `
         /* --- Existing Styles --- */
@@ -234,7 +234,7 @@ interface ExportColumn {
     template: `
         <p-toast />
         <div class="card">
-            <p-toolbar styleClass="mb-6" *ngIf="isadmin">
+            <p-toolbar styleClass="mb-6">
                 <ng-template #start>
                     <p-button label="Upload Solution" icon="pi pi-plus" severity="primary" (onClick)="opendialog()" />
                 </ng-template>
@@ -257,7 +257,7 @@ interface ExportColumn {
                 <table class="glass-table">
                     <thead>
                         <tr>
-                            <th *ngIf="isadmin">
+                            <th>
                                 Select
                             </th>
                             <th *ngIf="customervalid">Customer Name</th>
@@ -282,7 +282,7 @@ interface ExportColumn {
                     </thead>
                     <tbody>
                         <tr *ngFor="let repo of repositories()" >
-                            <td *ngIf="isadmin">
+                            <td >
                                 <input type="checkbox" 
                                     [checked]="isRepoSelected(repo)" 
                                     (change)="onCheckboxChange(repo, $event)" 
@@ -612,7 +612,7 @@ interface ExportColumn {
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
-export class ManageRepos implements OnInit {
+export class AddSolutions implements OnInit {
     adminDialog: boolean = false;
     repositories = signal<Repository[]>([]);
     repository!: Repository;
@@ -698,7 +698,7 @@ export class ManageRepos implements OnInit {
     ];
 
     filteredModules: string[] = [];
-    isadmin: boolean = false;
+
     editrepodialog: boolean = false;
     business_justification: any;
     uploadcodeprocessdocdialog: boolean = false;
@@ -768,7 +768,6 @@ export class ManageRepos implements OnInit {
         this.authservice.user.subscribe((x) => {
             if (x?.type == 'Superadmin') {
                 this.isvalid = true;
-                this.isadmin = true;
                 this.customervalid = true;
                 this.downloadvalid = true;
                 this.sendforapproval = false;
@@ -776,13 +775,12 @@ export class ManageRepos implements OnInit {
             }
             else if (x?.type == 'manager') {
                 this.isvalid = true;
-                this.isadmin = false;
                 
                 
-                this.attachvalid = false
+                
+                this.attachvalid = true;
             } else {
                 this.isvalid = false;
-                this.isadmin = false;
                 this.customervalid = false;
                 this.downloadvalid = false;
                 this.sendforapproval = true;
@@ -893,7 +891,7 @@ submitDownloadRequest() {
 
 
     loadDemoData(page: number) {
-        this.managereposervice.getallrepos(page).subscribe((data: any) => {
+        this.managereposervice.getalladdedrepos(page).subscribe((data: any) => {
             if (Array.isArray(data)) {
                 this.repositories.set(data);
             } else {
@@ -1181,7 +1179,7 @@ submitDownloadRequest() {
     }
 
     form_records() {
-        this.managereposervice.get_repo_records().subscribe((data: any) => {
+        this.managereposervice.get_addedrepo_records().subscribe((data: any) => {
             this.totalitems = data.length;
             this.totalrecords = data.totalrecords;
         });

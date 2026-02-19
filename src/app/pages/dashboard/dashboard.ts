@@ -188,15 +188,15 @@ import { ManageAdminsService } from '../service/manageadmins.service';
 
     <div class="card">
       <div class="charts-container">
-        <p-fieldset legend="Solutions by Module" toggleable="true" collapsed="false">
+        <p-fieldset legend="Solutions Added by Module" toggleable="true" collapsed="false">
           <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
         </p-fieldset>
-        <p-fieldset legend="Solutions by Domain" toggleable="true" collapsed="false">
+        <p-fieldset legend="Solutions Added by Domain" toggleable="true" collapsed="false">
           <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
         </p-fieldset>
       </div>
       <div class="charts-container">
-        <p-fieldset legend="Top Contributors by Solutions" toggleable="true">
+        <p-fieldset legend="Top Contributors by Overall Solutions" toggleable="true">
           <p-chart type="bar" [data]="s_chartData" *ngIf="s_chartData"></p-chart>
         </p-fieldset>
         <p-fieldset legend="Top Contributors by Community" toggleable="true">

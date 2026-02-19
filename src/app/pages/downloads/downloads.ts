@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -90,12 +90,83 @@ import { PaginatorModule } from 'primeng/paginator';
     .error {
       border: 1px solid red;
     }
+
+    /* ── Search styles ── */
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .search-input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input-container .pi-search {
+      position: absolute;
+      left: 0.75rem;
+      color: #6c757d;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .search-input-container input {
+      padding-left: 2.25rem;
+      border-radius: 20px;
+      border: 1px solid #c8e6c9;
+      background: rgba(255,255,255,0.8);
+      width: 280px;
+      height: 38px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input-container input:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.15);
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6c757d;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+    .search-clear-btn:hover {
+      color: #333;
+    }
+    .search-result-count {
+      font-size: 0.85rem;
+      color: #6c757d;
+      white-space: nowrap;
+    }
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+      font-size: 1rem;
+      grid-column: 1 / -1;
+    }
+    .no-results .pi {
+      font-size: 3rem;
+      color: #a5d6a7;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
     @media (max-width: 700px) {
       .cards-container {
         grid-template-columns: 1fr;
       }
       .approval-card {
         min-width: 0;
+      }
+      .search-input-container input {
+        width: 180px;
       }
     }
   `],
@@ -136,18 +207,68 @@ import { PaginatorModule } from 'primeng/paginator';
           <ng-template #start>
             <span><strong><h4>Download Requests</h4></strong></span>
           </ng-template>
+
+          <ng-template #center>
+            <!-- Search Bar -->
+            
+          </ng-template>
+
           <ng-template #end>
-            <p-button
+            <div class="search-wrapper">
+              <div class="search-input-container">
+                <i class="pi pi-search"></i>
+                <input
+                  type="text"
+                  [value]="searchQuery()"
+                  placeholder="Search by customer, module, name, email..."
+                  (input)="onSearchChange($event)"
+                />
+                <button
+                  *ngIf="searchQuery()"
+                  class="search-clear-btn"
+                  (click)="clearSearch()"
+                  title="Clear search">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+              <span class="search-result-count" *ngIf="searchQuery()">
+                {{ filteredRequests().length }} of {{ allRequests().length }} results
+              </span>
+            </div>
+            <!--<p-button
               label="Go to Repository"
               icon="pi pi-arrow-right"
               severity="help"
               (onClick)="gotoRepos()">
-            </p-button>
+            </p-button>-->
           </ng-template>
         </p-toolbar>
 
-        <div class="cards-container" *ngIf="!loading && requests.length; else emptyState">
-          <div *ngFor="let req of requests" class="approval-card">
+        <div class="cards-container">
+
+          <!-- No search results -->
+          <div *ngIf="filteredRequests().length === 0 && searchQuery()" class="no-results">
+            <i class="pi pi-search"></i>
+            <p>No requests found for <b>"{{ searchQuery() }}"</b></p>
+            <p style="font-size:0.85rem">Try searching by customer name, module, requester name or email.</p>
+            <button pButton type="button" label="Clear Search" icon="pi pi-times"
+              class="p-button-outlined p-button-sm" style="margin-top:0.75rem"
+              (click)="clearSearch()"></button>
+          </div>
+
+          <!-- Empty state (no data at all) -->
+          <div *ngIf="allRequests().length === 0 && !searchQuery() && !loading" class="no-results">
+            <i class="pi pi-inbox"></i>
+            <p>No download requests found.</p>
+          </div>
+
+          <!-- Loading state -->
+          <div *ngIf="loading" class="no-results">
+            <i class="pi pi-spin pi-spinner"></i>
+            <p>Loading download requests...</p>
+          </div>
+
+          <div *ngFor="let req of filteredRequests()" class="approval-card">
             <h4>{{ req.repo_customer_name }} - {{ req.repo_module_name }}</h4>
             <p><b>Requested By:</b> {{ req.requested_by_name }} ({{ req.requested_by_email }})</p>
             <p><b>Status:</b> {{ req.status }}</p>
@@ -167,16 +288,8 @@ import { PaginatorModule } from 'primeng/paginator';
               </button>
             </div>
           </div>
-        </div>
 
-        <ng-template #emptyState>
-          <div style="padding: 2rem; text-align: center;" *ngIf="!loading">
-            No download requests found.
-          </div>
-          <div style="padding: 2rem; text-align: center;" *ngIf="loading">
-            Loading download requests...
-          </div>
-        </ng-template>
+        </div>
       </div>
     </div>
 
@@ -219,12 +332,48 @@ import { PaginatorModule } from 'primeng/paginator';
   providers: [MessageService, ManageReposService, ConfirmationService]
 })
 export class ManageDownloads implements OnInit {
-  requests: DownloadRequest[] = [];
+  // ── Store all requests as a signal so computed() can track them ──
+  allRequests = signal<DownloadRequest[]>([]);
+
+  // ── Search query as a signal ──
+  searchQuery = signal<string>('');
+
+  // ── Computed: filters allRequests based on searchQuery ──
+  filteredRequests = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) return this.allRequests();
+
+    return this.allRequests().filter(req =>
+      req.repo_customer_name?.toLowerCase().includes(query) ||
+      req.repo_module_name?.toLowerCase().includes(query) ||
+      req.requested_by_name?.toLowerCase().includes(query) ||
+      req.requested_by_email?.toLowerCase().includes(query) ||
+      req.status?.toLowerCase().includes(query) ||
+      req.justification?.toLowerCase().includes(query)
+    );
+  });
+
+  onSearchChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(value);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    const input = document.querySelector('.search-input-container input') as HTMLInputElement;
+    if (input) input.value = '';
+  }
+
   loading = true;
   selectedRequest: DownloadRequest | null = null;
   approveDialogVisible = false;
   rejectDialogVisible = false;
   isvalid: boolean = false;
+
+  // Keep plain array for backward compat (not used in template anymore)
+  get requests(): DownloadRequest[] {
+    return this.allRequests();
+  }
 
   constructor(
     private managereposervice: ManageReposService,
@@ -236,7 +385,6 @@ export class ManageDownloads implements OnInit {
     this.authservice.user.subscribe((x) => {
       if (x?.type === 'Superadmin') {
         this.isvalid = true;
-        // only load requests after confirming access
         this.loadRequests();
       } else {
         this.isvalid = false;
@@ -245,16 +393,13 @@ export class ManageDownloads implements OnInit {
     });
   }
 
-  ngOnInit() {
-    // optional: if you prefer, you can move loadRequests() here
-    // and ensure auth guard is handled by route
-  }
+  ngOnInit() {}
 
   loadRequests() {
     this.loading = true;
     this.managereposervice.getDownloadRequests().subscribe({
       next: (data: DownloadRequest[]) => {
-        this.requests = data;
+        this.allRequests.set(data);   // ← set signal instead of plain array
         this.loading = false;
       },
       error: () => {

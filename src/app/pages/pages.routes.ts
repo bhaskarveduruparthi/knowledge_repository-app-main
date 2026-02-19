@@ -12,11 +12,13 @@ import { LoginHistory } from './loginhistory/loginhistory';
 import { DownloadHistory } from './downloadhistory/downloadhistory';
 import { ManageManagers } from './manage_managers/manage_managers';
 import { ManageDownloads } from './downloads/downloads';
+import { AddSolutions } from './addsolutions/addsolutions';
 
 
 export default [
      {path: 'manageusers', component: ManageUsers},  
      {path: 'managerepos', component: ManageRepos},
+     {path: 'addsolutions', component: AddSolutions},
      {path: 'manageapprovals', component: ManageApprovals},
      {path: 'managedownloads', component: ManageDownloads},
      {path: 'approved', component: ManageApprovalsReport},

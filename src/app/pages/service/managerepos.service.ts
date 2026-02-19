@@ -101,6 +101,10 @@ export class ManageReposService {
     return this.http.get(`${this.url}repos/getallrepos?page=${page}`);
   }
 
+  getalladdedrepos(page: number) {
+    return this.http.get(`${this.url}repos/getalladdedrepos?page=${page}`);
+  }
+
   getalllogs(page: number) {
     return this.http.get(`${this.url}repos/getlogs?page=${page}`);
   }
@@ -164,6 +168,10 @@ export class ManageReposService {
 
   get_repo_records() {
     return this.http.get(`${this.url}/repos/getallreporecords`);
+  }
+
+  get_addedrepo_records() {
+    return this.http.get(`${this.url}/repos/getalladdedreporecords`);
   }
 
   get_log_records() {
