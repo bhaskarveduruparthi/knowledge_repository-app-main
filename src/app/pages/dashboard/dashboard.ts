@@ -150,7 +150,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     <div class="grid">
       <div class="card">
         <div class="card-header">
-          <span>Total Solutions</span>
+          <span>{{ userType === 'Superadmin' ? 'Total Solutions' : 'Added Solutions' }}</span>
           <div class="icon-container icon-total">
             <i class="pi pi-book"></i>
           </div>
@@ -206,114 +206,76 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     </div>
 
     <!-- Manager Statistics Section -->
-    <div class="card" style="margin-top: 2rem;">
-      <p-fieldset legend="Manager Repository Statistics" toggleable="true" collapsed="false">
-        <div class="filter-container">
-          <span class="filter-label">Filter by:</span>
-          <p-autoComplete 
-            [(ngModel)]="selectedYear" 
-            [suggestions]="filteredYears"
-            (completeMethod)="filterYears($event)"
-            (onDropdownClick)="onYearDropdownClick()"
-            placeholder="Select Year"
-            field="label"
-            [dropdown]="true"
-            [showClear]="true"
-            (onSelect)="onYearSelect($event)"
-            (onClear)="onYearClear()"
-            [forceSelection]="true"
-            [style]="{'width': '200px'}"
-          ></p-autoComplete>
-          <p-autoComplete 
-            [(ngModel)]="selectedMonth" 
-            [suggestions]="filteredMonths"
-            (completeMethod)="filterMonths($event)"
-            (onDropdownClick)="onMonthDropdownClick()"
-            placeholder="Select Month"
-            field="label"
-            [dropdown]="true"
-            [showClear]="true"
-            (onSelect)="onMonthSelect($event)"
-            (onClear)="onMonthClear()"
-            [forceSelection]="true"
-            [style]="{'width': '200px'}"
-          ></p-autoComplete>
-          <p-autoComplete 
-            [(ngModel)]="selectedGroupBy" 
-            [suggestions]="filteredGroupByOptions"
-            (completeMethod)="filterGroupBy($event)"
-            (onDropdownClick)="onGroupByDropdownClick()"
-            placeholder="Group By"
-            field="label"
-            [dropdown]="true"
-            (onSelect)="onGroupBySelect($event)"
-            [forceSelection]="true"
-            [style]="{'width': '200px'}"
-          ></p-autoComplete>
-        </div>
+    <!-- Manager Statistics Section - Superadmin only -->
+<div class="card" style="margin-top: 2rem;" *ngIf="userType === 'Superadmin'">
+  <p-fieldset legend="Manager Repository Statistics" toggleable="true" collapsed="false">
+    <div class="filter-container">
+  <span class="filter-label">Filter by:</span>
+  <p-autoComplete
+    [(ngModel)]="selectedYear"
+    [suggestions]="filteredYears"
+    (completeMethod)="filterYears($event)"
+    (onDropdownClick)="onYearDropdownClick()"
+    placeholder="Select Year"
+    field="label"
+    [dropdown]="true"
+    [showClear]="true"
+    (onSelect)="onYearSelect($event)"
+    (onClear)="onYearClear()"
+    [forceSelection]="true"
+    [style]="{'width': '180px'}"
+  ></p-autoComplete>
+  <p-autoComplete
+    [(ngModel)]="selectedMonth"
+    [suggestions]="filteredMonths"
+    (completeMethod)="filterMonths($event)"
+    (onDropdownClick)="onMonthDropdownClick()"
+    placeholder="Select Month"
+    field="label"
+    [dropdown]="true"
+    [showClear]="true"
+    (onSelect)="onMonthSelect($event)"
+    (onClear)="onMonthClear()"
+    [forceSelection]="true"
+    [style]="{'width': '180px'}"
+  ></p-autoComplete>
+</div>
 
-        <!-- Chart View -->
-        <div style="margin-bottom: 2rem;">
-          <p-chart 
-            type="bar" 
-            [data]="managerStatsChartData" 
-            [options]="managerChartOptions"
-            *ngIf="managerStatsChartData"
-          ></p-chart>
-        </div>
-
-        <!-- Table View -->
-        <div class="manager-stats-table">
-          <p-table 
-            [value]="managerStatsTableData" 
-            [tableStyle]="{'min-width': '50rem'}"
-            styleClass="p-datatable-striped"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Manager</th>
-                <th *ngIf="getSelectedGroupByValue() === 'month'">Last Updated</th>
-                <th>Approved</th>
-                <th>Pending</th>
-                <th>Rejected</th>
-                <th>Total</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-stat>
-              <tr>
-                <td>{{ stat.manager_name }}</td>
-                <td *ngIf="getSelectedGroupByValue() === 'month'">{{ stat.period }}</td>
-                <td>
-                  <span class="badge" style="background-color: #66BB6A; color: white; padding: 0.25rem 0.5rem; border-radius: 4px;">
-                    {{ stat.approved }}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge" style="background-color: #FFA726; color: white; padding: 0.25rem 0.5rem; border-radius: 4px;">
-                    {{ stat.pending }}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge" style="background-color: #EF5350; color: white; padding: 0.25rem 0.5rem; border-radius: 4px;">
-                    {{ stat.rejected }}
-                  </span>
-                </td>
-                <td>
-                  <strong>{{ stat.total }}</strong>
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td [attr.colspan]="getSelectedGroupByValue() === 'month' ? 6 : 5" style="text-align: center;">
-                  No data available for the selected filters.
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </div>
-      </p-fieldset>
+    <div class="manager-stats-table">
+      <p-table
+        [value]="managerStatsTableData"
+        [tableStyle]="{'min-width': '50rem'}"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Manager</th>
+            <th>Period</th>
+            <th>Approved</th>
+            <th>Pending</th>
+            <th>Rejected</th>
+            <th>Total</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-stat>
+          <tr>
+            <td>{{ stat.manager_name }}</td>
+            <td>{{ stat.period }}</td>
+            <td><span class="badge" style="background-color:#66BB6A;color:white;padding:0.25rem 0.5rem;border-radius:4px;">{{ stat.approved }}</span></td>
+            <td><span class="badge" style="background-color:#FFA726;color:white;padding:0.25rem 0.5rem;border-radius:4px;">{{ stat.pending }}</span></td>
+            <td><span class="badge" style="background-color:#EF5350;color:white;padding:0.25rem 0.5rem;border-radius:4px;">{{ stat.rejected }}</span></td>
+            <td><strong>{{ stat.total }}</strong></td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" style="text-align:center;">No data available for the selected filters.</td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
+  </p-fieldset>
+</div>
   `
 })
 export class Dashboard implements OnInit {
@@ -324,6 +286,8 @@ export class Dashboard implements OnInit {
 
   moduleData: any;
   domainData: any;
+
+  userType: string = '';
 
   isvalid = true;
   greetingMessage: string = '';
@@ -338,6 +302,17 @@ export class Dashboard implements OnInit {
   managerStatsChartData: any;
   managerStatsTableData: any[] = [];
   managerChartOptions: any;
+
+selectedManagerType: any = { label: 'IRM', value: 'irm' };
+
+managerTypeOptions = [
+  { label: 'IRM', value: 'irm' },
+  { label: 'SRM', value: 'srm' },
+  { label: 'BUH', value: 'buh' },
+  { label: 'BGH', value: 'bgh' }
+];
+
+filteredManagerTypes: any[] = [];
   
   // Filter options
   yearOptions: any[] = [];
@@ -420,19 +395,24 @@ export class Dashboard implements OnInit {
   }
 
   ngOnInit() {
-    this.fetchCounts();
-    this.setGreetingMessage();
-    this.getUsername();
-    this.loadChartData();
-    this.fetchtopvotes();
-    this.fetchtopusers();
-    
-    // Set default group by
-    this.selectedGroupBy = this.groupByOptions[0];
-    
-    // Load years FIRST, then manager stats
-    this.loadAvailableYears();
-  }
+  this.fetchCounts();
+  this.setGreetingMessage();
+  this.getUsername();
+  this.loadChartData();
+  this.fetchtopvotes();
+  this.fetchtopusers();
+
+  // Load manager stats only after we know the user type
+  this.authservice.user.subscribe(user => {
+    this.userType = user?.type || '';
+    this.username = user?.name || 'User';
+
+    if (this.userType === 'Superadmin') {
+      this.selectedGroupBy = this.groupByOptions[0];
+      this.loadAvailableYears();
+    }
+  });
+}
 
   // ================= FIXED: AutoComplete Filter Methods =================
   filterYears(event: any) {
@@ -445,6 +425,8 @@ export class Dashboard implements OnInit {
       );
     }
   }
+
+  
 
   filterMonths(event: any) {
     const query = event.query.toLowerCase();
@@ -482,25 +464,31 @@ export class Dashboard implements OnInit {
   }
 
   // ================= FIXED: Selection handlers =================
+  
+
   onYearSelect(event: any) {
-    console.log('Year selected:', event); // debug
-    this.onFilterChange();
-  }
+  // PrimeNG passes the selected object in event.value
+  this.selectedYear = event.value ?? event;
+  console.log('Year selected:', this.selectedYear);
+  this.loadManagerStats();
+}
 
-  onYearClear() {
-    this.selectedYear = null;
-    this.onFilterChange();
-  }
+onYearClear() {
+  this.selectedYear = null;
+  this.loadManagerStats();
+}
 
-  onMonthSelect(event: any) {
-    console.log('Month selected:', event); // debug
-    this.onFilterChange();
-  }
+onMonthSelect(event: any) {
+  // PrimeNG passes the selected object in event.value
+  this.selectedMonth = event.value ?? event;
+  console.log('Month selected:', this.selectedMonth);
+  this.loadManagerStats();
+}
 
-  onMonthClear() {
-    this.selectedMonth = null;
-    this.onFilterChange();
-  }
+onMonthClear() {
+  this.selectedMonth = null;
+  this.loadManagerStats();
+}
 
   onGroupBySelect(event: any) {
     console.log('GroupBy selected:', event); // debug
@@ -514,71 +502,89 @@ export class Dashboard implements OnInit {
 
   // ================= FIXED: Years loading =================
   loadAvailableYears() {
-    this.managereposervice.getAvailableYears().subscribe({
-      next: (response: any) => {
-        console.log('Years API response:', response); // debug
-        if (response.success && response.years && Array.isArray(response.years)) {
-          this.yearOptions = response.years.map((year: number) => ({
-            label: year.toString(),
-            value: year
-          }));
-          // Ensure filteredYears also has data
-          this.filteredYears = [...this.yearOptions];
-          // Load manager stats AFTER years are loaded
-          this.loadManagerStats();
-        } else {
-          console.warn('Invalid years response:', response);
-          // Load stats anyway for default view
-          this.loadManagerStats();
-        }
-      },
-      error: (err) => {
-        console.error('Error loading available years', err);
-        // Load stats anyway for default view
-        this.loadManagerStats();
+  this.managereposervice.getAvailableYears().subscribe({
+    next: (response: any) => {
+      if (response.success && response.years && Array.isArray(response.years)) {
+        this.yearOptions = response.years.map((year: number) => ({
+          label: year.toString(),
+          value: year
+        }));
+        this.filteredYears = [...this.yearOptions];
       }
-    });
-  }
+      this.loadManagerStats();
+    },
+    error: (err) => {
+      console.error('Error loading years - user may not have access', err);
+      // Do NOT call loadManagerStats if years failed — user isn't Superadmin
+    }
+  });
+}
 
   // ================= FIXED: Manager stats with filters =================
   loadManagerStats() {
-    const yearValue = this.selectedYear?.value;
-    const monthValue = this.selectedMonth?.value;
-    const groupByValue = this.getSelectedGroupByValue();
+  if (this.userType !== 'Superadmin') {
+    return; // Safety guard — do nothing for non-Superadmin
+  }
 
-    console.log('Loading stats with filters:', { year: yearValue, month: monthValue, groupBy: groupByValue });
+  const yearValue = typeof this.selectedYear === 'object'
+    ? this.selectedYear?.value
+    : this.selectedYear;
 
-    // Load table data with year/month filters
-    this.managereposervice.getManagerStatsMonthly(yearValue, monthValue).subscribe({
-      next: (response: any) => {
-        console.log('Manager stats response:', response);
-        if (response.success && response.data && Array.isArray(response.data)) {
-          this.managerStatsTableData = response.data.map((item: any) => {
-            const monthName = new Date(item.year, item.month - 1).toLocaleString('default', { month: 'short' });
-            return {
-              manager_name: item.manager_name,
-              period: `${monthName} ${item.year}`,
-              approved: item.approved || 0,
-              pending: item.pending || 0,
-              rejected: item.rejected || 0,
-              total: item.total || 0
-            };
-          });
-        } else {
-          this.managerStatsTableData = [];
-        }
-      },
-      error: (err) => {
-        console.error('Error loading manager stats table', err);
+  const monthValue = typeof this.selectedMonth === 'object'
+    ? this.selectedMonth?.value
+    : this.selectedMonth;
+
+  console.log('loadManagerStats called with:', { year: yearValue, month: monthValue });
+
+  this.managereposervice.getManagerStatsMonthly(yearValue, monthValue).subscribe({
+    next: (response: any) => {
+      if (response.success && response.data && Array.isArray(response.data)) {
+        this.managerStatsTableData = response.data.map((item: any) => {
+          const monthName = new Date(item.year, item.month - 1)
+            .toLocaleString('default', { month: 'short' });
+          return {
+            manager_name: item.manager_name,
+            period: `${monthName} ${item.year}`,
+            approved: item.approved || 0,
+            pending: item.pending || 0,
+            rejected: item.rejected || 0,
+            total: item.total || 0
+          };
+        });
+      } else {
         this.managerStatsTableData = [];
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('Error loading manager stats', err);
+      this.managerStatsTableData = [];
+    }
+  });
+}
+
+filterManagerTypes(event: any) {
+  const query = event.query.toLowerCase();
+  this.filteredManagerTypes = !query
+    ? [...this.managerTypeOptions]
+    : this.managerTypeOptions.filter(o => o.label.toLowerCase().includes(query));
+}
+
+onManagerTypeDropdownClick() {
+  this.filteredManagerTypes = [...this.managerTypeOptions];
+}
+
+onManagerTypeSelect(event: any) {
+  this.onFilterChange();
+}
 
   onFilterChange() {
-    console.log('Filter changed - reloading stats'); // debug
+  setTimeout(() => {
+    const yearValue = this.selectedYear?.value;
+    const monthValue = this.selectedMonth?.value;
+    console.log('Sending filters → year:', yearValue, 'month:', monthValue);
     this.loadManagerStats();
-  }
+  }, 0);
+}
 
   // ================= Your existing methods unchanged =================
   fetchtopvotes() {
@@ -621,10 +627,13 @@ export class Dashboard implements OnInit {
   }
 
   getUsername() {
-    this.authservice.user.subscribe(user => {
-      this.username = user?.name || 'User';
-    });
-  }
+  this.authservice.user.subscribe(user => {
+    this.username = user?.name || 'User';
+    this.userType = user?.type || '';
+  });
+}
+
+  
 
   fetchCounts() {
     this.managereposervice.fetchCounts().subscribe({

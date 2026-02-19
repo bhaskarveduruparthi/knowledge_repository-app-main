@@ -437,10 +437,10 @@ export class ManageApprovals implements OnInit {
                 this.attachvalid = false
             }
              else {
-                this.isvalid = false;
-                this.downloadvalid = false;
-                this.sendforapproval = true;
-                this.attachvalid = true;
+                this.isvalid = true;
+                this.downloadvalid = true;
+                this.sendforapproval = false;
+                this.attachvalid = false
             }
         });
     }

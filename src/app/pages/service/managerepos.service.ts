@@ -1,32 +1,29 @@
-import { PaginatorModule } from 'primeng/paginator';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { UrlService } from './url.service';
 import { Observable } from 'rxjs';
-import { User } from './manageadmins.service';
-
 
 export interface Repository {
-  id: number; // Serial Number
-  customer_name?: string; // Customer Name
-  domain?: string; // Domain
-  sector?: string; // Sector
-  module_name?: string; // Module Name
-  detailed_requirement?: string; // Detailed Requirement
-  standard_custom?: string; // Standard/Custom
-  technical_details?: string; // Technical Details / Z Object Name
-  customer_benefit?: string; // Customer Benefit
-  attach_code_or_document?: string; // Code or Process Document
-  Approver?:string;
-  Approval_status?:string;
-  Approval_date?:string;
-  created_at?:string;
-  username?:string;
-  irm ?:string;
-  srm ?:string;
-  buh ?:string;
-  bgh?:string;
-  business_justification?:string;
+  id: number;
+  customer_name?: string;
+  domain?: string;
+  sector?: string;
+  module_name?: string;
+  detailed_requirement?: string;
+  standard_custom?: string;
+  technical_details?: string;
+  customer_benefit?: string;
+  attach_code_or_document?: string;
+  Approver?: string;
+  Approval_status?: string;
+  Approval_date?: string;
+  created_at?: string;
+  username?: string;
+  irm?: string;
+  srm?: string;
+  buh?: string;
+  bgh?: string;
+  business_justification?: string;
   download_approved?: boolean;
 }
 
@@ -38,18 +35,18 @@ export interface DownloadRequest {
   requested_by_name: string;
   requested_by_email: string;
   justification: string;
-  status: string;           // Pending / Approved / Rejected
-  requested_at: string;     // ISO string
+  status: string;
+  requested_at: string;
 }
 
 export interface LoginLog {
-    id?: number;
-    yash_id?: string | null;
-    ip_address?: string | null;
-    user_agent?: string | null;
-    success?: boolean;
-    message?: string | null;
-    timestamp?: string;  // ISO string from backend
+  id?: number;
+  yash_id?: string | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  success?: boolean;
+  message?: string | null;
+  timestamp?: string;
 }
 
 export interface DownloadLog {
@@ -63,129 +60,141 @@ export interface DownloadLog {
   user_agent?: string | null;
 }
 
-
-
 @Injectable({
-  providedIn: 'root'  // This registers the service app-wide automatically
+  providedIn: 'root'
 })
 export class ManageReposService {
-    
-  private url :string;
-  constructor(private http: HttpClient , private _url : UrlService) {
-    this.url = `${this._url.getApiUrl()}`
+
+  private url: string;
+
+  constructor(private http: HttpClient, private _url: UrlService) {
+    this.url = `${this._url.getApiUrl()}`;
   }
 
-  getallrepos(page: number){
+  // ─── HOME PAGE (public — no JWT needed) ─────────────────────────────────────
+
+  /**
+   * Loads all approved repositories for the Home page on initial render.
+   * Calls the public GET /repos/all-approved endpoint (no JWT required).
+   */
+  getAllRepositories(): Observable<Repository[]> {
+    return this.http.get<Repository[]>(`${this.url}repos/all-approved`);
+  }
+
+  /**
+   * Searches approved repositories by filter + free-text query.
+   * Calls the public GET /repos/search endpoint (no JWT required).
+   *
+   * @param filter  'Any' | 'Domain' | 'Module' | 'Customer Name' | 'Sector'
+   * @param query   Non-empty search string
+   */
+  searchRepositories(filter: string, query: string): Observable<Repository[]> {
+    const params = new HttpParams()
+      .set('filter', filter)
+      .set('query', query);
+    return this.http.get<Repository[]>(`${this.url}repos/search`, { params });
+  }
+
+  // ─── EXISTING METHODS (all unchanged) ───────────────────────────────────────
+
+  getallrepos(page: number) {
     return this.http.get(`${this.url}repos/getallrepos?page=${page}`);
   }
 
-  getalllogs(page:number){
+  getalllogs(page: number) {
     return this.http.get(`${this.url}repos/getlogs?page=${page}`);
-  
   }
 
-  getalldownloadlogs(page:number){
+  getalldownloadlogs(page: number) {
     return this.http.get(`${this.url}repos/getdownloadlogs?page=${page}`);
-  
   }
 
-  getallapprovedrepos(page: number){
+  getallapprovedrepos(page: number) {
     return this.http.get(`${this.url}repos/getallapprovedrepos?page=${page}`);
   }
 
-  getallpendingrepos(page: number){
+  getallpendingrepos(page: number) {
     return this.http.get(`${this.url}repos/getallpendingrepos?page=${page}`);
   }
 
-  getallunapprovedrepos(page: number){
+  getallunapprovedrepos(page: number) {
     return this.http.get(`${this.url}repos/getallunapprovedrepos?page=${page}`);
   }
 
-  getallrejectedrepos(page: number){
+  getallrejectedrepos(page: number) {
     return this.http.get(`${this.url}repos/getallrejectedrepos?page=${page}`);
   }
 
   uploadExcel(formData: FormData): Observable<any> {
-    
     return this.http.post(`${this.url}repos/upload-excel`, formData);
   }
 
   createRepository(formData: FormData): Observable<any> {
-  return this.http.post(`${this.url}/repos/createrepo`, formData);
+    return this.http.post(`${this.url}/repos/createrepo`, formData);
   }
 
-  RepoApproval(repository: Repository){
+  RepoApproval(repository: Repository) {
     return this.http.put(`${this.url}/repos/repoapproval/${repository.id}`, repository);
   }
 
-  RepoRejection(repository: Repository){
+  RepoRejection(repository: Repository) {
     return this.http.put(`${this.url}/repos/reporejection/${repository.id}`, repository);
   }
 
   SendforApproval(id: number, business_justification: string) {
-  const body = { business_justification: business_justification };
-  return this.http.put(`${this.url}/repos/sendforapproval/${id}`, body);
-}
+    const body = { business_justification };
+    return this.http.put(`${this.url}/repos/sendforapproval/${id}`, body);
+  }
 
-downloadWorkbook(id: number): Observable<Blob> {
+  downloadWorkbook(id: number): Observable<Blob> {
     return this.http.get(`${this.url}/download-file/${id}`, { responseType: 'blob' });
   }
 
   delete_repo(repository: Repository) {
-    
     return this.http.delete(`${this.url}repos/deleterepo/${repository.id}`);
   }
 
-  searchRepositories(filter: string, query: string): Observable<any> {
-    let params = new HttpParams();
-    params = params.append('filter', filter);
-    params = params.append('query', query);
-
-    return this.http.get<any>(`${this.url}repos/search`, { params });
-  }
-
-
-  SaveRepo(){
-     return this.http.get(`${this.url}repos/getallrepos`);
+  SaveRepo() {
+    return this.http.get(`${this.url}repos/getallrepos`);
   }
 
   fetchCounts() {
-  return this.http.get(`${this.url}/repos/counts`);
-}
+    return this.http.get(`${this.url}/repos/counts`);
+  }
 
-  get_repo_records(){
+  get_repo_records() {
     return this.http.get(`${this.url}/repos/getallreporecords`);
   }
 
-  get_log_records(){
+  get_log_records() {
     return this.http.get(`${this.url}/repos/getlogrecords`);
   }
 
-  get_downloadlog_records(){
+  get_downloadlog_records() {
     return this.http.get(`${this.url}/repos/getdownloadlogrecords`);
   }
 
-  getapproved_repo_records(){
+  getapproved_repo_records() {
     return this.http.get(`${this.url}/repos/getallapprovedreporecords`);
   }
 
-  getpending_repo_records(){
+  getpending_repo_records() {
     return this.http.get(`${this.url}/repos/getallpendingreporecords`);
   }
 
-  getunapproved_repo_records(){
+  getunapproved_repo_records() {
     return this.http.get(`${this.url}/repos/getallunapprovedreporecords`);
   }
 
-  getrejected_repo_records(){
+  getrejected_repo_records() {
     return this.http.get(`${this.url}/repos/getallrejectedreporecords`);
   }
 
-  get_approval_repos(){
+  get_approval_repos() {
     return this.http.get(`${this.url}repos/getapprovalrepos`);
   }
 
-  get_approval_records(){
+  get_approval_records() {
     return this.http.get(`${this.url}/repos/getapprovalreposrecords`);
   }
 
@@ -197,20 +206,19 @@ downloadWorkbook(id: number): Observable<Blob> {
     return this.http.get(`${this.url}/repos/refdownload/${id}`);
   }
 
-  getdatabydomain(){
+  getdatabydomain() {
     return this.http.get(`${this.url}/repos/repodatabydomain`);
   }
 
   upvoteAnswer(answerId: number) {
-  return this.http.post(`${this.url}support/upvote/${answerId}`, {});
+    return this.http.post(`${this.url}support/upvote/${answerId}`, {});
   }
 
   downvoteAnswer(answerId: number) {
     return this.http.post(`${this.url}support/downvote/${answerId}`, {});
   }
 
-
-  getdatabymodule(){
+  getdatabymodule() {
     return this.http.get(`${this.url}/repos/repodatabymodule`);
   }
 
@@ -218,12 +226,10 @@ downloadWorkbook(id: number): Observable<Blob> {
     return this.http.get<any>(`${this.url}support/getquestions`);
   }
 
-  // Create a new question
   createQuestion(payload: any): Observable<any> {
     return this.http.post<any>(`${this.url}support/createquestion`, payload);
   }
 
-  // Create a new answer
   createAnswer(payload: any): Observable<any> {
     return this.http.post<any>(`${this.url}support/createanswer`, payload);
   }
@@ -235,35 +241,32 @@ downloadWorkbook(id: number): Observable<Blob> {
   getTopUsersSolutions(): Observable<any> {
     return this.http.get<any>(`${this.url}repos/top-users-solutions`);
   }
-  
+
   getUsers() {
     return this.http.get(`${this.url}users/getallusers`);
   }
 
   requestDownload(id: number, justification: string) {
-  return this.http.post(`${this.url}repos/download-request/${id}`, {
-    justification
-  });
-}
+    return this.http.post(`${this.url}repos/download-request/${id}`, { justification });
+  }
 
-// optionally for a Superadmin approval screen:
-getDownloadRequests() {
-  return this.http.get<DownloadRequest[]>(`${this.url}repos/download-requests`);
-}
+  getDownloadRequests() {
+    return this.http.get<DownloadRequest[]>(`${this.url}repos/download-requests`);
+  }
 
-approveDownloadRequest(id: number) {
-  return this.http.post(`${this.url}repos/download-requests/${id}/approve`, {});
-}
+  approveDownloadRequest(id: number) {
+    return this.http.post(`${this.url}repos/download-requests/${id}/approve`, {});
+  }
 
-rejectDownloadRequest(id: number) {
-  return this.http.post(`${this.url}repos/download-requests/${id}/reject`, {});
-}
+  rejectDownloadRequest(id: number) {
+    return this.http.post(`${this.url}repos/download-requests/${id}/reject`, {});
+  }
 
-downloadAllLogs(): Observable<LoginLog[]> {
+  downloadAllLogs(): Observable<LoginLog[]> {
     return this.http.get<LoginLog[]>(`${this.url}repos/download-all-logs`);
-}
+  }
 
-delegateRepository(payload: {
+  delegateRepository(payload: {
     id: number;
     delegateUserId: number;
     delegateUserName?: string;
@@ -271,60 +274,25 @@ delegateRepository(payload: {
     return this.http.post<any>(`${this.url}repos/delegate`, payload);
   }
 
-
   getManagerStatsMonthly(year?: number, month?: number): Observable<any> {
-  let params = new HttpParams();
-  if (year) {
-    params = params.set('year', year.toString());
+    let params = new HttpParams();
+    if (year) params = params.set('year', year.toString());
+    if (month) params = params.set('month', month.toString());
+    return this.http.get(`${this.url}repos/manager-stats/monthly`, { params });
   }
-  if (month) {
-    params = params.set('month', month.toString());
+
+  getManagerStatsSummary(): Observable<any> {
+    return this.http.get(`${this.url}/manager-stats/summary`);
   }
-  
-  return this.http.get(`${this.url}repos/manager-stats/monthly`, { params });
-}
 
-/**
- * Get aggregated summary of manager statistics
- */
-getManagerStatsSummary(): Observable<any> {
-  return this.http.get(`${this.url}/manager-stats/summary`);
-}
-
-/**
- * Get manager statistics formatted for charts
- * @param year Optional year filter
- * @param month Optional month filter
- * @param groupBy Group by 'month' or 'manager'
- */
-getManagerStatsChartData(year?: number, month?: number, groupBy: string = 'month'): Observable<any> {
-  let params = new HttpParams().set('group_by', groupBy);
-  if (year) {
-    params = params.set('year', year.toString());
+  getManagerStatsChartData(year?: number, month?: number, groupBy: string = 'month'): Observable<any> {
+    let params = new HttpParams().set('group_by', groupBy);
+    if (year) params = params.set('year', year.toString());
+    if (month) params = params.set('month', month.toString());
+    return this.http.get(`${this.url}/manager-stats/chart-data`, { params });
   }
-  if (month) {
-    params = params.set('month', month.toString());
+
+  getAvailableYears(): Observable<any> {
+    return this.http.get(`${this.url}repos/manager-stats/years`);
   }
-  
-  return this.http.get(`${this.url}/manager-stats/chart-data`, { params });
-}
-
-/**
- * Get available years that have repository data
- */
-getAvailableYears(): Observable<any> {
-  return this.http.get(`${this.url}repos/manager-stats/years`);
-}
-  
-
-
-   
-
-    
-
-   
-
-    
-
-    
 }

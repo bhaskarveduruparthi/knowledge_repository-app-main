@@ -298,13 +298,8 @@ interface ExportColumn {
                             <td>{{ repo.customer_benefit }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                     <p-button 
-              severity="info"
-              label="View" 
-              (click)="openAttachment(repo.id)"
-              *ngIf="repo?.attach_code_or_document === 'ATTACHED'"
-              >
-            </p-button>
+                                    
+            
   <ng-container *ngIf="isAdmin; else normalUserBlock">
     <p-button
       label="Download"
