@@ -336,7 +336,6 @@ interface ExportColumn {
                 <p><b>Standard/Custom:</b> {{ selectedRepo.standard_custom }}</p>
                 <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
                 <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
-                <p><b>Remarks:</b> {{ selectedRepo.remarks }}</p>
             </div>
         </p-dialog>
 
