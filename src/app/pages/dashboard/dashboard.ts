@@ -150,7 +150,7 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     <div class="grid">
       <div class="card">
         <div class="card-header">
-          <span>{{ userType === 'Superadmin' ? 'Total Solutions' : 'Added Solutions' }}</span>
+          <span>Total Solutions</span>
           <div class="icon-container icon-total">
             <i class="pi pi-book"></i>
           </div>
@@ -188,10 +188,10 @@ import { ManageAdminsService } from '../service/manageadmins.service';
 
     <div class="card">
       <div class="charts-container">
-        <p-fieldset legend="Solutions Added by Module" toggleable="true" collapsed="false">
+        <p-fieldset legend="Total Solutions by Module" toggleable="true" collapsed="false">
           <p-chart type="bar" [data]="moduleData" *ngIf="moduleData"></p-chart>
         </p-fieldset>
-        <p-fieldset legend="Solutions Added by Domain" toggleable="true" collapsed="false">
+        <p-fieldset legend="Total Solutions by Domain" toggleable="true" collapsed="false">
           <p-chart type="bar" [data]="domainData" *ngIf="domainData"></p-chart>
         </p-fieldset>
       </div>
