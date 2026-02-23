@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core'; // Removed ViewChild
+import { Component, OnInit, ViewChild, ElementRef, signal } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 // Removed Table, TableModule imports
 import { CommonModule } from '@angular/common';
@@ -553,7 +553,7 @@ interface ExportColumn {
                         Choose File
                         <span *ngIf="isNewRepoAttachment" style="color:red"> *</span>
                     </label>
-                    <input type="file" class="custom-file-input" (change)="onUpload($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
+                    <input #fileInput type="file" class="custom-file-input" (change)="onUpload($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
                     <small *ngIf="isNewRepoAttachment && !file" style="color: #856404; margin-top: 4px; display:block;">
                         Please select a file to proceed.
                     </small>
@@ -705,6 +705,9 @@ export class AddSolutions implements OnInit {
      * or "existing repo" mode (optional re-attach via paperclip).
      */
     isNewRepoAttachment: boolean = false;
+
+    /** Template reference to the file input — used to clear it between dialogs. */
+    @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
     moduleOptions = [
         'FI: Financial Accounting',
@@ -1007,8 +1010,9 @@ export class AddSolutions implements OnInit {
      */
     upload_ref(repository: Repository) {
         this.repository = { ...repository };
-        this.isNewRepoAttachment = false; // existing repo flow
+        this.isNewRepoAttachment = false;
         this.file = null;
+        this.clearFileInput();
         this.uploadcodeprocessdocdialog = true;
     }
 
@@ -1111,8 +1115,9 @@ export class AddSolutions implements OnInit {
         if (this.repoForm.valid) {
             this.pendingRepoData = this.repoForm.value;
             this.createdialog = false;
-            this.file = null; // clear any stale file
-            this.isNewRepoAttachment = true; // mark as new-repo flow
+            this.file = null;
+            this.clearFileInput();
+            this.isNewRepoAttachment = true;
             this.uploadcodeprocessdocdialog = true;
         } else {
             this.repoForm.markAllAsTouched();
@@ -1121,94 +1126,34 @@ export class AddSolutions implements OnInit {
 
     /**
      * STEP 2 of new-repo flow (called by "Save Solution" button):
-     *
-     * The Flask /createrepo endpoint returns { message, repository } but does NOT
-     * include the new record's database id. So after creation we call
-     * getalladdedrepos(1) and pick the record that matches our pending form data
-     * to retrieve the real id, then immediately upload the attachment.
+     * Creates the repo, gets the id directly from the response, then uploads the attachment.
      */
     submitNewRepoWithAttachment() {
         if (!this.file) {
-            this.messageservice.add({
-                severity: 'warn',
-                summary: 'Attachment Required',
-                detail: 'Please select a file before saving the solution.'
-            });
+            this.messageservice.add({ severity: 'warn', summary: 'Attachment Required', detail: 'Please select a file before saving.' });
             return;
         }
 
-        // Step 1: Create the repository
         this.managereposervice.createRepository(this.pendingRepoData).subscribe({
-            next: (_res: any) => {
+            next: (res: any) => {
+                this.repository = { id: res.id } as Repository;
 
-                // Step 2: Fetch the latest repos to find the new record's id.
-                // We always look at page 1 because the backend orders by newest first
-                // (or we can scan all pages — page 1 is sufficient for a just-created record).
-                this.managereposervice.getalladdedrepos(1).subscribe({
-                    next: (repos: any) => {
-                        const repoList: Repository[] = Array.isArray(repos) ? repos : [];
+                const formData = new FormData();
+                formData.set('file', this.file);
 
-                        // Match by the unique combination of fields we just submitted.
-                        // customer_name + module_name + domain is specific enough.
-                        const matched = repoList.find(r =>
-                            r.customer_name === this.pendingRepoData.customer_name &&
-                            r.module_name   === this.pendingRepoData.module_name   &&
-                            r.domain        === this.pendingRepoData.domain        &&
-                            r.sector        === this.pendingRepoData.sector
-                        );
-
-                        if (!matched || !matched.id) {
-                            // Could not find the repo — still show a partial-success message
-                            this.messageservice.add({
-                                severity: 'warn',
-                                summary: 'Repository Saved',
-                                detail: 'Repository was created but attachment could not be linked. Use the paperclip icon to attach.'
-                            });
-                            this.resetNewRepoState();
-                            return;
-                        }
-
-                        this.repository = matched;
-
-                        // Step 3: Upload the attachment now that we have the real id
-                        const formData = new FormData();
-                        formData.set('file', this.file);
-
-                        this.managereposervice.uploadreference(this.repository, formData).subscribe({
-                            next: () => {
-                                this.messageservice.add({
-                                    severity: 'success',
-                                    summary: 'Solution Saved Successfully',
-                                    detail: 'Repository and attachment have been uploaded.'
-                                });
-                                this.resetNewRepoState();
-                            },
-                            error: () => {
-                                this.messageservice.add({
-                                    severity: 'error',
-                                    summary: 'Attachment Upload Failed',
-                                    detail: 'Repository was created but attachment failed. Use the paperclip icon to retry.'
-                                });
-                                this.resetNewRepoState();
-                            }
-                        });
+                this.managereposervice.uploadreference(this.repository, formData).subscribe({
+                    next: () => {
+                        this.messageservice.add({ severity: 'success', summary: 'Solution Saved Successfully', detail: 'Repository and attachment uploaded.' });
+                        this.resetNewRepoState();
                     },
                     error: () => {
-                        this.messageservice.add({
-                            severity: 'warn',
-                            summary: 'Repository Saved',
-                            detail: 'Repository was created but attachment could not be linked. Use the paperclip icon to attach.'
-                        });
+                        this.messageservice.add({ severity: 'error', summary: 'Attachment Upload Failed', detail: 'Repository was created. Use the paperclip icon to retry.' });
                         this.resetNewRepoState();
                     }
                 });
             },
             error: () => {
-                this.messageservice.add({
-                    severity: 'error',
-                    summary: 'Repository Creation Failed',
-                    detail: 'Please try again.'
-                });
+                this.messageservice.add({ severity: 'error', summary: 'Repository Creation Failed', detail: 'Please try again.' });
             }
         });
     }
@@ -1269,12 +1214,18 @@ export class AddSolutions implements OnInit {
         this.uploadcodeprocessdocdialog = false;
         this.isNewRepoAttachment = false;
         this.file = null;
-
-        // Restore form data so the user doesn't have to re-type everything
+        this.clearFileInput();
         if (this.pendingRepoData) {
             this.repoForm.patchValue(this.pendingRepoData);
         }
         this.createdialog = true;
+    }
+
+    /** Resets the native file input element so no previous filename is shown. */
+    private clearFileInput() {
+        if (this.fileInputRef?.nativeElement) {
+            this.fileInputRef.nativeElement.value = '';
+        }
     }
 
     onUpload(event: any) {
