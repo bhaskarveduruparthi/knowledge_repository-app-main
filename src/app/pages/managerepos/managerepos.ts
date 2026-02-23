@@ -1,6 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core'; // Removed ViewChild
+import { Component, OnInit, signal } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-// Removed Table, TableModule imports
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -50,7 +49,6 @@ interface ExportColumn {
     selector: 'app-managerepos',
     standalone: true,
     styles: `
-        /* --- Existing Styles --- */
         .custom-file-input {
             border: 1px solid #ced4da;
             border-radius: 6px;
@@ -75,23 +73,9 @@ interface ExportColumn {
             font-weight: 500;
         }
 
-        /*.card {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 20px;
-            color: #222;
-            display: flex;
-            flex-direction: column;
-        }*/
-
-        /* --- NEW CUSTOM TABLE STYLES --- */
         .custom-table-container {
             width: 100%;
-            overflow-x: auto; /* Horizontal scroll for small screens */
+            overflow-x: auto;
             margin-bottom: 1rem;
             border-radius: 8px;
         }
@@ -99,7 +83,7 @@ interface ExportColumn {
         .glass-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 75rem; /* Match previous tableStyle min-width */
+            min-width: 75rem;
             font-size: 0.95rem;
         }
 
@@ -110,6 +94,7 @@ interface ExportColumn {
             color: #11224E;
             border-bottom: 2px solid rgba(255, 255, 255, 0.4);
             white-space: nowrap;
+            background-color: #cce4f7;
         }
 
         .glass-table tbody td {
@@ -123,12 +108,10 @@ interface ExportColumn {
             transition: background-color 0.2s;
         }
 
-        /* Hover effect matching glass theme */
         .glass-table tbody tr:hover {
             background-color: rgba(255, 255, 255, 0.3);
         }
 
-        /* Checkbox styling */
         .glass-table input[type="checkbox"] {
             accent-color: #11224E;
             width: 16px;
@@ -136,7 +119,6 @@ interface ExportColumn {
             cursor: pointer;
         }
 
-        /* --- Form Styles --- */
         .responsive-form .custom-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -179,33 +161,32 @@ interface ExportColumn {
             margin-left: 5px;
         }
 
-        .glass-table thead th {
-    text-align: left;
-    padding: 1rem;
-    font-weight: bold;
-    color: #11224E;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    white-space: nowrap;
-    background-color: #cce4f7; /* Add your desired background color here */
-}
-
         .error {
             border: 1px solid red;
         }
 
-        .p-toolbar{
-      
+        .p-toolbar {
             box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        
-    }
+        }
 
-        .card{
+        .card {
             box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
+        }
+
+        .table-search-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-result-badge {
+            font-size: 0.85rem;
+            color: #555;
+            white-space: nowrap;
         }
     `,
     imports: [
         CommonModule,
-        // TableModule, // REMOVED
         FormsModule,
         ReactiveFormsModule,
         ButtonModule,
@@ -245,21 +226,41 @@ interface ExportColumn {
                 </ng-template>
             </p-toolbar>
 
-            <div class="flex items-center justify-between mb-3">
+            <!-- Header row: title + search bar -->
+            <div class="flex items-center justify-between mb-3" style="flex-wrap: wrap; gap: 0.75rem;">
                 <h5 class="m-0">Manage Solutions</h5>
-                <!--<p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onSearch($event)" placeholder="Search..." />
-                </p-iconfield>-->
+                <div class="table-search-bar">
+                    <p-iconfield>
+                        <p-inputicon styleClass="pi pi-search" />
+                        <input
+                            pInputText
+                            type="text"
+                            [value]="tableSearchTerm"
+                            (input)="onTableSearch($event)"
+                            placeholder="Search solutions..."
+                            style="min-width: 260px;" />
+                    </p-iconfield>
+                    <!-- Clear button: only visible during an active search -->
+                    <p-button
+                        *ngIf="isTableSearchMode"
+                        icon="pi pi-times"
+                        severity="secondary"
+                        [rounded]="true"
+                        (onClick)="clearTableSearch()"
+                        pTooltip="Clear search">
+                    </p-button>
+                    <!-- Result count shown while searching -->
+                    <span *ngIf="isTableSearchMode" class="search-result-badge">
+                        {{ totalitems }} result(s) for "{{ tableSearchTerm }}"
+                    </span>
+                </div>
             </div>
 
             <div class="custom-table-container">
                 <table class="glass-table">
                     <thead>
                         <tr>
-                            <th *ngIf="isadmin">
-                                Select
-                            </th>
+                            <th *ngIf="isadmin">Select</th>
                             <th *ngIf="customervalid">Customer Name</th>
                             <th>Domain</th>
                             <th>Sector</th>
@@ -277,15 +278,15 @@ interface ExportColumn {
                             <th>Business Group Head(BGH)</th>
                             <th>Status</th>
                             <th>By User</th>
-                            <th>Actions</th>
+                            <th *ngIf="isadmin">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let repo of repositories()" >
+                        <tr *ngFor="let repo of repositories()">
                             <td *ngIf="isadmin">
-                                <input type="checkbox" 
-                                    [checked]="isRepoSelected(repo)" 
-                                    (change)="onCheckboxChange(repo, $event)" 
+                                <input type="checkbox"
+                                    [checked]="isRepoSelected(repo)"
+                                    (change)="onCheckboxChange(repo, $event)"
                                     [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
                             </td>
                             <td *ngIf="customervalid" style="white-space: nowrap;">{{ repo.customer_name }}</td>
@@ -298,91 +299,89 @@ interface ExportColumn {
                             <td>{{ repo.customer_benefit }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                    
-            
-  <ng-container *ngIf="isAdmin; else normalUserBlock">
-    <p-button
-      label="Download"
-      icon="pi pi-download"
-      severity="primary"
-      (click)="download_ref(repo, repo.id)"
-      [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-    </p-button>
-  </ng-container>
+                                    <ng-container *ngIf="isAdmin; else normalUserBlock">
+                                        <p-button
+                                            label="Download"
+                                            icon="pi pi-download"
+                                            severity="primary"
+                                            (click)="download_ref(repo, repo.id)"
+                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                        </p-button>
+                                    </ng-container>
 
-  <ng-template #normalUserBlock>
-    <ng-container *ngIf="repo.download_approved; else requestBlock">
-      <p-button
-        label="Download"
-        icon="pi pi-download"
-        severity="primary"
-        (click)="download_ref(repo, repo.id)"
-        [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-      </p-button>
-    </ng-container>
+                                    <ng-template #normalUserBlock>
+                                        <ng-container *ngIf="repo.download_approved; else requestBlock">
+                                            <p-button
+                                                label="Download"
+                                                icon="pi pi-download"
+                                                severity="primary"
+                                                (click)="download_ref(repo, repo.id)"
+                                                [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                            </p-button>
+                                        </ng-container>
 
-    <ng-template #requestBlock>
-      <p-button
-        label="Request Download"
-        icon="pi pi-send"
-        severity="help"
-        (click)="openDownloadRequestDialog(repo)"
-        [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-      </p-button>
-    </ng-template>
-  </ng-template>
+                                        <ng-template #requestBlock>
+                                            <p-button
+                                                label="Request Download"
+                                                icon="pi pi-send"
+                                                severity="help"
+                                                (click)="openDownloadRequestDialog(repo)"
+                                                [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                            </p-button>
+                                        </ng-template>
+                                    </ng-template>
                                 </div>
-
-  
-
-</td>
-
-
+                            </td>
                             <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
                             <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
-                             <td style="white-space: nowrap; text-align: center">
-  <p-tag
-    [value]="repo.Approval_status"
-    [severity]="getApprovalSeverity(repo.Approval_status)"
-    [rounded]="true"
-  ></p-tag>
-</td>
-
                             <td style="white-space: nowrap; text-align: center">
-  <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">
-    Solution with {{ repo.username }}
-  </ng-container>
-  <ng-template #validated>
-    Validated by {{ repo.Approver }}
-  </ng-template>
-</td>
-
+                                <p-tag
+                                    [value]="repo.Approval_status"
+                                    [severity]="getApprovalSeverity(repo.Approval_status)"
+                                    [rounded]="true">
+                                </p-tag>
+                            </td>
+                            <td style="white-space: nowrap; text-align: center">
+                                <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">
+                                    Solution with {{ repo.username }}
+                                </ng-container>
+                                <ng-template #validated>
+                                    Validated by {{ repo.Approver }}
+                                </ng-template>
+                            </td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                    
-                                    
-                                   
                                     <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="attachvalid" (click)="upload_ref(repo)"></button>
-                                    <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
+                                    <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" *ngIf="isadmin" (click)="delete_Repo(repo)"></button>
                                 </div>
                             </td>
                         </tr>
                         <tr *ngIf="repositories().length === 0 && !loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">No Repositories found.</td>
+                            <td colspan="19" style="text-align:center; padding: 2rem;">No Repositories found.</td>
                         </tr>
-                         <tr *ngIf="loading">
-                            <td colspan="17" style="text-align:center; padding: 2rem;">Loading Data...</td>
+                        <tr *ngIf="loading">
+                            <td colspan="19" style="text-align:center; padding: 2rem;">Loading Data...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="10" (onPageChange)="onPageChange($event)"></p-paginator>
-        
+
+            <p-paginator
+                [totalRecords]="totalitems"
+                [first]="first"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
+                [showCurrentPageReport]="true"
+                [rows]="10"
+                (onPageChange)="onPageChange($event)">
+            </p-paginator>
         </div>
+
+        <!-- ── Dialogs (all unchanged) ─────────────────────────────────────── -->
+
         <p-dialog [(visible)]="uploaddialog" header="Upload Solutions" [modal]="true" [style]="{ width: '450px' }">
             <div class="flex align-items-c justify-content-c">
                 <div>
@@ -470,32 +469,32 @@ interface ExportColumn {
                         </div>
                         <div class="form-field">
                             <label class="required" for="domain">Domain</label>
-                            <p-autoComplete 
-            inputId="domain" 
-            formControlName="domain" 
-            [suggestions]="filteredDomains" 
-            (completeMethod)="filterDomain($event)" 
-            forceSelection="true" 
-            dropdown="true" 
-            minLength="1" 
-            placeholder="Select Domain"
-            (onSelect)="onDomainSelect($event)">
-          </p-autoComplete>
+                            <p-autoComplete
+                                inputId="domain"
+                                formControlName="domain"
+                                [suggestions]="filteredDomains"
+                                (completeMethod)="filterDomain($event)"
+                                forceSelection="true"
+                                dropdown="true"
+                                minLength="1"
+                                placeholder="Select Domain"
+                                (onSelect)="onDomainSelect($event)">
+                            </p-autoComplete>
                             <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
                         </div>
                         <div class="form-field">
                             <label class="required" for="sector">Sector</label>
-                            <p-autoComplete 
-            inputId="sector" 
-            formControlName="sector" 
-            [suggestions]="filteredSectors" 
-            (completeMethod)="filterSector($event)" 
-            forceSelection="true" 
-            dropdown="true" 
-            minLength="1" 
-            placeholder="Select Sector"
-            [disabled]="!selectedDomain">
-          </p-autoComplete>
+                            <p-autoComplete
+                                inputId="sector"
+                                formControlName="sector"
+                                [suggestions]="filteredSectors"
+                                (completeMethod)="filterSector($event)"
+                                forceSelection="true"
+                                dropdown="true"
+                                minLength="1"
+                                placeholder="Select Sector"
+                                [disabled]="!selectedDomain">
+                            </p-autoComplete>
                             <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
                         </div>
                         <div class="form-field">
@@ -523,7 +522,6 @@ interface ExportColumn {
                             <input id="customer_benefit" pInputText formControlName="customer_benefit" />
                             <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
                         </div>
-                        
                     </div>
                 </form>
             </ng-template>
@@ -534,14 +532,14 @@ interface ExportColumn {
         </p-dialog>
 
         <p-dialog [(visible)]="editrepodialog" header="Create Repository" [modal]="true" [style]="{ width: '700px' }" [resizable]="false">
-             <ng-template pTemplate="content">
+            <ng-template pTemplate="content">
                 <form [formGroup]="repoForm" (ngSubmit)="onSubmit()" class="responsive-form">
                     <div class="form-grid">
-                       <div class="form-field">
+                        <div class="form-field">
                             <label for="customer_name">Customer Name</label>
                             <input id="customer_name" pInputText formControlName="customer_name" />
                         </div>
-                        </div>
+                    </div>
                     <div style="margin-top:24px;">
                         <button pButton type="submit" label="Submit" [disabled]="repoForm.invalid"></button>
                     </div>
@@ -576,39 +574,24 @@ interface ExportColumn {
         </p-dialog>
 
         <p-dialog
-  [(visible)]="downloadRequestDialog"
-  header="Request Download Access"
-  [modal]="true"
-  [style]="{ width: '450px' }">
-
-  <form [formGroup]="downloadRequestForm">
-    <label class="required" for="justification">Business Justification</label>
-    <textarea
-      id="justification"
-      pInputTextarea
-      rows="3"
-      formControlName="justification">
-    </textarea>
-
-    <p-message
-      *ngIf="downloadRequestForm.controls['justification'].errors?.['required'] &&
-             downloadRequestForm.controls['justification'].touched"
-      severity="error"
-      text="Business Justification is required">
-    </p-message>
-  </form>
-
-  <ng-template pTemplate="footer">
-    <button pButton type="button" class="p-button-text"
-            label="Cancel"
-            (click)="downloadRequestDialog = false"></button>
-    <button pButton type="button" class="p-button-text"
-            label="Send Request"
-            (click)="submitDownloadRequest()"
-            [disabled]="downloadRequestForm.invalid"></button>
-  </ng-template>
-</p-dialog>
-
+            [(visible)]="downloadRequestDialog"
+            header="Request Download Access"
+            [modal]="true"
+            [style]="{ width: '450px' }">
+            <form [formGroup]="downloadRequestForm">
+                <label class="required" for="justification">Business Justification</label>
+                <textarea id="justification" pInputTextarea rows="3" formControlName="justification"></textarea>
+                <p-message
+                    *ngIf="downloadRequestForm.controls['justification'].errors?.['required'] && downloadRequestForm.controls['justification'].touched"
+                    severity="error"
+                    text="Business Justification is required">
+                </p-message>
+            </form>
+            <ng-template pTemplate="footer">
+                <button pButton type="button" class="p-button-text" label="Cancel" (click)="downloadRequestDialog = false"></button>
+                <button pButton type="button" class="p-button-text" label="Send Request" (click)="submitDownloadRequest()" [disabled]="downloadRequestForm.invalid"></button>
+            </ng-template>
+        </p-dialog>
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
@@ -646,55 +629,60 @@ export class ManageRepos implements OnInit {
     sendforapproval: boolean = false;
     sendforapprovaldialog: boolean = false;
     deleteRepoDialog: boolean = false;
-    rejectdialog:boolean = false;
+    rejectdialog: boolean = false;
     domainOptions: string[] = [];
-  sectorOptions: { [key: string]: string[] } = {};
-  filteredDomains: string[] = [];
-  filteredSectors: string[] = [];
-  selectedDomain: string = '';
-
+    sectorOptions: { [key: string]: string[] } = {};
+    filteredDomains: string[] = [];
+    filteredSectors: string[] = [];
+    selectedDomain: string = '';
     file: any;
-    
+
+    // ── Table search properties ──────────────────────────────────────────────
+    tableSearchTerm: string = '';
+    isTableSearchMode: boolean = false;
+    private _tableSearchTimeout: any = null;
+    // ────────────────────────────────────────────────────────────────────────
+
     moduleOptions = [
         'FI: Financial Accounting',
-'CO: Controlling',
-'MM: Materials Management',
-'SD: Sales and Distribution',
-'HCM: Human Capital Management',
-'PP: Production Planning',
-'PM: Plant Maintenance',
-'QM: Quality Management',
-'PS: Project System',
-'FSCM: Financial Supply Chain Management',
-'SRM: Supplier Relationship Management',
-'CRM: Customer Relationship Management',
-'LE: Logistics Execution',
-'WM: Warehouse Management',
-'EWM: Extended Warehouse Management',
-'TRM: Treasury and Risk Management',
-'FM: Funds Management',
-'IM: Investment Management',
-'PLM: Product Lifecycle Management',
-'BI/BW: Business Intelligence / Business Warehouse',
-'GRC: Governance, Risk, and Compliance',
-'MDM: Master Data Management',
-'EHS: Environment, Health, and Safety',
-'SEM: Strategic Enterprise Management',
-'BASIS: SAP Basis (technical administration)',
-'ABAP: Advanced Business Application Programming (development)',
-'PI/XI: Process Integration / Exchange Infrastructure (middleware)',
-'EP: Enterprise Portal',
-'SOLMAN: SAP Solution Manager',
-'Fiori: SAP Fiori (UX and apps)',
-'FLM: File Lifecycle Management',
-'CPI: Cloud Platform Integration',
-'BTP: Business Technology Platform',
-'AI: Artificial Intelligence',
-'Cloud ALM: Cloud Application Lifecycle Management',
-'API: Application Programming Interface',
-'SAC: SAP Analytics Cloud',
-'Python: Python Programming Language',
-'Salesforce: Salesforce Customer 360 Platform'
+        'CO: Controlling',
+        'MM: Materials Management',
+        'SD: Sales and Distribution',
+        'HCM: Human Capital Management',
+        'PP: Production Planning',
+        'PM: Plant Maintenance',
+        'QM: Quality Management',
+        'PS: Project System',
+        'FSCM: Financial Supply Chain Management',
+        'SRM: Supplier Relationship Management',
+        'CRM: Customer Relationship Management',
+        'LE: Logistics Execution',
+        'WM: Warehouse Management',
+        'EWM: Extended Warehouse Management',
+        'TRM: Treasury and Risk Management',
+        'FM: Funds Management',
+        'IM: Investment Management',
+        'PLM: Product Lifecycle Management',
+        'BI/BW: Business Intelligence / Business Warehouse',
+        'GRC: Governance, Risk, and Compliance',
+        'MDM: Master Data Management',
+        'EHS: Environment, Health, and Safety',
+        'SEM: Strategic Enterprise Management',
+        'BASIS: SAP Basis (technical administration)',
+        'ABAP: Advanced Business Application Programming (development)',
+        'PI/XI: Process Integration / Exchange Infrastructure (middleware)',
+        'EP: Enterprise Portal',
+        'SOLMAN: SAP Solution Manager',
+        'Fiori: SAP Fiori (UX and apps)',
+        'FLM: File Lifecycle Management',
+        'CPI: Cloud Platform Integration',
+        'BTP: Business Technology Platform',
+        'AI: Artificial Intelligence',
+        'Cloud ALM: Cloud Application Lifecycle Management',
+        'API: Application Programming Interface',
+        'SAC: SAP Analytics Cloud',
+        'Python: Python Programming Language',
+        'Salesforce: Salesforce Customer 360 Platform'
     ];
 
     filteredModules: string[] = [];
@@ -737,8 +725,6 @@ export class ManageRepos implements OnInit {
             standard_custom: new FormControl('', Validators.required),
             technical_details: new FormControl('', Validators.required),
             customer_benefit: new FormControl('', Validators.required),
-            
-
         });
         this.approvalForm = new FormGroup({
             business_justification: new FormControl('', [
@@ -748,14 +734,13 @@ export class ManageRepos implements OnInit {
             ])
         });
         this.messages = [];
-
         this.downloadRequestForm = new FormGroup({
-    justification: new FormControl('', [
-      Validators.required,
-      Validators.minLength(10),
-      Validators.maxLength(250)
-    ])
-  });
+            justification: new FormControl('', [
+                Validators.required,
+                Validators.minLength(10),
+                Validators.maxLength(250)
+            ])
+        });
     }
 
     constructor(
@@ -772,14 +757,11 @@ export class ManageRepos implements OnInit {
                 this.customervalid = true;
                 this.downloadvalid = true;
                 this.sendforapproval = false;
-                this.attachvalid = false
-            }
-            else if (x?.type == 'manager') {
+                this.attachvalid = false;
+            } else if (x?.type == 'manager') {
                 this.isvalid = true;
                 this.isadmin = false;
-                
-                
-                this.attachvalid = false
+                this.attachvalid = false;
             } else {
                 this.isvalid = false;
                 this.isadmin = false;
@@ -791,60 +773,115 @@ export class ManageRepos implements OnInit {
         });
     }
 
-
+    // ── Existing onSearch — untouched, used by other components ─────────────
     onSearch(event: Event) {
         const value = (event.target as HTMLInputElement).value.toLowerCase();
         this.searchTerm = value;
-        this.first = 0; // Reset to first page on search
+        this.first = 0;
 
         if (!value) {
             this.filteredRepoList = this.repositories();
         } else {
-            this.filteredRepoList = this.repositories().filter(repository => 
-                repository.customer_name?.includes(value) || 
-                repository.module_name?.includes(value) || 
-                repository.domain?.includes(value) || 
+            this.filteredRepoList = this.repositories().filter(repository =>
+                repository.customer_name?.includes(value) ||
+                repository.module_name?.includes(value) ||
+                repository.domain?.includes(value) ||
                 repository.sector?.includes(value)
             );
         }
     }
 
+    // ── NEW: Table search methods ────────────────────────────────────────────
+
+    /** Called on every keystroke in the search input. Debounces 400 ms. */
+    onTableSearch(event: Event) {
+        const value = (event.target as HTMLInputElement).value.trim();
+        this.tableSearchTerm = value;
+
+        if (!value) {
+            this.clearTableSearch();
+            return;
+        }
+
+        clearTimeout(this._tableSearchTimeout);
+        this._tableSearchTimeout = setTimeout(() => {
+            this.doTableSearch(1);
+        }, 400);
+    }
+
+    /** Calls the /table-search API with the current term and page. */
+    doTableSearch(page: number) {
+        if (!this.tableSearchTerm) return;
+        this.loading = true;
+        this.isTableSearchMode = true;
+        this.first = (page - 1) * 10;
+
+        this.managereposervice.tableSearch(this.tableSearchTerm, page).subscribe({
+            next: (res) => {
+                this.repositories.set(res.items);
+                this.totalitems = res.total;
+                this.loading = false;
+            },
+            error: () => {
+                this.repositories.set([]);
+                this.loading = false;
+                this.messageservice.add({
+                    severity: 'error',
+                    summary: 'Search failed',
+                    detail: 'Please try again'
+                });
+            }
+        });
+    }
+
+    /** Clears the search and restores normal paginated browse. */
+    clearTableSearch() {
+        this.tableSearchTerm = '';
+        this.isTableSearchMode = false;
+        this.first = 0;
+        this.CurrentPage = 1;
+        localStorage.setItem('CurrentPage', '1');
+        this.loadDemoData(1);
+        this.form_records();
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+
     openDownloadRequestDialog(repo: Repository) {
-  if (repo.id == null) return;
-  this.selectedDownloadRepo = repo;
-  this.downloadRequestDialog = true;
-}
+        if (repo.id == null) return;
+        this.selectedDownloadRepo = repo;
+        this.downloadRequestDialog = true;
+    }
 
+    submitDownloadRequest() {
+        if (this.downloadRequestForm.invalid) {
+            this.downloadRequestForm.markAllAsTouched();
+            return;
+        }
 
-submitDownloadRequest() {
-  if (this.downloadRequestForm.invalid) {
-    this.downloadRequestForm.markAllAsTouched();
-    return;
-  }
+        const justification = this.downloadRequestForm.get('justification')?.value;
 
-  const justification = this.downloadRequestForm.get('justification')?.value;
-
-  this.managereposervice
-    .requestDownload(this.selectedDownloadRepo.id, justification)
-    .subscribe({
-      next: _ => {
-        this.messageservice.add({
-          severity: 'success',
-          summary: 'Download request submitted',
-          detail: 'Waiting for Superadmin approval'
-        });
-        this.downloadRequestDialog = false;
-        this.downloadRequestForm.reset();
-      },
-      error: _ => {
-        this.messageservice.add({
-          severity: 'error',
-          summary: 'Failed to submit request',
-          detail: 'Please try again later'
-        });
-      }
-    });
-}
+        this.managereposervice
+            .requestDownload(this.selectedDownloadRepo.id, justification)
+            .subscribe({
+                next: _ => {
+                    this.messageservice.add({
+                        severity: 'success',
+                        summary: 'Download request submitted',
+                        detail: 'Waiting for Superadmin approval'
+                    });
+                    this.downloadRequestDialog = false;
+                    this.downloadRequestForm.reset();
+                },
+                error: _ => {
+                    this.messageservice.add({
+                        severity: 'error',
+                        summary: 'Failed to submit request',
+                        detail: 'Please try again later'
+                    });
+                }
+            });
+    }
 
     downloadWorkbook(id: number, filename: string) {
         this.managereposervice.downloadWorkbook(id).subscribe(
@@ -857,32 +894,26 @@ submitDownloadRequest() {
                 window.URL.revokeObjectURL(url);
             },
             (error) => {
-                this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' })
+                this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' });
             }
         );
     }
 
     openAttachment(attachmentId: number) {
-    // use your actual Flask endpoint base URL as needed
-    const url = `http://127.0.0.1:5001/repos/refview/${attachmentId}`;
-    window.open(url, '_blank');
-  }
-
-  
+        const url = `http://127.0.0.1:5001/repos/refview/${attachmentId}`;
+        window.open(url, '_blank');
+    }
 
     getApprovalSeverity(status: string | undefined): string {
-  const safeStatus = status ?? 'Not Approved';
-  
-  switch(safeStatus) {
-    case 'Approved': return 'success';     // Green tag
-    case 'Rejected': return 'danger';      // Red tag
-    case 'Sent for Approval': return 'warn';  // Orange/yellow tag
-    case 'Not Approved': return 'info';    // Blue tag (default)
-    default: return 'info';
-  }
-}
-
-
+        const safeStatus = status ?? 'Not Approved';
+        switch (safeStatus) {
+            case 'Approved': return 'success';
+            case 'Rejected': return 'danger';
+            case 'Sent for Approval': return 'warn';
+            case 'Not Approved': return 'info';
+            default: return 'info';
+        }
+    }
 
     filterModule(event: any) {
         const query = event.query.toLowerCase();
@@ -890,7 +921,6 @@ submitDownloadRequest() {
             option.toLowerCase().includes(query)
         );
     }
-
 
     loadDemoData(page: number) {
         this.managereposervice.getallrepos(page).subscribe((data: any) => {
@@ -918,20 +948,12 @@ submitDownloadRequest() {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    /* NOTE: Because you removed the PrimeNG Table, 'dt.filterGlobal' is no longer available.
-       You must implement a custom pipe or backend filter to handle search. 
-       I have commented this out to prevent errors.
-    */
-    // onGlobalFilter(table: Table, event: Event) {
-    //     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    // }
-
     onFileSelected(event: any) {
         const file: File = event.target.files[0];
         if (file && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             this.selectedFile = file;
         } else {
-            this.messageservice.add({ severity: 'error', summary: 'Please Select a Valid .xlsx Excel File', detail: 'Via UploadService' })
+            this.messageservice.add({ severity: 'error', summary: 'Please Select a Valid .xlsx Excel File', detail: 'Via UploadService' });
             this.selectedFile = null;
         }
     }
@@ -963,13 +985,11 @@ submitDownloadRequest() {
                 this.messageservice.add({ severity: 'error', summary: 'Error Found, Failed Sending for Approval', detail: 'Via ApprovalService' });
             }
         });
-
     }
 
     delete_Repo(repository: Repository) {
         this.deleteRepoDialog = true;
         this.repository = { ...repository };
-
     }
 
     reject_dialog(repository: Repository) {
@@ -978,7 +998,6 @@ submitDownloadRequest() {
     }
 
     upload_ref(repository: Repository) {
-
         this.repository = { ...repository };
         this.uploadcodeprocessdocdialog = true;
         console.log(this.repository);
@@ -991,7 +1010,6 @@ submitDownloadRequest() {
 
     editRepo(repository: Repository) {
         this.repository = { ...repository };
-
         this.editrepodialog = true;
     }
 
@@ -1035,13 +1053,10 @@ submitDownloadRequest() {
                 this.reloadPage();
             },
             error: (err) => {
-                this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' })
+                this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' });
             }
         });
     }
-
-   
-
 
     isRepoSelected(repo: Repository): boolean {
         return this.selectedrepositories.some((r) => r.id === repo.id);
@@ -1050,7 +1065,6 @@ submitDownloadRequest() {
     exportCSV() {
         if (this.selectedrepositories.length === 0) return;
 
-        // Prepare worksheet data as array of objects
         const worksheetData = this.selectedrepositories.map((repo) => {
             const row: any = {};
             this.exportColumns.forEach((col) => {
@@ -1059,17 +1073,13 @@ submitDownloadRequest() {
             return row;
         });
 
-        // Create worksheet and workbook
         const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(worksheetData);
         const workbook: XLSX.WorkBook = {
             Sheets: { Repositories: worksheet },
             SheetNames: ['Repositories']
         };
 
-        // Generate Excel file buffer
         const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-        // Save to file using FileSaver
         const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
         saveAs(data, 'selected_repositories.xlsx');
         this.messageservice.add({ severity: 'success', summary: 'Repository has been Exported', detail: 'Via ExportService' });
@@ -1092,8 +1102,6 @@ submitDownloadRequest() {
                     this.loadDemoData(this.page);
                     this.createdialog = false;
                     this.repoForm.reset();
-
-
                 },
                 error: _ => {
                     this.messageservice.add({ severity: 'error', summary: 'Repository Creation is Failed', detail: 'Via CreateService' });
@@ -1107,40 +1115,38 @@ submitDownloadRequest() {
     onUpload(event: any) {
         this.file = event.target.files[0];
         console.log(this.file);
-
     }
 
     submitData(repository: Repository) {
         let formData = new FormData();
-
         formData.set("file", this.file);
         this.managereposervice.uploadreference(this.repository, formData).subscribe((data: any) => {
-
             this.uploadcodeprocessdocdialog = false;
-
-            this.messageservice.add({ severity: 'success', summary: 'Uploaded File Successfully', detail: 'Via UploadService' })
-
+            this.messageservice.add({ severity: 'success', summary: 'Uploaded File Successfully', detail: 'Via UploadService' });
         }, (err) => {
             if (this.repository.attach_code_or_document == 'Not Attached') {
                 this.messageservice.add({ severity: 'error', summary: ' No Uploaded File Found', detail: 'Via UploadService' });
             }
-        })
-
+        });
     }
 
-
+    /** Page change — routes to search API or normal API depending on mode. */
     onPageChange(event: any) {
         this.CurrentPage = event.page + 1;
-        this.loadDemoData(this.CurrentPage);
-        localStorage.setItem('CurrentPage', this.CurrentPage.toString());
+        this.first = event.first;
+
+        if (this.isTableSearchMode) {
+            // Stay in search mode: fetch next page of search results
+            this.doTableSearch(this.CurrentPage);
+        } else {
+            this.loadDemoData(this.CurrentPage);
+            localStorage.setItem('CurrentPage', this.CurrentPage.toString());
+        }
     }
 
     cancelEdit() {
         this.repoForm.reset();
     }
-
-
-    
 
     upload_dialog() {
         this.uploaddialog = true;
@@ -1157,16 +1163,15 @@ submitDownloadRequest() {
     }
 
     formatDate(dateString?: string): string {
-    if (!dateString) {
-        return ""; // or any default fallback
+        if (!dateString) {
+            return "";
+        }
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
     }
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-}
-
 
     Repoapproval(repository: Repository) {
         this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
@@ -1192,19 +1197,17 @@ submitDownloadRequest() {
     }
 
     download_ref(repository: Repository, id: any) {
-  this.repository = { ...repository };
+        this.repository = { ...repository };
 
-  const raw = localStorage.getItem('token');          // e.g. '{"access_token":"eyJhbGciOi..."}'
-  if (!raw) { return; }
+        const raw = localStorage.getItem('token');
+        if (!raw) { return; }
 
-  const parsed = JSON.parse(raw);                     // { access_token: "eyJhbGciOi..." }
-  const jwt = parsed.access_token;                    // <-- actual JWT string
+        const parsed = JSON.parse(raw);
+        const jwt = parsed.access_token;
 
-  const url = `http://10.6.102.245:5002/repos/refdownload/${id}?access_token=${jwt}`;
-  window.open(url, '_blank');
-}
-
-
+        const url = `http://10.6.102.245:5002/repos/refdownload/${id}?access_token=${jwt}`;
+        window.open(url, '_blank');
+    }
 
     delete_repo(repository: Repository): void {
         this.managereposervice.delete_repo(this.repository).subscribe(
@@ -1216,81 +1219,72 @@ submitDownloadRequest() {
     }
 
     loadDomainsAndSectors() {
-    // Extract unique domains and their sectors from Excel data [file:2]
-    const excelData = [
-      { domain: 'Technology', sectors: ['Software', 'Hardware', 'IT Services', 'AI Data Science'] },
-      { domain: 'Healthcare', sectors: ['Hospitals', 'Pharmaceuticals', 'Biotechnology', 'Medical Devices'] },
-      { domain: 'Finance', sectors: ['Banking', 'Insurance', 'Investment', 'FinTech'] },
-      { domain: 'Education', sectors: ['Schools', 'Universities', 'EdTech', 'Vocational Training'] },
-      { domain: 'Manufacturing', sectors: ['Automotive', 'Electronics', 'Textiles', 'Machinery'] },
-      { domain: 'Energy', sectors: ['Oil Gas', 'Renewables', 'Utilities', 'Mining'] },
-      { domain: 'Retail', sectors: ['E-commerce', 'FMCG', 'Luxury Goods', 'Consumer Electronics'] },
-      { domain: 'Agriculture', sectors: ['Farming', 'AgriTech', 'Food Processing', 'Dairy'] },
-      { domain: 'Transport', sectors: ['Aviation', 'Shipping', 'Railways', 'Logistics'] },
-      { domain: 'Media Entertainment', sectors: ['Film', 'Television', 'Gaming', 'Publishing'] },
-      { domain: 'Government', sectors: ['Public Sector Defense', 'Administration', 'Infrastructure', 'Policy'] },
-      { domain: 'Telecommunications', sectors: ['Mobile Networks', 'Broadband', 'Satellite', 'IoT'] },
-      { domain: 'Real Estate', sectors: ['Residential', 'Commercial', 'Industrial', 'Smart Cities'] },
-      { domain: 'Hospitality', sectors: ['Hotels', 'Restaurants', 'Travel Agencies', 'Tourism'] },
-      { domain: 'Legal', sectors: ['Law Firms', 'Corporate Law', 'Intellectual Property', 'Compliance'] },
-      { domain: 'Environmental Services', sectors: ['Waste Management', 'Recycling', 'Water Treatment', 'Sustainability'] },
-      { domain: 'Consulting', sectors: ['Construction Civil Engineering', 'Urban Development', 'Smart Infrastructure', 'Housing Projects'] },
-      { domain: 'Fashion', sectors: ['Apparel', 'Footwear', 'Accessories', 'Luxury Brands'] },
-      { domain: 'Sports', sectors: ['Professional Teams', 'Sportswear', 'Events Management', 'Fitness'] },
-      { domain: 'Food Beverage', sectors: ['Restaurants', 'Packaged Foods', 'Beverages', 'Nutrition'] },
-      { domain: 'Aerospace Defense', sectors: ['Aviation', 'Commercial Airlines', 'Space Exploration', 'Drones'] },
-      { domain: 'Chemicals', sectors: ['Industrial Chemicals', 'Petrochemicals', 'Agrochemicals', 'Specialty Chemicals'] },
-      { domain: 'Logistics', sectors: ['Supply Chain Warehousing', 'Distribution', 'Freight Forwarding', 'Cold Chain'] },
-      { domain: 'Non-Profit', sectors: ['NGOs Charities', 'Foundations', 'Social Work', 'Community Development'] },
-      { domain: 'Cybersecurity', sectors: ['Network Security', 'Data Protection', 'Cloud Security', 'Risk Management'] },
-      { domain: 'Human Resources', sectors: ['Recruitment', 'Training', 'Payroll', 'Employee Engagement'] },
-      { domain: 'Art Culture', sectors: ['Museums', 'Performing Arts', 'Heritage Conservation', 'Design'] }
-    ];
+        const excelData = [
+            { domain: 'Technology', sectors: ['Software', 'Hardware', 'IT Services', 'AI Data Science'] },
+            { domain: 'Healthcare', sectors: ['Hospitals', 'Pharmaceuticals', 'Biotechnology', 'Medical Devices'] },
+            { domain: 'Finance', sectors: ['Banking', 'Insurance', 'Investment', 'FinTech'] },
+            { domain: 'Education', sectors: ['Schools', 'Universities', 'EdTech', 'Vocational Training'] },
+            { domain: 'Manufacturing', sectors: ['Automotive', 'Electronics', 'Textiles', 'Machinery'] },
+            { domain: 'Energy', sectors: ['Oil Gas', 'Renewables', 'Utilities', 'Mining'] },
+            { domain: 'Retail', sectors: ['E-commerce', 'FMCG', 'Luxury Goods', 'Consumer Electronics'] },
+            { domain: 'Agriculture', sectors: ['Farming', 'AgriTech', 'Food Processing', 'Dairy'] },
+            { domain: 'Transport', sectors: ['Aviation', 'Shipping', 'Railways', 'Logistics'] },
+            { domain: 'Media Entertainment', sectors: ['Film', 'Television', 'Gaming', 'Publishing'] },
+            { domain: 'Government', sectors: ['Public Sector Defense', 'Administration', 'Infrastructure', 'Policy'] },
+            { domain: 'Telecommunications', sectors: ['Mobile Networks', 'Broadband', 'Satellite', 'IoT'] },
+            { domain: 'Real Estate', sectors: ['Residential', 'Commercial', 'Industrial', 'Smart Cities'] },
+            { domain: 'Hospitality', sectors: ['Hotels', 'Restaurants', 'Travel Agencies', 'Tourism'] },
+            { domain: 'Legal', sectors: ['Law Firms', 'Corporate Law', 'Intellectual Property', 'Compliance'] },
+            { domain: 'Environmental Services', sectors: ['Waste Management', 'Recycling', 'Water Treatment', 'Sustainability'] },
+            { domain: 'Consulting', sectors: ['Construction Civil Engineering', 'Urban Development', 'Smart Infrastructure', 'Housing Projects'] },
+            { domain: 'Fashion', sectors: ['Apparel', 'Footwear', 'Accessories', 'Luxury Brands'] },
+            { domain: 'Sports', sectors: ['Professional Teams', 'Sportswear', 'Events Management', 'Fitness'] },
+            { domain: 'Food Beverage', sectors: ['Restaurants', 'Packaged Foods', 'Beverages', 'Nutrition'] },
+            { domain: 'Aerospace Defense', sectors: ['Aviation', 'Commercial Airlines', 'Space Exploration', 'Drones'] },
+            { domain: 'Chemicals', sectors: ['Industrial Chemicals', 'Petrochemicals', 'Agrochemicals', 'Specialty Chemicals'] },
+            { domain: 'Logistics', sectors: ['Supply Chain Warehousing', 'Distribution', 'Freight Forwarding', 'Cold Chain'] },
+            { domain: 'Non-Profit', sectors: ['NGOs Charities', 'Foundations', 'Social Work', 'Community Development'] },
+            { domain: 'Cybersecurity', sectors: ['Network Security', 'Data Protection', 'Cloud Security', 'Risk Management'] },
+            { domain: 'Human Resources', sectors: ['Recruitment', 'Training', 'Payroll', 'Employee Engagement'] },
+            { domain: 'Art Culture', sectors: ['Museums', 'Performing Arts', 'Heritage Conservation', 'Design'] }
+        ];
 
-    // Populate domains and sectors
-    this.domainOptions = [...new Set(excelData.map(item => item.domain))];
-    excelData.forEach(item => {
-      this.sectorOptions[item.domain] = item.sectors;
-    });
-  }
-
-  // Domain autocomplete filter
-  filterDomain(event: any) {
-    const query = event.query.toLowerCase();
-    this.filteredDomains = this.domainOptions.filter(option => 
-      option.toLowerCase().includes(query)
-    );
-  }
-
-  // Update form controls to watch domain changes
-  ngAfterViewInit() {
-    // Watch domain changes to update sector options
-    this.repoForm.get('domain')?.valueChanges.subscribe(domain => {
-      this.selectedDomain = domain || '';
-      this.filteredSectors = [];
-      this.repoForm.patchValue({ sector: '' });
-      if (domain && this.sectorOptions[domain]) {
-        this.filteredSectors = this.sectorOptions[domain];
-      }
-    });
-  }
-
-  // Sector autocomplete filter
-  filterSector(event: any) {
-    const query = event.query.toLowerCase();
-    if (this.selectedDomain && this.sectorOptions[this.selectedDomain]) {
-      this.filteredSectors = this.sectorOptions[this.selectedDomain].filter(option => 
-        option.toLowerCase().includes(query)
-      );
+        this.domainOptions = [...new Set(excelData.map(item => item.domain))];
+        excelData.forEach(item => {
+            this.sectorOptions[item.domain] = item.sectors;
+        });
     }
-  }
 
-  // Add this method to handle domain selection
-onDomainSelect(event: any) {
-  this.selectedDomain = event.value;
-  this.repoForm.patchValue({ sector: '' });
-  this.filteredSectors = this.sectorOptions[this.selectedDomain] || [];
-}
+    filterDomain(event: any) {
+        const query = event.query.toLowerCase();
+        this.filteredDomains = this.domainOptions.filter(option =>
+            option.toLowerCase().includes(query)
+        );
+    }
 
+    ngAfterViewInit() {
+        this.repoForm.get('domain')?.valueChanges.subscribe(domain => {
+            this.selectedDomain = domain || '';
+            this.filteredSectors = [];
+            this.repoForm.patchValue({ sector: '' });
+            if (domain && this.sectorOptions[domain]) {
+                this.filteredSectors = this.sectorOptions[domain];
+            }
+        });
+    }
 
+    filterSector(event: any) {
+        const query = event.query.toLowerCase();
+        if (this.selectedDomain && this.sectorOptions[this.selectedDomain]) {
+            this.filteredSectors = this.sectorOptions[this.selectedDomain].filter(option =>
+                option.toLowerCase().includes(query)
+            );
+        }
+    }
+
+    onDomainSelect(event: any) {
+        this.selectedDomain = event.value;
+        this.repoForm.patchValue({ sector: '' });
+        this.filteredSectors = this.sectorOptions[this.selectedDomain] || [];
+    }
 }

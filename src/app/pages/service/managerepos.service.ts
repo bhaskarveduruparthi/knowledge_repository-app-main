@@ -71,29 +71,34 @@ export class ManageReposService {
     this.url = `${this._url.getApiUrl()}`;
   }
 
-  // ─── HOME PAGE (public — no JWT needed) ─────────────────────────────────────
+  // ─── HOME PAGE ───────────────────────────────────────────────────────────────
 
-  /**
-   * Loads all approved repositories for the Home page on initial render.
-   * Calls the public GET /repos/all-approved endpoint (no JWT required).
-   */
   getAllRepositories(): Observable<Repository[]> {
     return this.http.get<Repository[]>(`${this.url}repos/all-approved`);
   }
 
-  /**
-   * Searches approved repositories by filter + free-text query.
-   * Calls the public GET /repos/search endpoint (no JWT required).
-   *
-   * @param filter  'Any' | 'Domain' | 'Module' | 'Customer Name' | 'Sector'
-   * @param query   Non-empty search string
-   */
+  // Existing search used by other components — NOT changed
   searchRepositories(filter: string, query: string): Observable<Repository[]> {
     const params = new HttpParams()
       .set('filter', filter)
       .set('query', query);
     return this.http.get<Repository[]>(`${this.url}repos/search`, { params });
   }
+
+  // ─── NEW: table search for ManageRepos component only ────────────────────────
+  tableSearch(
+    query: string,
+    page: number = 1
+  ): Observable<{ items: Repository[]; total: number; page: number }> {
+    const params = new HttpParams()
+      .set('query', query)
+      .set('page', page.toString());
+    return this.http.get<{ items: Repository[]; total: number; page: number }>(
+      `${this.url}repos/table-search`,
+      { params }
+    );
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── EXISTING METHODS (all unchanged) ───────────────────────────────────────
 
