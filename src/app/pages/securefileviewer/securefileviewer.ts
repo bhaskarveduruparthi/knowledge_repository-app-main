@@ -264,14 +264,14 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         const win = this.newWindow;
 
         // Disable right-click
-        win.document.addEventListener('contextmenu', function(e) {
+        win.document.addEventListener('contextmenu', (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
 
         // Disable keyboard shortcuts
-        win.document.addEventListener('keydown', function(e) {
+        win.document.addEventListener('keydown', (e: KeyboardEvent) => {
             // Ctrl+C or Cmd+C (copy)
             if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
                 e.preventDefault();
@@ -338,52 +338,58 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                 e.stopPropagation();
                 return false;
             }
+            return true;
         }, true);
 
         // Disable copy event
-        win.document.addEventListener('copy', function(e) {
+        win.document.addEventListener('copy', (e: ClipboardEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            e.clipboardData?.setData('text/plain', '');
+            if (e.clipboardData) {
+                e.clipboardData.setData('text/plain', '');
+            }
             return false;
         }, true);
 
         // Disable cut event
-        win.document.addEventListener('cut', function(e) {
+        win.document.addEventListener('cut', (e: ClipboardEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            e.clipboardData?.setData('text/plain', '');
+            if (e.clipboardData) {
+                e.clipboardData.setData('text/plain', '');
+            }
             return false;
         }, true);
 
         // Disable paste event
-        win.document.addEventListener('paste', function(e) {
+        win.document.addEventListener('paste', (e: ClipboardEvent) => {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
 
         // Disable text selection
-        win.document.addEventListener('selectstart', function(e) {
+        win.document.addEventListener('selectstart', (e: Event) => {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
 
         // Disable drag
-        win.document.addEventListener('dragstart', function(e) {
+        win.document.addEventListener('dragstart', (e: DragEvent) => {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
 
         // Disable mouse selection
-        win.document.addEventListener('mousedown', function(e) {
+        win.document.addEventListener('mousedown', (e: MouseEvent) => {
             if (e.detail > 1) {
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             }
+            return true;
         }, true);
 
         // Additional protection: Clear clipboard periodically
