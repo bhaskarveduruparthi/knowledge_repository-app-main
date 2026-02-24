@@ -63,408 +63,595 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     PasswordModule,
     MessageModule,
     SecureFileViewerComponent
-],
+  ],
   providers: [
     MessageService,
     ConfirmationService
   ],
   styles: [`
-    .center-wrapper {
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :host {
+      --color-bg:       #EEF4E9;
+      --color-surface:  #FFFFFF;
+      --color-border:   #D8E8CC;
+      --color-primary:  #2D6A4F;
+      --color-primary-light: #52B788;
+      --color-accent:   #B7E4C7;
+      --color-text:     #1B2D24;
+      --color-muted:    #6B8F77;
+      --color-tag-bg:   #D8F3DC;
+      --color-tag-text: #1B4332;
+      --radius-card:    16px;
+      --shadow-card:    0 2px 12px rgba(45, 106, 79, 0.08), 0 1px 3px rgba(45, 106, 79, 0.06);
+      --shadow-hover:   0 8px 32px rgba(45, 106, 79, 0.15), 0 2px 8px rgba(45, 106, 79, 0.08);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ── Page shell ── */
+    .page {
+      min-height: 100vh;
+      background-color: var(--color-bg);
+      padding: 40px 24px 60px;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      width: 100%;
-      background-color: #ECF4E8;
-      padding: 20px;
-      box-sizing: border-box;
     }
-    .greeting {
-      font-size: 2.5rem;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 2rem;
+
+    /* ── Heading ── */
+    .heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      color: var(--color-text);
+      margin: 0 0 8px;
+      letter-spacing: -0.5px;
       text-align: center;
-      letter-spacing: -0.025em;
-      animation: fadeIn 0.8s ease-out;
+      animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
+    .subheading {
+      font-size: 1rem;
+      color: var(--color-muted);
+      margin: 0 0 36px;
+      font-weight: 400;
+      text-align: center;
+      animation: slideDown 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .search-wrapper {
+
+    /* ── Search bar ── */
+    .search-shell {
       width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
+      max-width: 720px;
+      margin-bottom: 12px;
+      animation: slideDown 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .search-container {
+    .search-bar {
       display: flex;
       align-items: center;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 50px;
-      box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-      padding: 4px 12px;
-      width: 100%;
-      max-width: 700px;
-      transition: all 0.3s ease;
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      border-radius: 14px;
+      padding: 6px 8px 6px 0;
+      gap: 0;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .filter-dropdown {
+    .search-bar:focus-within {
+      border-color: var(--color-primary-light);
+      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.18), var(--shadow-card);
+    }
+    .filter-select {
       appearance: none;
-      background-color: transparent;
+      background: transparent;
       border: none;
-      padding: 12px 24px 12px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #374151;
+      padding: 10px 36px 10px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-primary);
       cursor: pointer;
       outline: none;
-      min-width: 150px;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-      background-position: right 12px center;
+      min-width: 130px;
+      font-family: 'DM Sans', sans-serif;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%232D6A4F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 10px center;
       background-repeat: no-repeat;
-      background-size: 1.25em 1.25em;
+      background-size: 1.1em;
     }
-    .divider {
+    .vr {
       width: 1px;
-      height: 32px;
-      background-color: #e5e7eb;
-      margin: 0 12px;
+      height: 28px;
+      background: var(--color-border);
+      flex-shrink: 0;
     }
     .search-input {
       flex: 1;
       border: none;
-      padding: 12px 16px;
-      font-size: 16px;
-      color: #1f2937;
+      padding: 10px 14px;
+      font-size: 15px;
+      color: var(--color-text);
       outline: none;
       background: transparent;
-      border-radius: 40px;
+      font-family: 'DM Sans', sans-serif;
     }
-    .search-input::placeholder {
-      color: #9ca3af;
-    }
-    .search-button {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 10px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-left: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .search-button:hover {
-      background-color: #2563eb;
-    }
-    .search-button:disabled {
-      background-color: #93c5fd;
-      cursor: not-allowed;
-    }
-    .clear-button {
-      background-color: #6b7280;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 10px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-left: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .clear-button:hover {
-      background-color: #4b5563;
-    }
-    .status-bar {
-      display: block;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
-    .status-bar.results    { color: #3b82f6; }
-    .status-bar.no-results { color: #ef4444; }
-    .status-bar.all-repos  { color: #6b7280; }
+    .search-input::placeholder { color: #a8bcb0; }
 
-    .cards-container {
+    .btn-search {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      align-items: stretch;
-      gap: 1rem;
-    }
-    .cards-container p-card {
-      flex: 1 1 320px;
-      max-width: 420px;
-      min-width: 320px;
-      min-height: 260px;
-      box-sizing: border-box;
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.125);
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      overflow: hidden;
-      transition: box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
-    .cards-container p-card:hover {
-      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.18);
-    }
-    .cards-container .card-content {
-      padding: 1.5rem;
-      color: #19202C;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    .more-info-row {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: flex-end;
       align-items: center;
-      flex: 1;
-    }
-    .cards-container p-card .p-card-header {
-      background: rgba(255,255,255,0.15);
-      border-bottom: 1px solid rgba(255,255,255,0.18);
-      padding: 1rem 1.5rem;
+      gap: 6px;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 20px;
+      font-size: 13.5px;
       font-weight: 600;
-      font-size: 1.1rem;
-      border-radius: 24px 24px 0 0;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.18s, transform 0.1s;
+      flex-shrink: 0;
     }
-    .cards-container.single-card p-card {
-      flex: 0 1 420px;
-      max-width: 520px;
-      min-width: 320px;
-      margin: auto;
+    .btn-search:hover  { background: #1e4d39; }
+    .btn-search:active { transform: scale(0.97); }
+    .btn-search:disabled { background: #86bda5; cursor: not-allowed; }
+
+    .btn-clear {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: var(--color-muted);
+      border: none;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: color 0.18s;
+      flex-shrink: 0;
     }
-    .card-content p {
-      margin: 0.25rem 0;
+    .btn-clear:hover { color: var(--color-primary); }
+
+    /* ── Status line ── */
+    .status {
+      font-size: 13.5px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      height: 20px;
     }
-    .content-wrapper {
-      width: 100%;
-      max-width: 1200px;
-      margin-top: 1.5rem;
-    }
-    .loading-spinner {
+    .status.found    { color: var(--color-primary); }
+    .status.empty    { color: #c0392b; }
+    .status.all      { color: var(--color-muted); }
+
+    /* ── Loading ── */
+    .spinner-wrap {
       display: flex;
       justify-content: center;
-      margin: 2rem 0;
+      margin: 48px 0;
     }
     .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #3b82f6;
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--color-accent);
+      border-top-color: var(--color-primary);
       border-radius: 50%;
-      animation: spin 0.75s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Card grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1280px;
     }
+    .grid.single { grid-template-columns: minmax(320px, 480px); justify-content: center; }
+
+    /* ── Repo card ── */
+    .repo-card {
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.2s cubic-bezier(0.16,1,0.3,1),
+                  box-shadow 0.2s cubic-bezier(0.16,1,0.3,1),
+                  border-color 0.2s;
+      animation: cardIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .repo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--color-primary-light);
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card color bar */
+    
+
+    .card-body {
+      padding: 22px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* Card header row */
+    .card-header-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--color-tag-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-icon svg { color: var(--color-primary); }
+    .card-title-group { flex: 1; min-width: 0; }
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem;
+      color: var(--color-text);
+      margin: 0 0 3px;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-domain-pill {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-tag-bg);
+      color: var(--color-tag-text);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.02em;
+    }
+
+    /* Card meta rows */
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .meta-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-muted);
+      width: 90px;
+      flex-shrink: 0;
+    }
+    .meta-value {
+      font-size: 13.5px;
+      color: var(--color-text);
+      font-weight: 400;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-standard {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .badge-custom {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    /* divider */
+    .card-divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 0 0 16px;
+    }
+
+    /* Card footer */
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .author-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .author-name {
+      font-size: 12.5px;
+      color: var(--color-muted);
+      font-weight: 500;
+    }
+    .btn-details {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.18s, transform 0.1s;
+    }
+    .btn-details:hover  { background: #1e4d39; }
+    .btn-details:active { transform: scale(0.97); }
+    .btn-details svg { flex-shrink: 0; }
+
+    /* ── Details dialog (keep existing, minor polish) ── */
+    .detail-table { width: 100%; border-collapse: collapse; }
+    .detail-table tr { border-bottom: 1px solid #f0f4f0; }
+    .detail-table tr:last-child { border-bottom: none; }
+    .detail-table td { padding: 13px 16px; font-size: 14px; vertical-align: top; }
+    .detail-table .dt-label {
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-muted);
+      width: 190px;
+      background: #f7faf7;
+    }
+    .detail-table .dt-value { color: var(--color-text); }
   `],
   template: `
+    
     <p-toast></p-toast>
-    <div class="center-wrapper">
+    <div class="page">
 
-      <div class="greeting">Search Solutions</div>
+      <!-- Heading -->
+      <h1 class="heading">Search Solutions</h1>
+      <p class="subheading">Explore, and Discover Approved solutions</p>
 
-      <!-- ── Search bar ── -->
-      <div class="search-wrapper">
-        <div class="search-container">
-
-          <!-- Filter dropdown -->
-          <select
-            [(ngModel)]="selectedFilter"
-            class="filter-dropdown"
-            (change)="onFilterChange()"
-            aria-label="Filter By"
-          >
-            <option *ngFor="let option of filterOptions" [value]="option">{{ option }}</option>
+      <!-- Search bar -->
+      <div class="search-shell">
+        <div class="search-bar">
+          <select [(ngModel)]="selectedFilter" class="filter-select"
+            (change)="onFilterChange()" aria-label="Filter By">
+            <option *ngFor="let opt of filterOptions" [value]="opt">{{ opt }}</option>
           </select>
 
-          <div class="divider"></div>
+          <div class="vr"></div>
 
-          <!-- Search input -->
           <input
             type="text"
             [(ngModel)]="searchText"
-            placeholder="Search Knowledge Repository..."
+            placeholder="Search knowledge repository…"
             (ngModelChange)="onSearchInputChange($event)"
             (keydown.enter)="onSearch()"
             class="search-input"
           />
 
-          <!-- Search button -->
-          <button
-            class="search-button"
-            (click)="onSearch()"
-            [disabled]="isLoading"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <button *ngIf="searchText.trim()" class="btn-clear" (click)="clearSearch()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="2" x2="2" y2="12"/><line x1="2" y1="2" x2="12" y2="12"/>
             </svg>
-            <span>Search</span>
+            Clear
           </button>
 
-          <!-- Clear button -->
-          <button
-            *ngIf="searchText.trim()"
-            class="clear-button"
-            (click)="clearSearch()"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-              fill="none" stroke="white" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6"  x2="6"  y2="18"></line>
-              <line x1="6"  y1="6"  x2="18" y2="18"></line>
+          <button class="btn-search" (click)="onSearch()" [disabled]="isLoading">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6.5" cy="6.5" r="5.5"/>
+              <line x1="10.9" y1="10.9" x2="14" y2="14"/>
             </svg>
-            <span>Clear</span>
+            Search
           </button>
-
         </div>
       </div>
 
-      <!-- ── Loading spinner ── -->
-      <div class="loading-spinner" *ngIf="isLoading">
+      <!-- Status -->
+      <ng-container *ngIf="!isLoading">
+        <div *ngIf="isSearchActive && displayedRepos.length > 0" class="status found">
+          {{ displayedRepos.length }} result{{ displayedRepos.length !== 1 ? 's' : '' }} found for "{{ lastSearchText }}"
+        </div>
+        <div *ngIf="isSearchActive && displayedRepos.length === 0" class="status empty">
+          No results found for "{{ lastSearchText }}"
+        </div>
+        <div *ngIf="!isSearchActive && displayedRepos.length > 0" class="status all">
+          Showing all {{ displayedRepos.length }} approved repositories
+        </div>
+        <div *ngIf="!isSearchActive && displayedRepos.length === 0 && !isLoading" class="status all">
+          &nbsp;
+        </div>
+      </ng-container>
+
+      <!-- Loading -->
+      <div class="spinner-wrap" *ngIf="isLoading">
         <div class="spinner"></div>
       </div>
 
-      <!-- ── Status bar ── -->
-      <ng-container *ngIf="!isLoading">
-        <span *ngIf="isSearchActive && displayedRepos.length > 0"
-          class="status-bar results">
-          {{ displayedRepos.length }} result{{ displayedRepos.length !== 1 ? 's' : '' }} found
-        </span>
-        <span *ngIf="isSearchActive && displayedRepos.length === 0"
-          class="status-bar no-results">
-          No results found for "{{ lastSearchText }}"
-        </span>
-        <span *ngIf="!isSearchActive && displayedRepos.length > 0"
-          class="status-bar all-repos">
-          Showing all {{ displayedRepos.length }} approved repositories
-        </span>
-      </ng-container>
+      <!-- Card Grid -->
+      <div class="grid" [ngClass]="{'single': displayedRepos.length === 1}" *ngIf="!isLoading">
 
-      <!-- ── Cards ── -->
-      <div
-        class="cards-container"
-        [ngClass]="{'single-card': displayedRepos.length === 1}"
-        *ngIf="!isLoading"
-      >
-        <p-card
-          *ngFor="let repo of displayedRepos"
-          header="{{ repo.module_name }} - {{ repo.domain }}"
-        >
-          <ng-template pTemplate="content">
-            <div class="card-content">
-              <p><b>Domain:</b> {{ repo.domain }}</p>
-              <p><b>Sector:</b> {{ repo.sector }}</p>
-              <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
-              <p><b>User Created:</b> {{ repo.username }}</p>
-              <div class="more-info-row">
-                <button pButton type="button" label="More Info" (click)="showDetails(repo)"></button>
+        <div class="repo-card" *ngFor="let repo of displayedRepos; let i = index"
+          [style.animation-delay]="(i * 0.05) + 's'">
+
+          <!-- Accent bar -->
+          <div class="card-bar"></div>
+
+          <div class="card-body">
+
+            <!-- Header -->
+            <div class="card-header-row">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                  stroke="#2D6A4F" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2V4a2 2 0 0 0-2-2z"/>
+                  <line x1="9" y1="9" x2="15" y2="9"/>
+                  <line x1="9" y1="13" x2="15" y2="13"/>
+                  <line x1="9" y1="17" x2="11" y2="17"/>
+                </svg>
+              </div>
+              <div class="card-title-group">
+                <div class="card-title" [title]="repo.module_name">{{ repo.module_name }}</div>
+                <span class="card-domain-pill">Domain: {{ repo.domain }}</span>
+                
+                
               </div>
             </div>
-          </ng-template>
-        </p-card>
-      </div>
 
-      <!-- ── Details dialog ── -->
-      <!-- ── Details dialog ── -->
-<p-dialog
-  header="Repository Details"
-  [(visible)]="dialogVisible"
-  [modal]="true"
-  [style]="{width: '90vw', height: '90vh'}"
-  [contentStyle]="{height: 'calc(100% - 60px)', overflow: 'auto'}"
-  (onHide)="closeDetails()"
->
-  <ng-template pTemplate="content">
-    <div *ngIf="selectedRepo" style="padding: 1rem;">
-      <table style="width: 100%; border-collapse: collapse;">
-        <tbody>
-          <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 600; width: 200px; background-color: #f9fafb;">Domain:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.domain }}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Sector:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.sector }}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Module Name:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.module_name }}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Detailed Requirement:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.detailed_requirement }}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Standard/Custom:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.standard_custom }}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Technical Details:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.technical_details }}</td>
-          </tr>
-          <tr>
-            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Customer Benefit:</td>
-            <td style="padding: 0.75rem;">{{ selectedRepo.customer_benefit }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </ng-template>
+            <!-- Meta -->
+            <div class="card-meta">
+              <div class="meta-row">
+                <span class="meta-label">Sector</span>
+                <span class="meta-value">{{ repo.sector }}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Object Type</span>
+                <span class="badge"
+                  [ngClass]="repo.standard_custom === 'Standard' ? 'badge-standard' : 'badge-custom'">
+                  {{ repo.standard_custom }}
+                </span>
+              </div>
+            </div>
 
-  <ng-template pTemplate="footer">
-    <ng-container *ngIf="selectedRepo">
-      <!-- Secure File Viewer -->
-      <app-secure-file-viewer
-        [repoId]="selectedRepo.id"
-        [filename]="selectedRepo.attachment_filename || ''"
-        [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
-        apiBase="http://10.6.102.245:5002">
-      </app-secure-file-viewer>
-      
-      <!-- Button for Superadmin: visible if attachment exists and approved -->
-      <button
-        pButton
-        type="button"
-        [label]="isAttachmentLoading ? 'Loading...' : 'Open Solution Attachment'"
-        [disabled]="isAttachmentLoading"
-        (click)="openAttachment(selectedRepo)"
-        *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved === true"
-      ></button>
+            <div class="card-divider"></div>
 
-      <!-- Button for regular users: show Request Download if not yet approved -->
-      <button
-        pButton
-        type="button"
-        label="Request Download Access"
-        severity="secondary"
-        (click)="requestDownload(selectedRepo)"
-        *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved !== true"
-      ></button>
-    </ng-container>
-  </ng-template>
-</p-dialog>
+            <!-- Footer -->
+            <div class="card-footer">
+              <div class="card-author">
+                <div class="author-avatar">{{ (repo.username || '?')[0].toUpperCase() }}</div>
+                <span class="author-name">{{ repo.username }}</span>
+              </div>
+              <button class="btn-details" (click)="showDetails(repo)">
+                View Details
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="2" y1="7" x2="12" y2="7"/>
+                  <polyline points="8 3 12 7 8 11"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /grid -->
+
+
+      <!-- Details Dialog -->
+      <p-dialog
+        header="Repository Details"
+        [(visible)]="dialogVisible"
+        [modal]="true"
+        [style]="{width: '90vw', maxWidth: '800px', height: '90vh'}"
+        [contentStyle]="{height: 'calc(100% - 60px)', overflow: 'auto'}"
+        (onHide)="closeDetails()"
+      >
+        <ng-template pTemplate="content">
+          <div *ngIf="selectedRepo" style="padding: 1rem;">
+            <table class="detail-table">
+              <tbody>
+                <tr>
+                  <td class="dt-label">Domain</td>
+                  <td class="dt-value">{{ selectedRepo.domain }}</td>
+                </tr>
+                <tr>
+                  <td class="dt-label">Sector</td>
+                  <td class="dt-value">{{ selectedRepo.sector }}</td>
+                </tr>
+                <tr>
+                  <td class="dt-label">Module Name</td>
+                  <td class="dt-value">{{ selectedRepo.module_name }}</td>
+                </tr>
+                <tr>
+                  <td class="dt-label">Detailed Requirement</td>
+                  <td class="dt-value">{{ selectedRepo.detailed_requirement }}</td>
+                </tr>
+                <tr>
+                  <td class="dt-label">Standard / Custom</td>
+                  <td class="dt-value">{{ selectedRepo.standard_custom }}</td>
+                </tr>
+                <tr>
+                  <td class="dt-label">Technical Details</td>
+                  <td class="dt-value">{{ selectedRepo.technical_details }}</td>
+                </tr>
+                <tr>
+                  <td class="dt-label">Customer Benefit</td>
+                  <td class="dt-value">{{ selectedRepo.customer_benefit }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+          <ng-container *ngIf="selectedRepo">
+            <app-secure-file-viewer
+              [repoId]="selectedRepo.id"
+              [filename]="selectedRepo.attachment_filename || ''"
+              [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
+              apiBase="http://10.6.102.245:5002">
+            </app-secure-file-viewer>
+
+            <button
+              pButton type="button"
+              [label]="isAttachmentLoading ? 'Loading…' : 'Open Solution Attachment'"
+              [disabled]="isAttachmentLoading"
+              (click)="openAttachment(selectedRepo)"
+              *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved === true"
+            ></button>
+
+            <button
+              pButton type="button"
+              label="Request Download Access"
+              severity="secondary"
+              (click)="requestDownload(selectedRepo)"
+              *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved !== true"
+            ></button>
+          </ng-container>
+        </ng-template>
+      </p-dialog>
 
     </div>
   `
@@ -477,15 +664,11 @@ export class Home implements OnInit, OnDestroy {
 
   isAttachmentLoading: boolean = false;
 
-  /** All repos loaded on init */
   allRepos: any[] = [];
-  /** What's currently shown in the cards */
   displayedRepos: any[] = [];
 
   isLoading: boolean = false;
-  /** true when the cards reflect a search query rather than the full list */
   isSearchActive: boolean = false;
-  /** remembers the last executed query text for the "no results" message */
   lastSearchText: string = '';
 
   dialogVisible: boolean = false;
@@ -502,7 +685,6 @@ export class Home implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Wire up debounced live search
     this.searchInput$.pipe(
       debounceTime(300),
       takeUntil(this.destroy$)
@@ -511,14 +693,12 @@ export class Home implements OnInit, OnDestroy {
       if (trimmed) {
         this.executeSearch(trimmed);
       } else {
-        // Input cleared → fall back to full list
         this.displayedRepos  = this.allRepos;
         this.isSearchActive  = false;
         this.lastSearchText  = '';
       }
     });
 
-    // Load all repos on startup
     this.loadAllRepos();
   }
 
@@ -526,8 +706,6 @@ export class Home implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  // ─── Data loading ──────────────────────────────────────────────────────────
 
   loadAllRepos() {
     this.isLoading = true;
@@ -548,13 +726,9 @@ export class Home implements OnInit, OnDestroy {
     });
   }
 
-  // ─── Search ────────────────────────────────────────────────────────────────
-
-  /** Called by button click and Enter key */
   onSearch() {
     const trimmed = this.searchText.trim();
     if (!trimmed) {
-      // No text → show everything
       this.displayedRepos = this.allRepos;
       this.isSearchActive = false;
       return;
@@ -562,21 +736,16 @@ export class Home implements OnInit, OnDestroy {
     this.executeSearch(trimmed);
   }
 
-  /** Called by the debounce pipe (live typing) */
   onSearchInputChange(value: string) {
     this.searchInput$.next(value);
   }
 
-  /** Called when the filter dropdown changes */
   onFilterChange() {
     if (this.searchText.trim()) {
-      // Text already present → re-run search with new filter immediately
       this.executeSearch(this.searchText.trim());
     }
-    // No text → nothing to do, filter will apply on next search
   }
 
-  /** Shared search execution – single source of truth */
   private executeSearch(query: string) {
     this.isLoading      = true;
     this.lastSearchText = query;
@@ -606,8 +775,6 @@ export class Home implements OnInit, OnDestroy {
     this.lastSearchText = '';
   }
 
-  // ─── Dialog ────────────────────────────────────────────────────────────────
-
   showDetails(repo: any) {
     this.selectedRepo  = repo;
     this.dialogVisible = true;
@@ -618,110 +785,62 @@ export class Home implements OnInit, OnDestroy {
     this.dialogVisible = false;
   }
 
-  
+  openAttachment(repo: any) {
+    const base    = 'http://10.6.102.245:5002';
+    const fileUrl = `${base}/repos/refview/${repo.id}`;
+    const token   = localStorage.getItem('access_token') || localStorage.getItem('token') || '';
 
-  
+    if (!token) {
+      this.messageservice.add({ severity: 'warn', summary: 'Not logged in', detail: 'You must be logged in to view attachments.' });
+      return;
+    }
 
-openAttachment(repo: any) {
-  const base    = 'http://10.6.102.245:5002'; 
-  const fileUrl = `${base}/repos/refview/${repo.id}`;
+    this.isAttachmentLoading = true;
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-  // Read JWT from wherever your app stores it (adjust key name if different)
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token') || '';
+    this.http.get(fileUrl, { headers, responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        this.isAttachmentLoading = false;
+        const objectUrl = URL.createObjectURL(blob);
+        const newTab    = window.open(objectUrl, '_blank');
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
 
-  if (!token) {
-    this.messageservice.add({
-      severity: 'warn',
-      summary: 'Not logged in',
-      detail: 'You must be logged in to view attachments.'
+        if (!newTab) {
+          this.messageservice.add({ severity: 'info', summary: 'Popup Blocked', detail: 'Your browser blocked the popup. The file will download instead.' });
+          const a    = document.createElement('a');
+          a.href     = objectUrl;
+          a.download = repo.attachment_filename || `repository_${repo.id}`;
+          a.target   = '_blank';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      },
+      error: (err: any) => {
+        this.isAttachmentLoading = false;
+        if (err.status === 403) {
+          this.messageservice.add({ severity: 'warn', summary: 'Access Denied', detail: 'You need Superadmin approval before you can view this attachment.' });
+        } else if (err.status === 401) {
+          this.messageservice.add({ severity: 'error', summary: 'Unauthorised', detail: 'Please log in again.' });
+        } else {
+          this.messageservice.add({ severity: 'error', summary: 'Failed to open attachment', detail: err.message || 'Could not load the file. Please try again.' });
+        }
+      }
     });
-    return;
   }
 
-  this.isAttachmentLoading = true;
-
-  const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
-  this.http.get(fileUrl, { headers, responseType: 'blob' }).subscribe({
-    next: (blob: Blob) => {
-      this.isAttachmentLoading = false;
-
-      const objectUrl = URL.createObjectURL(blob);
-      const newTab    = window.open(objectUrl, '_blank');
-
-      // Revoke blob URL after 60s to free memory
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-
-      if (!newTab) {
-        // Popup blocked — fall back to anchor download
-        this.messageservice.add({
-          severity: 'info',
-          summary: 'Popup Blocked',
-          detail: 'Your browser blocked the popup. The file will download instead.'
-        });
-        const a    = document.createElement('a');
-        a.href     = objectUrl;
-        a.download = repo.attachment_filename || `repository_${repo.id}`;
-        a.target   = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+  requestDownload(repo: any) {
+    this.managereposervice.requestDownload(repo.id, '').subscribe({
+      next: () => {
+        this.messageservice.add({ severity: 'success', summary: 'Request Sent', detail: 'Your download request has been sent to the Superadmin for approval.' });
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.messageservice.add({ severity: 'info', summary: 'Already Requested', detail: 'Your request is already pending approval.' });
+        } else {
+          this.messageservice.add({ severity: 'error', summary: 'Request Failed', detail: err.message || 'Could not send request. Please try again.' });
+        }
       }
-    },
-    error: (err:any) => {
-      this.isAttachmentLoading = false;
-
-      if (err.status === 403) {
-        this.messageservice.add({
-          severity: 'warn',
-          summary: 'Access Denied',
-          detail: 'You need Superadmin approval before you can view this attachment.'
-        });
-      } else if (err.status === 401) {
-        this.messageservice.add({
-          severity: 'error',
-          summary: 'Unauthorised',
-          detail: 'Please log in again.'
-        });
-      } else {
-        this.messageservice.add({
-          severity: 'error',
-          summary: 'Failed to open attachment',
-          detail: err.message || 'Could not load the file. Please try again.'
-        });
-      }
-    }
-  });
-}
-
-requestDownload(repo: any) {
-  this.managereposervice.requestDownload(repo.id, '').subscribe({
-    next: () => {
-      this.messageservice.add({
-        severity: 'success',
-        summary: 'Request Sent',
-        detail: 'Your download request has been sent to the Superadmin for approval.'
-      });
-    },
-    error: (err) => {
-      // If already pending, show a friendly message instead of an error
-      if (err.status === 400) {
-        this.messageservice.add({
-          severity: 'info',
-          summary: 'Already Requested',
-          detail: 'Your request is already pending approval.'
-        });
-      } else {
-        this.messageservice.add({
-          severity: 'error',
-          summary: 'Request Failed',
-          detail: err.message || 'Could not send request. Please try again.'
-        });
-      }
-    }
-  });
-}
-
-
-
+    });
+  }
 }

@@ -37,34 +37,25 @@ interface ExportColumn { title: string; dataKey: string; }
     selector: 'app-managependingreport',
     standalone: true,
     styles: `
+        /* ── Base ── */
         .custom-file-input {
             border: 1px solid #ced4da; border-radius: 6px; background-color: #f8f9fa;
             padding: 8px 12px; width: 100%; color: #333; font-size: 1rem; transition: border-color 0.2s;
         }
         .custom-file-input:hover { border-color: #007ad9; background-color: #e9ecef; }
-        .custom-table-container { width: 100%; overflow-x: auto; margin-bottom: 1rem; border-radius: 8px; }
-        .glass-table { width: 100%; border-collapse: collapse; min-width: 75rem; font-size: 0.95rem; }
-        .glass-table thead th {
-            text-align: left; padding: 1rem; font-weight: bold; color: #11224E;
-            border-bottom: 2px solid rgba(255,255,255,0.4); white-space: nowrap;
-            background-color: #cce4f7;
-        }
-        .glass-table tbody td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); vertical-align: middle; color: #222; }
-        .glass-table tbody tr { transition: background-color 0.2s; }
-        .glass-table tbody tr:hover { background-color: rgba(255,255,255,0.3); }
-        .glass-table input[type="checkbox"] { accent-color: #11224E; width: 16px; height: 16px; cursor: pointer; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
-        @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
-        label.required:after { content: "*"; color: red; margin-left: 5px; }
-        .error { border: 1px solid red; }
         .p-toolbar { box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5); }
         .card { box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5); }
+        label.required:after { content: "*"; color: red; margin-left: 5px; }
+        .error { border: 1px solid red; }
 
-        /* ── Search styles ── */
-        .search-bar-row {
+        /* ── Toolbar row ── */
+        .toolbar-row {
             display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 0.75rem; gap: 1rem; flex-wrap: wrap;
         }
+        .toolbar-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+
+        /* ── Search ── */
         .search-input-container { position: relative; display: flex; align-items: center; }
         .search-input-container .pi-search {
             position: absolute; left: 0.75rem; color: #6c757d; pointer-events: none; z-index: 1;
@@ -82,6 +73,103 @@ interface ExportColumn { title: string; dataKey: string; }
         }
         .search-clear-btn:hover { color: #333; }
         .search-result-count { font-size: 0.82rem; color: #6c757d; white-space: nowrap; }
+
+        /* ── View toggle ── */
+        .view-toggle { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid #c8e6c9; }
+        .view-toggle button {
+            background: #fff; border: none; padding: 6px 14px; cursor: pointer;
+            color: #6c757d; font-size: 1rem; transition: background 0.18s, color 0.18s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .view-toggle button.active { background: #4caf50; color: #fff; }
+        .view-toggle button:hover:not(.active) { background: #e8f5e9; color: #388e3c; }
+
+        /* ── TABLE view ── */
+        .custom-table-container { width: 100%; overflow-x: auto; margin-bottom: 1rem; border-radius: 8px; }
+        .glass-table { width: 100%; border-collapse: collapse; min-width: 75rem; font-size: 0.95rem; }
+        .glass-table thead th {
+            text-align: left; padding: 1rem; font-weight: bold; color: #11224E;
+            border-bottom: 2px solid rgba(255,255,255,0.4); white-space: nowrap;
+            background-color: #cce4f7;
+        }
+        .glass-table tbody td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); vertical-align: middle; color: #222; }
+        .glass-table tbody tr { transition: background-color 0.2s; }
+        .glass-table tbody tr:hover { background-color: rgba(255,255,255,0.3); }
+
+        /* ── CARD view ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .repo-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e0f0e9;
+            box-shadow: 0 2px 14px 0 rgba(76,175,80,0.10);
+            padding: 1.25rem 1.4rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .repo-card:hover {
+            box-shadow: 0 6px 28px 0 rgba(76,175,80,0.22);
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.25rem;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #11224E;
+            line-height: 1.3;
+        }
+        .card-module {
+            font-size: 0.82rem;
+            color: #388e3c;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            white-space: nowrap;
+            background: #fff9c4;
+            color: #f57f17;
+            border: 1px solid #ffe082;
+        }
+        .status-badge.approved { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+        .status-badge.rejected { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
+        .status-badge.pending  { background: #fff9c4; color: #f57f17; border-color: #ffe082; }
+        .card-divider { border: none; border-top: 1px solid #f0f4f0; margin: 0.4rem 0; }
+        .card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem 1rem; }
+        .card-meta-item { font-size: 0.81rem; color: #555; }
+        .card-meta-item span { display: block; font-size: 0.73rem; color: #999; margin-bottom: 1px; }
+        .card-detail { font-size: 0.83rem; color: #444; }
+        .card-detail span { font-size: 0.73rem; color: #999; display: block; margin-bottom: 1px; }
+        .card-detail p { margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-approvers { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+        .approver-chip {
+            background: #e3f2fd; color: #1565c0; border-radius: 20px;
+            padding: 2px 10px; font-size: 0.74rem; font-weight: 500;
+        }
+        .approver-chip.srm { background: #f3e5f5; color: #6a1b9a; }
+        .approver-chip.buh { background: #e8f5e9; color: #2e7d32; }
+        .approver-chip.bgh { background: #fff3e0; color: #e65100; }
+        .empty-state { text-align: center; padding: 3rem; color: #888; }
+        .empty-state i { font-size: 2rem; display: block; margin-bottom: 0.75rem; color: #ccc; }
     `,
     imports: [
         CommonModule, FormsModule, ReactiveFormsModule, ButtonModule, RippleModule, ToastModule,
@@ -93,9 +181,13 @@ interface ExportColumn { title: string; dataKey: string; }
     template: `
         <p-toast />
         <div class="card">
-            <div class="search-bar-row">
+
+            <!-- ── Toolbar ── -->
+            <div class="toolbar-row">
                 <h5 class="m-0">Pending</h5>
-                <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div class="toolbar-right">
+
+                    <!-- Search -->
                     <div class="search-input-container">
                         <i class="pi pi-search"></i>
                         <input
@@ -111,76 +203,196 @@ interface ExportColumn { title: string; dataKey: string; }
                     <span class="search-result-count" *ngIf="searchQuery()">
                         {{ filteredRepositories().length }} / {{ repositories().length }} rows
                     </span>
+
+                    <!-- View toggle -->
+                    <div class="view-toggle">
+                        <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" title="Table view">
+                            <i class="pi pi-list"></i>
+                        </button>
+                        <button [class.active]="viewMode === 'card'" (click)="viewMode = 'card'" title="Card view">
+                            <i class="pi pi-th-large"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="custom-table-container">
-                <table class="glass-table">
-                    <thead>
-                        <tr>
-                            <th>Customer Name</th>
-                            <th>Domain</th>
-                            <th>Sector</th>
-                            <th>Module Name</th>
-                            <th>Detailed Requirement</th>
-                            <th>Standard/Custom</th>
-                            <th>Technical details</th>
-                            <th>Customer Benefit</th>
-                            <th>Created On</th>
-                            <th>Created User</th>
-                            <th>Immediate Response Manager(IRM)</th>
-                            <th>Secondary Response Manager(SRM)</th>
-                            <th>Business Unit Head(BUH)</th>
-                            <th>Business Group Head(BGH)</th>
-                            <th>Business Justification</th>
-                            <th>Repo Status</th>
-                            <th>Repo Approver</th>
-                            <th>Repo Approval Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let repo of filteredRepositories()">
-                            <td style="white-space:nowrap">{{ repo.customer_name }}</td>
-                            <td style="white-space:nowrap">{{ repo.domain }}</td>
-                            <td style="white-space:nowrap">{{ repo.sector }}</td>
-                            <td style="white-space:nowrap">{{ repo.module_name }}</td>
-                            <td>{{ repo.detailed_requirement }}</td>
-                            <td>{{ repo.standard_custom }}</td>
-                            <td>{{ repo.technical_details }}</td>
-                            <td>{{ repo.customer_benefit }}</td>
-                            <td style="white-space:nowrap">{{ formatDate(repo.created_at) }}</td>
-                            <td style="white-space:nowrap;text-align:center">{{ repo.username }}</td>
-                            <td style="white-space:nowrap;text-align:center">{{ repo.irm }}</td>
-                            <td style="white-space:nowrap;text-align:center">{{ repo.srm }}</td>
-                            <td style="white-space:nowrap;text-align:center">{{ repo.buh }}</td>
-                            <td style="white-space:nowrap;text-align:center">{{ repo.bgh }}</td>
-                            <td>{{ repo.business_justification }}</td>
-                            <td style="white-space:nowrap">{{ repo.Approval_status }}</td>
-                            <td style="white-space:nowrap">{{ repo.Approver }}</td>
-                            <td style="white-space:nowrap">{{ repo.Approval_date }}</td>
-                        </tr>
-                        <tr *ngIf="filteredRepositories().length === 0 && searchQuery() && !loading">
-                            <td colspan="18" style="text-align:center;padding:2rem;color:#888">
-                                <i class="pi pi-search" style="font-size:1.5rem;display:block;margin-bottom:0.5rem"></i>
-                                No rows match <b>"{{ searchQuery() }}"</b> on this page.
-                                <button pButton type="button" label="Clear" icon="pi pi-times"
-                                    class="p-button-text p-button-sm" style="margin-left:0.5rem"
-                                    (click)="clearSearch()"></button>
-                            </td>
-                        </tr>
-                        <tr *ngIf="repositories().length === 0 && !searchQuery() && !loading">
-                            <td colspan="18" style="text-align:center;padding:2rem">No Repositories found.</td>
-                        </tr>
-                        <tr *ngIf="loading">
-                            <td colspan="18" style="text-align:center;padding:2rem">Loading Data...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- ═══════════════ TABLE VIEW ═══════════════ -->
+            <ng-container *ngIf="viewMode === 'table'">
+                <div class="custom-table-container">
+                    <table class="glass-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Domain</th>
+                                <th>Sector</th>
+                                <th>Module Name</th>
+                                <th>Detailed Requirement</th>
+                                <th>Standard/Custom</th>
+                                <th>Technical details</th>
+                                <th>Customer Benefit</th>
+                                <th>Created On</th>
+                                <th>Created User</th>
+                                <th>IRM</th>
+                                <th>SRM</th>
+                                <th>BUH</th>
+                                <th>BGH</th>
+                                <th>Business Justification</th>
+                                <th>Repo Status</th>
+                                <th>Repo Approver</th>
+                                <th>Repo Approval Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let repo of filteredRepositories()">
+                                <td style="white-space:nowrap">{{ repo.customer_name }}</td>
+                                <td style="white-space:nowrap">{{ repo.domain }}</td>
+                                <td style="white-space:nowrap">{{ repo.sector }}</td>
+                                <td style="white-space:nowrap">{{ repo.module_name }}</td>
+                                <td>{{ repo.detailed_requirement }}</td>
+                                <td>{{ repo.standard_custom }}</td>
+                                <td>{{ repo.technical_details }}</td>
+                                <td>{{ repo.customer_benefit }}</td>
+                                <td style="white-space:nowrap">{{ formatDate(repo.created_at) }}</td>
+                                <td style="white-space:nowrap;text-align:center">{{ repo.username }}</td>
+                                <td style="white-space:nowrap;text-align:center">{{ repo.irm }}</td>
+                                <td style="white-space:nowrap;text-align:center">{{ repo.srm }}</td>
+                                <td style="white-space:nowrap;text-align:center">{{ repo.buh }}</td>
+                                <td style="white-space:nowrap;text-align:center">{{ repo.bgh }}</td>
+                                <td>{{ repo.business_justification }}</td>
+                                <td style="white-space:nowrap">{{ repo.Approval_status }}</td>
+                                <td style="white-space:nowrap">{{ repo.Approver }}</td>
+                                <td style="white-space:nowrap">{{ repo.Approval_date }}</td>
+                            </tr>
+                            <tr *ngIf="filteredRepositories().length === 0 && searchQuery() && !loading">
+                                <td colspan="18" class="empty-state">
+                                    <i class="pi pi-search"></i>
+                                    No rows match <b>"{{ searchQuery() }}"</b> on this page.
+                                    <button pButton type="button" label="Clear" icon="pi pi-times"
+                                        class="p-button-text p-button-sm" style="margin-left:0.5rem"
+                                        (click)="clearSearch()"></button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="repositories().length === 0 && !searchQuery() && !loading">
+                                <td colspan="18" class="empty-state">No Repositories found.</td>
+                            </tr>
+                            <tr *ngIf="loading">
+                                <td colspan="18" class="empty-state">Loading Data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </ng-container>
+
+            <!-- ═══════════════ CARD VIEW ═══════════════ -->
+            <ng-container *ngIf="viewMode === 'card'">
+
+                <!-- Loading -->
+                <div *ngIf="loading" class="empty-state">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    Loading Data...
+                </div>
+
+                <!-- No results (search) -->
+                <div *ngIf="!loading && filteredRepositories().length === 0 && searchQuery()" class="empty-state">
+                    <i class="pi pi-search"></i>
+                    No rows match <b>"{{ searchQuery() }}"</b> on this page.
+                    <button pButton type="button" label="Clear" icon="pi pi-times"
+                        class="p-button-text p-button-sm" style="margin-left:0.5rem"
+                        (click)="clearSearch()"></button>
+                </div>
+
+                <!-- No data -->
+                <div *ngIf="!loading && repositories().length === 0 && !searchQuery()" class="empty-state">
+                    <i class="pi pi-inbox"></i>
+                    No Repositories found.
+                </div>
+
+                <!-- Cards -->
+                <div class="card-grid" *ngIf="!loading && filteredRepositories().length > 0">
+                    <div class="repo-card" *ngFor="let repo of filteredRepositories()">
+
+                        <!-- Header -->
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">{{ repo.customer_name }}</div>
+                                <div class="card-module">{{ repo.module_name }}</div>
+                            </div>
+                            <span class="status-badge"
+                                [class.approved]="repo.Approval_status?.toLowerCase() === 'approved'"
+                                [class.rejected]="repo.Approval_status?.toLowerCase() === 'rejected'"
+                                [class.pending]="repo.Approval_status?.toLowerCase() === 'pending'">
+                                {{ repo.Approval_status || 'Pending' }}
+                            </span>
+                        </div>
+
+                        <hr class="card-divider" />
+
+                        <!-- Meta grid -->
+                        <div class="card-meta">
+                            <div class="card-meta-item">
+                                <span>Domain</span>{{ repo.domain || '—' }}
+                            </div>
+                            <div class="card-meta-item">
+                                <span>Sector</span>{{ repo.sector || '—' }}
+                            </div>
+                            <div class="card-meta-item">
+                                <span>Standard / Custom</span>{{ repo.standard_custom || 'NA' }}
+                            </div>
+                            <div class="card-meta-item">
+                                <span>Created On</span>{{ formatDate(repo.created_at) || 'NA' }}
+                            </div>
+                            <div class="card-meta-item">
+                                <span>Created By</span>{{ repo.username || 'NA' }}
+                            </div>
+                            <div class="card-meta-item">
+                                <span>Approver</span>{{ repo.Approver || 'NA' }}
+                            </div>
+                            <div class="card-meta-item">
+                                <span>Approval Date</span>{{ repo.Approval_date || 'NA' }}
+                            </div>
+                        </div>
+
+                        <!-- Detailed requirement -->
+                        <div class="card-detail" *ngIf="repo.detailed_requirement">
+                            <span>Detailed Requirement</span>
+                            <p title="{{ repo.detailed_requirement }}">{{ repo.detailed_requirement }}</p>
+                        </div>
+
+                        <!-- Technical details -->
+                        <div class="card-detail" *ngIf="repo.technical_details">
+                            <span>Technical Details</span>
+                            <p title="{{ repo.technical_details }}">{{ repo.technical_details }}</p>
+                        </div>
+
+                        <!-- Business justification -->
+                        <div class="card-detail" *ngIf="repo.business_justification">
+                            <span>Business Justification</span>
+                            <p title="{{ repo.business_justification }}">{{ repo.business_justification }}</p>
+                        </div>
+
+                        <!-- Customer benefit -->
+                        <div class="card-detail" *ngIf="repo.customer_benefit">
+                            <span>Customer Benefit</span>
+                            <p title="{{ repo.customer_benefit }}">{{ repo.customer_benefit }}</p>
+                        </div>
+
+                        <hr class="card-divider" />
+
+                        <!-- Approvers row -->
+                        <div class="card-approvers">
+                            <span class="approver-chip" *ngIf="repo.irm" title="IRM">IRM: {{ repo.irm }}</span>
+                            
+                        </div>
+
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- Paginator -->
             <p-paginator
                 [totalRecords]="totalitems" [first]="first"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
-                [showCurrentPageReport]="true" [rows]="10"
+                [showCurrentPageReport]="true" [rows]="6"
                 (onPageChange)="onPageChange($event)">
             </p-paginator>
         </div>
@@ -211,6 +423,9 @@ export class ManagePendingReport implements OnInit {
     attachvalid: boolean = false;
     file: any;
     business_justification: any;
+
+    /** 'table' | 'card' */
+    viewMode: 'table' | 'card' = 'card';
 
     // ── Search ──────────────────────────────────────────────────────────────
     searchQuery = signal<string>('');
@@ -292,7 +507,7 @@ export class ManagePendingReport implements OnInit {
 
     onPageChange(event: any) {
         this.PendingCurrentPage = event.page + 1;
-        this.searchQuery.set(''); // reset search on page change
+        this.searchQuery.set('');
         this.loadDemoData(this.PendingCurrentPage);
         localStorage.setItem('PendingCurrentPage', this.PendingCurrentPage.toString());
     }

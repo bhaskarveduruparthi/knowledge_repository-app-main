@@ -31,6 +31,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { User } from '../service/manageadmins.service';
 import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer";
+import { CardModule } from "primeng/card";
 
 interface Column {
     field: string;
@@ -52,392 +53,834 @@ interface ExportColumn {
     selector: 'app-approvals',
     standalone: true,
     styles: [`
-        .background-wrapper {
-            background-color: #e6f2ea;
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap');
+
+        * {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        :host {
+            display: block;
+        }
+
+        .page-wrapper {
             min-height: 100vh;
-            width: 100%;
-            padding: 32px 0;
+            padding: 2rem;
         }
 
-        .card {
-            padding: 0;
-            margin: 0 auto;
-            border-radius: 24px;
-            box-shadow: none;
-            background: transparent;
-        }
-
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        /* ── Toolbar ── */
+        .toolbar-shell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border-radius: 18px;
+            padding: 0.9rem 1.4rem;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 2px 16px rgba(67, 160, 71, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid rgba(165, 214, 167, 0.35);
             gap: 1rem;
-            justify-items: stretch;
         }
 
-        .approval-card {
-            background: rgba(255, 255, 255, 0.13);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            padding: 1.5rem;
-            color: #19202C;
+        .toolbar-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.45rem;
+            font-weight: 400;
+            color: #1b5e20;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .toolbar-title span {
+            color: #43a047;
+        }
+
+        .toolbar-right {
             display: flex;
-            flex-direction: column;
-            min-height: 260px;
-            width: 100%;
-            margin: 0;
-            transition: box-shadow 0.2s;
-        }
-
-        .approval-card:hover {
-            box-shadow: 0 12px 40px rgba(31,38,135,0.18);
-        }
-
-        .approval-card h4 {
-            margin-bottom: 1rem;
-            color: #23304b;
-        }
-
-        .approval-card p {
-            margin: 0.3rem 0;
-            font-size: 1rem;
-        }
-
-        .approval-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
             justify-content: flex-end;
         }
 
-        .p-toolbar {
-            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        }
-
-        .search-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .search-input-container {
+        /* ── Search ── */
+        .search-pill {
             position: relative;
             display: flex;
             align-items: center;
         }
 
-        .search-input-container .pi-search {
+        .search-pill .pi-search {
             position: absolute;
-            left: 0.75rem;
-            color: #6c757d;
+            left: 0.85rem;
+            color: #81c784;
+            font-size: 0.85rem;
             pointer-events: none;
-            z-index: 1;
         }
 
-        .search-input-container input {
-            padding-left: 2.25rem;
-            border-radius: 20px;
-            border: 1px solid #c8e6c9;
-            background: rgba(255,255,255,0.8);
-            width: 280px;
-            height: 38px;
-            font-size: 0.95rem;
+        .search-pill input {
+            padding: 0.5rem 2.2rem 0.5rem 2.3rem;
+            border-radius: 50px;
+            border: 1.5px solid #c8e6c9;
+            background: #f9fafb;
+            width: 290px;
+            font-size: 0.875rem;
+            color: #2e3a2f;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            font-family: 'DM Sans', sans-serif;
         }
 
-        .search-input-container input:focus {
-            border-color: #4caf50;
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.15);
+        .search-pill input::placeholder { color: #aab5ab; }
+
+        .search-pill input:focus {
+            border-color: #43a047;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.12);
         }
 
-        .search-clear-btn {
+        .search-clear {
             position: absolute;
-            right: 0.5rem;
+            right: 0.6rem;
             background: none;
             border: none;
             cursor: pointer;
-            color: #6c757d;
+            color: #aab5ab;
             padding: 0;
-            display: flex;
-            align-items: center;
+            line-height: 1;
+            font-size: 0.78rem;
+            transition: color 0.15s;
+        }
+
+        .search-clear:hover { color: #43a047; }
+
+        .result-badge {
             font-size: 0.8rem;
-        }
-
-        .search-clear-btn:hover {
-            color: #333;
-        }
-
-        .search-result-count {
-            font-size: 0.85rem;
-            color: #6c757d;
+            color: #fff;
+            background: linear-gradient(135deg, #43a047, #66bb6a);
+            border-radius: 50px;
+            padding: 0.2rem 0.7rem;
+            font-weight: 600;
             white-space: nowrap;
         }
 
-        .no-results {
-            text-align: center;
-            padding: 3rem;
-            color: #6c757d;
-            font-size: 1rem;
-            grid-column: 1 / -1;
+        /* ── Grid ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.25rem;
         }
 
-        .no-results .pi {
-            font-size: 3rem;
-            color: #a5d6a7;
-            display: block;
+        /* ── Card ── */
+        .repo-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(165, 214, 167, 0.6);
+            box-shadow: 0 4px 20px rgba(67, 160, 71, 0.09), 0 1px 4px rgba(0,0,0,0.05);
+            padding: 1.5rem 1.5rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        
+
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .repo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(67, 160, 71, 0.15), 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* Card header */
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
             margin-bottom: 1rem;
         }
 
-        .error {
-            border: 1px solid red;
+        .card-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            flex: 1;
+            min-width: 0;
         }
 
+        .card-module {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #1b5e20;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-domain {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+
+        /* Status chip */
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-chip.pending {
+            background: #fff8e1;
+            color: #f57f17;
+            border: 1px solid #ffe082;
+        }
+
+        .status-chip.approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .status-chip.rejected {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .pending .status-dot   { background: #ffa000; }
+        .approved .status-dot  { background: #2e7d32; }
+        .rejected .status-dot  { background: #c62828; }
+
+        /* Meta rows */
+        .card-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            min-width: 0;
+        }
+
+        .meta-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #5d8a5e;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+
+        .meta-value {
+            font-size: 0.855rem;
+            color: #2e3a2f;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Divider */
+        .card-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e8f5e9, #c8e6c9, #e8f5e9, transparent);
+            margin: 0 -0.25rem 1rem;
+        }
+
+        /* Creator row */
+        .card-creator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .creator-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #66bb6a, #2e7d32);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0;
+            flex-shrink: 0;
+        }
+
+        .creator-label {
+            font-size: 0.8rem;
+            color: #6b8c6b;
+        }
+
+        .creator-name {
+            font-weight: 600;
+            color: #2e3a2f;
+        }
+
+        /* Action row */
+        .card-actions {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            margin-top: auto;
+        }
+
+        /* Base override for all action buttons */
+        .card-actions ::ng-deep .p-button {
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 10px !important;
+            border-width: 1.5px !important;
+            border-style: solid !important;
+            transition: all 0.15s ease !important;
+            letter-spacing: 0.01em !important;
+        }
+
+        .card-actions ::ng-deep .p-button:not(:disabled):hover {
+            transform: translateY(-1px) !important;
+        }
+
+        .card-actions ::ng-deep .p-button:disabled {
+            opacity: 0.4 !important;
+        }
+
+        /* Approve */
+        .card-actions ::ng-deep .btn-approve.p-button,
+        .card-actions ::ng-deep .btn-approve .p-button {
+            background: #e8f5e9 !important;
+            color: #1b5e20 !important;
+            border-color: #66bb6a !important;
+        }
+        .card-actions ::ng-deep .btn-approve.p-button:not(:disabled):hover,
+        .card-actions ::ng-deep .btn-approve .p-button:not(:disabled):hover {
+            background: #2e7d32 !important;
+            color: #fff !important;
+            border-color: #2e7d32 !important;
+            box-shadow: 0 4px 14px rgba(46,125,50,0.32) !important;
+        }
+
+        /* Delegate */
+        .card-actions ::ng-deep .btn-delegate.p-button,
+        .card-actions ::ng-deep .btn-delegate .p-button {
+            background: #e3f2fd !important;
+            color: #0d47a1 !important;
+            border-color: #64b5f6 !important;
+        }
+        .card-actions ::ng-deep .btn-delegate.p-button:not(:disabled):hover,
+        .card-actions ::ng-deep .btn-delegate .p-button:not(:disabled):hover {
+            background: #1565c0 !important;
+            color: #fff !important;
+            border-color: #1565c0 !important;
+            box-shadow: 0 4px 14px rgba(21,101,192,0.3) !important;
+        }
+
+        /* Reject */
+        .card-actions ::ng-deep .btn-reject.p-button,
+        .card-actions ::ng-deep .btn-reject .p-button {
+            background: #ffebee !important;
+            color: #b71c1c !important;
+            border-color: #e57373 !important;
+        }
+        .card-actions ::ng-deep .btn-reject.p-button:not(:disabled):hover,
+        .card-actions ::ng-deep .btn-reject .p-button:not(:disabled):hover {
+            background: #c62828 !important;
+            color: #fff !important;
+            border-color: #c62828 !important;
+            box-shadow: 0 4px 14px rgba(198,40,40,0.3) !important;
+        }
+
+        /* Details */
+        .card-actions ::ng-deep .btn-info.p-button,
+        .card-actions ::ng-deep .btn-info .p-button {
+            background: #f0f4f8 !important;
+            color: #37474f !important;
+            border-color: #b0bec5 !important;
+        }
+        .card-actions ::ng-deep .btn-info.p-button:hover,
+        .card-actions ::ng-deep .btn-info .p-button:hover {
+            background: #455a64 !important;
+            color: #fff !important;
+            border-color: #455a64 !important;
+            box-shadow: 0 4px 14px rgba(69,90,100,0.28) !important;
+        }
+
+        /* ── Empty / No-results states ── */
+        .state-card {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            background: #fff;
+            border-radius: 20px;
+            border: 1.5px dashed #c8e6c9;
+            color: #81c784;
+            text-align: center;
+            gap: 0.75rem;
+        }
+
+        .state-card .state-icon {
+            font-size: 2.75rem;
+            color: #a5d6a7;
+        }
+
+        .state-card p {
+            margin: 0;
+            color: #6b8c6b;
+            font-size: 0.95rem;
+        }
+
+        .state-card p.sub {
+            font-size: 0.82rem;
+            color: #a5c8a6;
+        }
+
+        .state-clear-btn {
+            margin-top: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            border-radius: 50px;
+            border: 1.5px solid #a5d6a7;
+            background: transparent;
+            color: #43a047;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.15s;
+        }
+        .state-clear-btn:hover {
+            background: #43a047;
+            color: #fff;
+        }
+
+        /* ── Dialog overrides ── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #6b8c6b;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding-top: 0.1rem;
+        }
+
+        .detail-value {
+            color: #2e3a2f;
+            line-height: 1.5;
+        }
+
+        .detail-divider {
+            grid-column: 1 / -1;
+            height: 1px;
+            background: #e8f5e9;
+            margin: 0.1rem 0;
+        }
+
+        /* ── Paginator ── */
+        .paginator-wrapper {
+            margin-top: 1.75rem;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid rgba(165, 214, 167, 0.35);
+            box-shadow: 0 2px 16px rgba(67, 160, 71, 0.08);
+            overflow: hidden;
+        }
+
+        .paginator-wrapper ::ng-deep .p-paginator {
+            background: transparent !important;
+            border: none !important;
+            padding: 0.5rem 0.75rem !important;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .paginator-wrapper ::ng-deep .p-paginator-page,
+        .paginator-wrapper ::ng-deep .p-paginator-next,
+        .paginator-wrapper ::ng-deep .p-paginator-prev,
+        .paginator-wrapper ::ng-deep .p-paginator-first,
+        .paginator-wrapper ::ng-deep .p-paginator-last {
+            border-radius: 10px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            color: #2e7d32 !important;
+            min-width: 2.2rem !important;
+            height: 2.2rem !important;
+            transition: all 0.15s ease !important;
+            border: 1.5px solid transparent !important;
+        }
+
+        .paginator-wrapper ::ng-deep .p-paginator-page:not(.p-highlight):hover,
+        .paginator-wrapper ::ng-deep .p-paginator-next:not(.p-disabled):hover,
+        .paginator-wrapper ::ng-deep .p-paginator-prev:not(.p-disabled):hover,
+        .paginator-wrapper ::ng-deep .p-paginator-first:not(.p-disabled):hover,
+        .paginator-wrapper ::ng-deep .p-paginator-last:not(.p-disabled):hover {
+            background: #e8f5e9 !important;
+            border-color: #c8e6c9 !important;
+        }
+
+        .paginator-wrapper ::ng-deep .p-paginator-page.p-highlight {
+            background: linear-gradient(135deg, #43a047, #2e7d32) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            border-color: transparent !important;
+            box-shadow: 0 3px 10px rgba(46, 125, 50, 0.35) !important;
+        }
+
+        .paginator-wrapper ::ng-deep .p-paginator-current {
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 0.82rem !important;
+            color: #6b8c6b !important;
+        }
+
+        .paginator-wrapper ::ng-deep .p-paginator-icon {
+            color: #43a047 !important;
+        }
+
+        .paginator-wrapper ::ng-deep .p-disabled .p-paginator-icon {
+            color: #c8e6c9 !important;
+        }
+
+        /* ── Responsive ── */
         @media (max-width: 700px) {
-            .cards-container {
-                grid-template-columns: 1fr;
-            }
-            .approval-card {
-                min-width: 0;
-            }
-            .search-input-container input {
-                width: 180px;
-            }
+            .page-wrapper { padding: 1rem; }
+            .toolbar-shell { flex-direction: column; align-items: flex-start; }
+            .search-pill input { width: 200px; }
+            .cards-grid { grid-template-columns: 1fr; }
         }
     `],
     imports: [
-    CommonModule,
-    TableModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    RippleModule,
-    ToastModule,
-    RouterModule,
-    ToolbarModule,
-    RatingModule,
-    FluidModule,
-    PanelModule,
-    AutoCompleteModule,
-    PaginatorModule,
-    InputTextModule,
-    TextareaModule,
-    SelectModule,
-    RadioButtonModule,
-    InputNumberModule,
-    DialogModule,
-    TagModule,
-    InputIconModule,
-    IconFieldModule,
-    ConfirmDialogModule,
-    PasswordModule,
-    MessageModule,
-    SecureFileViewerComponent
-],
+        CommonModule, TableModule, FormsModule, ReactiveFormsModule, ButtonModule,
+        RippleModule, ToastModule, RouterModule, ToolbarModule, RatingModule, FluidModule,
+        PanelModule, AutoCompleteModule, PaginatorModule, InputTextModule, TextareaModule,
+        SelectModule, RadioButtonModule, InputNumberModule, DialogModule, TagModule,
+        InputIconModule, IconFieldModule, ConfirmDialogModule, PasswordModule, MessageModule,
+        SecureFileViewerComponent,
+        CardModule
+    ],
     template: `
-        <div class="card">
+        <p-card>
+        <div class="page-wrapper">
             <p-toast />
-            <div class="card">
-                <p-toolbar styleClass="mb-6">
-                    <ng-template #start>
-                        <span><strong><h4>Manage Approvals</h4></strong></span>
-                    </ng-template>
 
-                    <ng-template #center>
-                        <!-- Search Bar -->
-                        
-                    </ng-template>
+            <!-- ── Toolbar ── -->
+            <div class="toolbar-shell">
+                <div class="toolbar-title">
+                    Manage <span>Approvals</span>
+                </div>
 
-                    <ng-template #end>
-                        <div class="search-wrapper">
-                            <div class="search-input-container">
-                                <i class="pi pi-search"></i>
-                                <input
-                                    type="text"
-                                    [value]="searchQuery()"
-                                    placeholder="Search by name, module, domain, sector..."
-                                    (input)="onSearchChange($event)"
-                                />
-                                <button
-                                    *ngIf="searchQuery()"
-                                    class="search-clear-btn"
-                                    (click)="clearSearch()"
-                                    title="Clear search">
-                                    <i class="pi pi-times"></i>
-                                </button>
-                            </div>
-                            <span class="search-result-count" *ngIf="searchQuery()">
-                                {{ filteredRepositories().length }} of {{ repositories().length }} results
-                            </span>
-                        </div>
-                        <span></span>
-                        <!--<p-button
-                            label="Go to Repository"
-                            icon="pi pi-arrow-right"
-                            severity="help"
-                            (onClick)="gotoRepos()">
-                        </p-button>-->
-                    </ng-template>
-                </p-toolbar>
-
-                <div class="cards-container">
-                    <!-- No results state -->
-                    <div *ngIf="filteredRepositories().length === 0 && searchQuery()" class="no-results">
+                <div class="toolbar-right">
+                    <div class="search-pill">
                         <i class="pi pi-search"></i>
-                        <p>No repositories found for <b>"{{ searchQuery() }}"</b></p>
-                        <p style="font-size:0.85rem">Try searching by customer name, module, domain, or sector.</p>
-                        <button pButton type="button" label="Clear Search" icon="pi pi-times"
-                            class="p-button-outlined p-button-sm" style="margin-top:0.75rem"
-                            (click)="clearSearch()"></button>
+                        <input
+                            type="text"
+                            [value]="searchQuery()"
+                            placeholder="Search name, module, domain, sector…"
+                            (input)="onSearchChange($event)"
+                        />
+                        <button
+                            *ngIf="searchQuery()"
+                            class="search-clear"
+                            (click)="clearSearch()"
+                            title="Clear search">
+                            <i class="pi pi-times"></i>
+                        </button>
                     </div>
+                    <span *ngIf="searchQuery()" class="result-badge">
+                        {{ filteredRepositories().length }} / {{ repositories().length }}
+                    </span>
+                </div>
+            </div>
 
-                    <!-- Empty state (no data at all) -->
-                    <div *ngIf="repositories().length === 0 && !searchQuery()" class="no-results">
-                        <i class="pi pi-inbox"></i>
-                        <p>No repositories pending approval.</p>
-                    </div>
+            <!-- ── Cards Grid ── -->
+            <div class="cards-grid">
 
-                    <div *ngFor="let repo of filteredRepositories()"
-                         class="approval-card">
-                        <h4>{{ repo.module_name }} - {{ repo.domain }}</h4>
-                        <p><b>Customer:</b> {{ repo.customer_name }}</p>
-                        <p><b>Sector:</b> {{ repo.sector }}</p>
-                        <p><b>Standard/Custom:</b> {{ repo.standard_custom }}</p>
-                        <p><b>Created by:</b> {{ repo.username }}</p>
-                        <div class="approval-actions">
-                            <button pButton type="button" label="Approve" icon="pi pi-check"
-                                class="p-button-success" (click)="approve_dialog(repo)"
-                                [disabled]="repo.Approval_status === 'Approved'"></button>
-                            <button pButton type="button" label="Delegate" icon="pi pi-forward"
-                                class="p-button-info" (click)="delegate_dialog(repo)"
-                                [disabled]="repo.Approval_status === 'Approved'"></button>
-                            <button pButton type="button" label="Reject" icon="pi pi-times"
-                                class="p-button-danger" (click)="reject_dialog(repo)"
-                                [disabled]="repo.Approval_status === 'Approved'"></button>
-                            <button pButton type="button" label="More Info" icon="pi pi-info-circle"
-                                (click)="showDetails(repo)"></button>
+                <!-- No search results -->
+                <div *ngIf="filteredRepositories().length === 0 && searchQuery()" class="state-card">
+                    <i class="pi pi-search state-icon"></i>
+                    <p>No results for <b>"{{ searchQuery() }}"</b></p>
+                    <p class="sub">Try customer name, module, domain, or sector.</p>
+                    <button class="state-clear-btn" (click)="clearSearch()">
+                        <i class="pi pi-times" style="font-size:0.75rem; margin-right:0.3rem"></i>Clear Search
+                    </button>
+                </div>
+
+                <!-- Empty state -->
+                <div *ngIf="repositories().length === 0 && !searchQuery()" class="state-card">
+                    <i class="pi pi-inbox state-icon"></i>
+                    <p>No repositories pending approval.</p>
+                    <p class="sub">Check back later or refresh the page.</p>
+                </div>
+
+                <!-- Repo Cards — uses pagedRepositories() for 6-per-page slicing -->
+                <div *ngFor="let repo of pagedRepositories()" class="repo-card">
+
+                    <!-- Header -->
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div class="card-module" [title]="repo.module_name">{{ repo.module_name }}</div>
+                            <div class="card-domain">{{ repo.domain }}</div>
                         </div>
+                        <span class="status-chip"
+                            [ngClass]="{
+                                'approved': repo.Approval_status === 'Approved',
+                                'rejected': repo.Approval_status === 'Rejected',
+                                'pending':  repo.Approval_status !== 'Approved' && repo.Approval_status !== 'Rejected'
+                            }">
+                            <span class="status-dot"></span>
+                            {{ repo.Approval_status === 'Approved' ? 'Approved' : repo.Approval_status === 'Rejected' ? 'Rejected' : 'Pending' }}
+                        </span>
+                    </div>
+
+                    <!-- Meta grid -->
+                    <div class="card-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Customer</span>
+                            <span class="meta-value" [title]="repo.customer_name">{{ repo.customer_name }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Sector</span>
+                            <span class="meta-value" [title]="repo.sector">{{ repo.sector }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Type</span>
+                            <span class="meta-value">{{ repo.standard_custom }}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-divider"></div>
+
+                    <!-- Creator -->
+                    <div class="card-creator">
+                        <div class="creator-avatar">
+                            {{ (repo.username || 'U').charAt(0).toUpperCase() }}
+                        </div>
+                        <span class="creator-label">
+                            Created by <span class="creator-name">{{ repo.username }}</span>
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card-actions">
+                        <p-button
+                            label="Approve" icon="pi pi-check"
+                            styleClass="btn-approve"
+                            (onClick)="approve_dialog(repo)"
+                            [disabled]="repo.Approval_status === 'Approved'">
+                        </p-button>
+                        <p-button
+                            label="Delegate" icon="pi pi-share-alt"
+                            styleClass="btn-delegate"
+                            (onClick)="delegate_dialog(repo)"
+                            [disabled]="repo.Approval_status === 'Approved'">
+                        </p-button>
+                        <p-button
+                            label="Reject" icon="pi pi-times"
+                            styleClass="btn-reject"
+                            (onClick)="reject_dialog(repo)"
+                            [disabled]="repo.Approval_status === 'Approved'">
+                        </p-button>
+                        <p-button
+                            label="Details" icon="pi pi-info-circle"
+                            styleClass="btn-info"
+                            (onClick)="showDetails(repo)">
+                        </p-button>
                     </div>
                 </div>
             </div>
+
+            <!-- ── Paginator ── -->
+            <div class="paginator-wrapper" *ngIf="filteredRepositories().length > pageSize">
+                <p-paginator
+                    [rows]="pageSize"
+                    [totalRecords]="filteredRepositories().length"
+                    [first]="currentPage() * pageSize"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    (onPageChange)="onPageChange($event)">
+                </p-paginator>
+            </div>
+
         </div>
+        </p-card>
 
-
+        <!-- ── Details Dialog ── -->
         <p-dialog header="Solution Details"
             [(visible)]="dialogVisible"
             [modal]="true"
-            [style]="{width: '700px'}"
+            [style]="{width: '680px', borderRadius: '20px'}"
             (onHide)="closeDetails()">
-            <div *ngIf="selectedRepo">
-                <p><b>Customer Name:</b> {{ selectedRepo.customer_name }}</p>
-                <p><b>Domain:</b> {{ selectedRepo.domain }}</p>
-                <p><b>Sector:</b> {{ selectedRepo.sector }}</p>
-                <p><b>Module Name:</b> {{ selectedRepo.module_name }}</p>
-                <p><b>Detailed Requirement:</b> {{ selectedRepo.detailed_requirement }}</p>
-                <p><b>Standard/Custom:</b> {{ selectedRepo.standard_custom }}</p>
-                <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
-                <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
-                <p><b>Created by:</b> {{ selectedRepo.username }}</p>
-                <app-secure-file-viewer
-      [repoId]="selectedRepo.id"
-      [filename]="selectedRepo.attachment_filename || ''"
-      [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
-      apiBase="http://10.6.102.245:5002">
-    </app-secure-file-viewer>
+            <div *ngIf="selectedRepo" class="detail-grid" style="padding: 0.5rem 0">
+                <span class="detail-label">Customer</span>
+                <span class="detail-value">{{ selectedRepo.customer_name }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Domain</span>
+                <span class="detail-value">{{ selectedRepo.domain }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Sector</span>
+                <span class="detail-value">{{ selectedRepo.sector }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Module</span>
+                <span class="detail-value">{{ selectedRepo.module_name }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Requirement</span>
+                <span class="detail-value">{{ selectedRepo.detailed_requirement }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Std / Custom</span>
+                <span class="detail-value">{{ selectedRepo.standard_custom }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Technical</span>
+                <span class="detail-value">{{ selectedRepo.technical_details }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Benefit</span>
+                <span class="detail-value">{{ selectedRepo.customer_benefit }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Created by</span>
+                <span class="detail-value">{{ selectedRepo.username }}</span>
+                <div class="detail-divider"></div>
+
+                <span class="detail-label">Attachment</span>
+                <span class="detail-value">
+                    <app-secure-file-viewer
+                        [repoId]="selectedRepo.id"
+                        [filename]="selectedRepo.attachment_filename || ''"
+                        [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
+                        apiBase="http://10.6.102.245:5002">
+                    </app-secure-file-viewer>
+                </span>
             </div>
         </p-dialog>
 
-        <p-dialog [(visible)]="approvedialog" header="Approve Solution" [modal]="true" [style]="{ width: '450px' }">
-            <div class="flex align-items-c justify-content-c">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span *ngIf="repository">
-                    Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Solution?
+        <!-- ── Approve Dialog ── -->
+        <p-dialog [(visible)]="approvedialog" header="Approve Solution" [modal]="true" [style]="{ width: '440px' }">
+            <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
+                <i class="pi pi-check-circle" style="font-size:2rem; color:#43a047; flex-shrink:0; margin-top:0.1rem"></i>
+                <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
+                    Confirm approval of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
+                    <br><span style="font-size:0.82rem; color:#81c784">This action will mark the solution as approved.</span>
                 </span>
             </div>
-            <br>
             <ng-template pTemplate="footer">
-                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
-                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Repoapproval(repository)"></button>
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="approvedialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-success" label="Approve" (click)="Repoapproval(repository)"></button>
             </ng-template>
         </p-dialog>
 
+        <!-- ── Delegate Dialog ── -->
         <p-dialog
             [(visible)]="delegatedialog"
             header="Delegate Solution"
             [modal]="true"
-            [style]="{ width: '1020px' }">
-            <div class="flex flex-column" style="gap: 1rem">
-                <div class="flex align-items-center" style="gap: 0.75rem">
-                    <i class="pi pi-exclamation-triangle" style="font-size: 1.8rem"></i>
-                    <span>
-                        Delegate
-                        <b>{{ repository?.customer_name }}'s - {{ repository?.module_name }}</b>
-                        to a user?
+            [style]="{ width: '560px' }">
+            <div style="display:flex; flex-direction:column; gap:1.1rem; padding:0.25rem 0">
+                <div style="display:flex; align-items:flex-start; gap:0.85rem">
+                    <i class="pi pi-share-alt" style="font-size:1.8rem; color:#1565c0; flex-shrink:0"></i>
+                    <span style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
+                        Delegate <b>{{ repository?.module_name }}</b> for <b>{{ repository?.customer_name }}</b> to another user.
                     </span>
                 </div>
 
-                <div class="flex flex-column" style="gap: 0.25rem; padding: 0.75rem 1rem; border-radius: 8px; background: #f5f7fb">
-                    <div class="flex">
-                        <span class="font-bold" style="width: 130px">Domain:</span>
-                        <span>{{ repository?.domain }}</span>
-                    </div>
-                    <div class="flex">
-                        <span class="font-bold" style="width: 130px">Sector:</span>
-                        <span>{{ repository?.sector }}</span>
-                    </div>
-                    <div class="flex">
-                        <span class="font-bold" style="width: 130px">Technical Details:</span>
-                        <span>{{ repository?.technical_details }}</span>
-                    </div>
-                    <div class="flex">
-                        <span class="font-bold" style="width: 130px">Created by:</span>
-                        <span>{{ repository?.username }}</span>
-                    </div>
+                <div style="background:#f5f7fb; border-radius:12px; padding:0.85rem 1rem; display:grid; grid-template-columns:120px 1fr; gap:0.4rem 0.75rem; font-size:0.875rem">
+                    <span style="font-weight:600; color:#6b8c6b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em">Domain</span>
+                    <span style="color:#2e3a2f">{{ repository?.domain }}</span>
+                    <span style="font-weight:600; color:#6b8c6b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em">Sector</span>
+                    <span style="color:#2e3a2f">{{ repository?.sector }}</span>
+                    <span style="font-weight:600; color:#6b8c6b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em">Technical</span>
+                    <span style="color:#2e3a2f">{{ repository?.technical_details }}</span>
+                    <span style="font-weight:600; color:#6b8c6b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em">Created by</span>
+                    <span style="color:#2e3a2f">{{ repository?.username }}</span>
                 </div>
 
-                <div class="flex flex-column" style="gap: 0.25rem">
-                    <label for="delegateUser" class="font-bold">Select User</label>
+                <div style="display:flex; flex-direction:column; gap:0.35rem">
+                    <label style="font-size:0.82rem; font-weight:600; color:#2e3a2f">Select User to Delegate</label>
                     <p-select
                         id="delegateUser"
                         [(ngModel)]="selectedDelegateUserId"
                         [options]="delegateUsers"
                         optionLabel="name"
                         optionValue="id"
-                        placeholder="Click to select user..."
+                        placeholder="Choose a user…"
                         class="w-full"
                         showClear="true"
                         filter="false">
                     </p-select>
-                    <small *ngIf="!selectedDelegateUserId" class="p-error">
-                        User selection is required.
+                    <small *ngIf="!selectedDelegateUserId" style="color:#e57373; font-size:0.78rem">
+                        Please select a user to continue.
                     </small>
                 </div>
             </div>
 
             <ng-template pTemplate="footer">
-                <div class="flex justify-content-end align-items-center w-full" style="gap: 0.75rem">
-                    <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text"
-                        label="Cancel" (click)="delegatedialog = false"></button>
-                    <button pButton pRipple type="button" icon="pi pi-share" class="p-button-info"
-                        label="Delegate" [disabled]="!selectedDelegateUserId"
-                        (click)="delegateRepository()"></button>
-                </div>
+                <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text"
+                    label="Cancel" (click)="delegatedialog = false"></button>
+                <button pButton pRipple type="button" icon="pi pi-share-alt" class="p-button-info"
+                    label="Delegate" [disabled]="!selectedDelegateUserId"
+                    (click)="delegateRepository()"></button>
             </ng-template>
         </p-dialog>
 
-        <p-dialog [(visible)]="rejectdialog" header="Reject Solution" [modal]="true" [style]="{ width: '450px' }">
-            <div class="flex align-items-c justify-content-c">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span *ngIf="repository">
-                    Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Solution?
+        <!-- ── Reject Dialog ── -->
+        <p-dialog [(visible)]="rejectdialog" header="Reject Solution" [modal]="true" [style]="{ width: '440px' }">
+            <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
+                <i class="pi pi-times-circle" style="font-size:2rem; color:#e53935; flex-shrink:0; margin-top:0.1rem"></i>
+                <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
+                    Confirm rejection of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
+                    <br><span style="font-size:0.82rem; color:#ef9a9a">This action will mark the solution as rejected.</span>
                 </span>
             </div>
-            <br>
             <ng-template pTemplate="footer">
-                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="rejectdialog = false"></button>
-                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="Reporeject(repository)"></button>
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="rejectdialog = false"></button>
+                <button pButton pRipple icon="pi pi-ban" class="p-button-danger" label="Reject" (click)="Reporeject(repository)"></button>
             </ng-template>
         </p-dialog>
     `,
@@ -486,8 +929,10 @@ export class ManageApprovals implements OnInit {
     users = signal<User[]>([]);
     delegateUsers: User[] = [];
 
-    // ── Search ──────────────────────────────────────────────────────────────
-    // Must be a signal so computed() can reactively track it
+    // ── Pagination ──
+    pageSize: number = 6;
+    currentPage = signal<number>(0);
+
     searchQuery = signal<string>('');
 
     filteredRepositories = computed(() => {
@@ -506,26 +951,34 @@ export class ManageApprovals implements OnInit {
         });
     });
 
+    // Returns only the current page slice of filtered results
+    pagedRepositories = computed(() => {
+        const all = this.filteredRepositories();
+        const start = this.currentPage() * this.pageSize;
+        return all.slice(start, start + this.pageSize);
+    });
+
+    onPageChange(event: any): void {
+        this.currentPage.set(event.page);
+    }
+
     onSearchChange(event: Event): void {
         const value = (event.target as HTMLInputElement).value;
         this.searchQuery.set(value);
+        this.currentPage.set(0); // Reset to first page on search
     }
 
     clearSearch(): void {
         this.searchQuery.set('');
-        const input = document.querySelector('.search-input-container input') as HTMLInputElement;
+        this.currentPage.set(0); // Reset to first page on clear
+        const input = document.querySelector('.search-pill input') as HTMLInputElement;
         if (input) input.value = '';
     }
-    // ────────────────────────────────────────────────────────────────────────
 
-    get isAdmin(): boolean {
-        return this.downloadvalid === true;
-    }
+    get isAdmin(): boolean { return this.downloadvalid === true; }
 
     get isExportEnabled(): boolean {
-        if (this.isAdmin) {
-            return this.selectedrepositories.length > 0;
-        }
+        if (this.isAdmin) return this.selectedrepositories.length > 0;
         return this.selectedrepositories.length > 0 && this.selectedrepositories.every((repo) => repo.Approval_status === 'Approved');
     }
 
@@ -542,12 +995,7 @@ export class ManageApprovals implements OnInit {
         public router: Router
     ) {
         this.authservice.user.subscribe((x) => {
-            if (x?.type == 'Superadmin') {
-                this.isvalid = true;
-                this.downloadvalid = true;
-                this.sendforapproval = false;
-                this.attachvalid = false;
-            } else if (x?.type == 'manager') {
+            if (x?.type == 'Superadmin' || x?.type == 'manager') {
                 this.isvalid = true;
                 this.downloadvalid = true;
                 this.sendforapproval = false;
@@ -574,6 +1022,7 @@ export class ManageApprovals implements OnInit {
     loadDemoData() {
         this.managereposervice.get_approval_repos().subscribe((data: any) => {
             this.repositories.set(data);
+            this.currentPage.set(0); // Reset page when data reloads
             this.loading = false;
         });
         this.cols = [
@@ -611,7 +1060,6 @@ export class ManageApprovals implements OnInit {
 
     delegate_dialog(repository: Repository) {
         this.repository = { ...repository };
-        console.log('delegateUsers at open:', Array.isArray(this.delegateUsers), this.delegateUsers);
         this.selectedDelegateUserId = null;
         this.delegatedialog = true;
     }
@@ -624,31 +1072,17 @@ export class ManageApprovals implements OnInit {
     loadUsers() {
         this.managereposervice.getUsers().subscribe({
             next: (data: any) => {
-                console.log('RAW getUsers response:', data);
-
                 let usersArray: User[] = [];
-
-                if (Array.isArray(data)) {
-                    usersArray = data as User[];
-                } else if (Array.isArray(data?.data)) {
-                    usersArray = data.data as User[];
-                } else if (Array.isArray(data?.users)) {
-                    usersArray = data.users as User[];
-                } else if (Array.isArray(data?.results)) {
-                    usersArray = data.results as User[];
-                } else {
-                    usersArray = data ? [data as User] : [];
-                }
-
-                console.log('Resolved usersArray:', usersArray);
+                if (Array.isArray(data)) usersArray = data as User[];
+                else if (Array.isArray(data?.data)) usersArray = data.data as User[];
+                else if (Array.isArray(data?.users)) usersArray = data.users as User[];
+                else if (Array.isArray(data?.results)) usersArray = data.results as User[];
+                else usersArray = data ? [data as User] : [];
 
                 this.users.set(usersArray);
                 this.delegateUsers = [...usersArray];
-
-                console.log('delegateUsers final:', this.delegateUsers);
             },
             error: (error: any) => {
-                console.error('getUsers error:', error);
                 this.messageservice.add({
                     severity: 'error',
                     summary: 'Error',
@@ -660,11 +1094,7 @@ export class ManageApprovals implements OnInit {
 
     delegateRepository() {
         if (!this.selectedDelegateUserId || !this.repository?.id) {
-            this.messageservice.add({
-                severity: 'warn',
-                summary: 'Missing data',
-                detail: 'Please select a user to delegate.'
-            });
+            this.messageservice.add({ severity: 'warn', summary: 'Missing data', detail: 'Please select a user to delegate.' });
             return;
         }
 
@@ -679,15 +1109,10 @@ export class ManageApprovals implements OnInit {
             next: () => {
                 this.delegatedialog = false;
                 this.selectedDelegateUserId = null;
-                this.messageservice.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: `Delegated to ${selectedUser?.name}`
-                });
+                this.messageservice.add({ severity: 'success', summary: 'Delegated', detail: `Delegated to ${selectedUser?.name}` });
                 this.reloadPage();
             },
             error: (error: any) => {
-                console.error('Delegate error:', error);
                 this.messageservice.add({
                     severity: 'error',
                     summary: 'Error',
@@ -708,22 +1133,20 @@ export class ManageApprovals implements OnInit {
     Repoapproval(repository: Repository) {
         this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
             this.approvedialog = false;
-            this.messageservice.add({ severity: 'success', summary: 'Repository has been Approved', detail: 'Via ApprovalService' });
+            this.messageservice.add({ severity: 'success', summary: 'Approved', detail: 'Repository has been approved successfully.' });
             this.reloadPage();
         });
     }
 
     Reporeject(repository: Repository) {
         this.managereposervice.RepoRejection(this.repository).subscribe((data: any) => {
-            this.approvedialog = false;
-            this.messageservice.add({ severity: 'success', summary: 'Repository has been Rejected', detail: 'Via ApprovalService' });
+            this.rejectdialog = false;
+            this.messageservice.add({ severity: 'warn', summary: 'Rejected', detail: 'Repository has been rejected.' });
             this.reloadPage();
         });
     }
 
-    opendialog() {
-        this.createdialog = true;
-    }
+    opendialog() { this.createdialog = true; }
 
     form_records() {
         this.managereposervice.get_approval_records().subscribe((data: any) => {
@@ -732,7 +1155,5 @@ export class ManageApprovals implements OnInit {
         });
     }
 
-    reloadPage() {
-        window.location.reload();
-    }
+    reloadPage() { window.location.reload(); }
 }

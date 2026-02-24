@@ -29,6 +29,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer";
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Column {
     field: string;
@@ -50,6 +51,158 @@ interface ExportColumn {
     selector: 'app-managerepos',
     standalone: true,
     styles: `
+        /* ── View toggle ─────────────────────────────────────────────────────── */
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #eef2f7;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .view-toggle button {
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            color: #666;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-toggle button.active {
+            background: #fff;
+            color: #11224E;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        }
+
+        /* ── Card grid ───────────────────────────────────────────────────────── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .repo-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(17, 34, 78, 0.10);
+            border: 1px solid #e4eaf4;
+            padding: 1.25rem 1.25rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+            position: relative;
+        }
+
+        .repo-card:hover {
+            box-shadow: 0 6px 24px rgba(17, 34, 78, 0.16);
+            transform: translateY(-2px);
+        }
+
+        .repo-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .repo-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #11224E;
+            line-height: 1.3;
+        }
+
+        .repo-card-subtitle {
+            font-size: 0.82rem;
+            color: #6b7a99;
+            margin-top: 2px;
+        }
+
+        .repo-card-select {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            accent-color: #11224E;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .repo-card.has-checkbox {
+            padding-left: 2.25rem;
+        }
+
+        .repo-card-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .badge-domain {
+            background: #e8f0fb;
+            color: #2457b3;
+        }
+
+        .badge-sector {
+            background: #f0f7ee;
+            color: #2e7d32;
+        }
+
+        .repo-card-field {
+            font-size: 0.83rem;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .repo-card-field strong {
+            color: #11224E;
+            font-weight: 600;
+        }
+
+        .repo-card-divider {
+            border: none;
+            border-top: 1px solid #eef2f7;
+            margin: 0.25rem 0;
+        }
+
+        .repo-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .repo-card-meta {
+            font-size: 0.77rem;
+            color: #8a96b0;
+        }
+
+        .repo-card-actions {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* ── Existing styles (kept) ──────────────────────────────────────────── */
         .custom-file-input {
             border: 1px solid #ced4da;
             border-radius: 6px;
@@ -154,6 +307,10 @@ interface ExportColumn {
             .form-grid {
                 grid-template-columns: 1fr;
             }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         label.required:after {
@@ -187,33 +344,34 @@ interface ExportColumn {
         }
     `,
     imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    RippleModule,
-    ToastModule,
-    RouterModule,
-    ToolbarModule,
-    RatingModule,
-    FluidModule,
-    PanelModule,
-    AutoCompleteModule,
-    PaginatorModule,
-    InputTextModule,
-    TextareaModule,
-    SelectModule,
-    RadioButtonModule,
-    InputNumberModule,
-    DialogModule,
-    TagModule,
-    InputIconModule,
-    IconFieldModule,
-    ConfirmDialogModule,
-    PasswordModule,
-    MessageModule,
-    SecureFileViewerComponent
-],
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ButtonModule,
+        RippleModule,
+        ToastModule,
+        RouterModule,
+        ToolbarModule,
+        RatingModule,
+        FluidModule,
+        PanelModule,
+        AutoCompleteModule,
+        PaginatorModule,
+        InputTextModule,
+        TextareaModule,
+        SelectModule,
+        RadioButtonModule,
+        InputNumberModule,
+        DialogModule,
+        TagModule,
+        InputIconModule,
+        IconFieldModule,
+        ConfirmDialogModule,
+        PasswordModule,
+        MessageModule,
+        TooltipModule,
+        SecureFileViewerComponent
+    ],
     template: `
         <p-toast />
         <div class="card">
@@ -228,97 +386,108 @@ interface ExportColumn {
                 </ng-template>
             </p-toolbar>
 
-            <!-- Header row: title + search bar -->
+            <!-- Header row: title + search bar + view toggle -->
             <div class="flex items-center justify-between mb-3" style="flex-wrap: wrap; gap: 0.75rem;">
                 <h5 class="m-0">Manage Solutions</h5>
-                <div class="table-search-bar">
-                    <p-iconfield>
-                        <p-inputicon styleClass="pi pi-search" />
-                        <input
-                            pInputText
-                            type="text"
-                            [value]="tableSearchTerm"
-                            (input)="onTableSearch($event)"
-                            placeholder="Search solutions..."
-                            style="min-width: 260px;" />
-                    </p-iconfield>
-                    <!-- Clear button: only visible during an active search -->
-                    <p-button
-                        *ngIf="isTableSearchMode"
-                        icon="pi pi-times"
-                        severity="secondary"
-                        [rounded]="true"
-                        (onClick)="clearTableSearch()"
-                        pTooltip="Clear search">
-                    </p-button>
-                    <!-- Result count shown while searching -->
-                    <span *ngIf="isTableSearchMode" class="search-result-badge">
-                        {{ totalitems }} result(s) for "{{ tableSearchTerm }}"
-                    </span>
+
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <!-- Search bar -->
+                    <div class="table-search-bar">
+                        <p-iconfield>
+                            <p-inputicon styleClass="pi pi-search" />
+                            <input
+                                pInputText
+                                type="text"
+                                [value]="tableSearchTerm"
+                                (input)="onTableSearch($event)"
+                                placeholder="Search solutions..."
+                                style="min-width: 260px;" />
+                        </p-iconfield>
+                        <p-button
+                            *ngIf="isTableSearchMode"
+                            icon="pi pi-times"
+                            severity="secondary"
+                            [rounded]="true"
+                            (onClick)="clearTableSearch()"
+                            pTooltip="Clear search">
+                        </p-button>
+                        <span *ngIf="isTableSearchMode" class="search-result-badge">
+                            {{ totalitems }} result(s) for "{{ tableSearchTerm }}"
+                        </span>
+                    </div>
+
+                    <!-- View toggle -->
+                    <div class="view-toggle">
+                        <button
+                            [class.active]="viewMode === 'table'"
+                            (click)="viewMode = 'table'"
+                            pTooltip="Table view"
+                            tooltipPosition="top">
+                            <i class="pi pi-table"></i>
+                        </button>
+                        <button
+                            [class.active]="viewMode === 'card'"
+                            (click)="viewMode = 'card'"
+                            pTooltip="Card view"
+                            tooltipPosition="top">
+                            <i class="pi pi-th-large"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="custom-table-container">
-                <table class="glass-table">
-                    <thead>
-                        <tr>
-                            <th *ngIf="isadmin">Select</th>
-                            <th *ngIf="customervalid">Customer Name</th>
-                            <th>Domain</th>
-                            <th>Sector</th>
-                            <th>Module Name</th>
-                            <th>Detailed Requirement</th>
-                            <th>Object Type</th>
-                            <th>Technical details</th>
-                            <th>Customer Benefit</th>
-                            <th>Code/Process Document</th>
-                            <th>Created On</th>
-                            <th>Created User</th>
-                            <th>Immediate Response Manager(IRM)</th>
-                            <th>Secondary Response Manager(SRM)</th>
-                            <th>Business Unit Head(BUH)</th>
-                            <th>Business Group Head(BGH)</th>
-                            <th>Status</th>
-                            <th>By User</th>
-                            <th *ngIf="isadmin">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let repo of repositories()">
-                            <td *ngIf="isadmin">
-                                <input type="checkbox"
-                                    [checked]="isRepoSelected(repo)"
-                                    (change)="onCheckboxChange(repo, $event)"
-                                    [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
-                            </td>
-                            <td *ngIf="customervalid" style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                            <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                            <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                            <td style="white-space: nowrap;">{{ repo.module_name }}</td>
-                            <td>{{ repo.detailed_requirement }}</td>
-                            <td>{{ repo.standard_custom }}</td>
-                            <td>{{ repo.technical_details }}</td>
-                            <td>{{ repo.customer_benefit }}</td>
-                            <td>
-                                <div class="flex" style="min-width: 300px; gap: 0.5rem;">
-                                     <app-secure-file-viewer
-      [repoId]="repo.id"
-      [filename]="repo.attachment_filename || ''"
-      [disabled]="repo.attach_code_or_document === 'UPLOADED'"
-      apiBase="http://10.6.102.245:5002">
-    </app-secure-file-viewer>
-                                    <ng-container *ngIf="isAdmin; else normalUserBlock">
-                                        <p-button
-                                            label="Download"
-                                            icon="pi pi-download"
-                                            severity="primary"
-                                            (click)="download_ref(repo, repo.id)"
-                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                        </p-button>
-                                    </ng-container>
-
-                                    <ng-template #normalUserBlock>
-                                        <ng-container *ngIf="repo.download_approved; else requestBlock">
+            <!-- ══ TABLE VIEW ═════════════════════════════════════════════════ -->
+            <ng-container *ngIf="viewMode === 'table'">
+                <div class="custom-table-container">
+                    <table class="glass-table">
+                        <thead>
+                            <tr>
+                                <th *ngIf="isadmin">Select</th>
+                                <th *ngIf="customervalid">Customer Name</th>
+                                <th>Domain</th>
+                                <th>Sector</th>
+                                <th>Module Name</th>
+                                <th>Detailed Requirement</th>
+                                <th>Object Type</th>
+                                <th>Technical details</th>
+                                <th>Customer Benefit</th>
+                                <th>Code/Process Document</th>
+                                <th>Created On</th>
+                                <th>Created User</th>
+                                <th>Immediate Response Manager(IRM)</th>
+                                <th>Secondary Response Manager(SRM)</th>
+                                <th>Business Unit Head(BUH)</th>
+                                <th>Business Group Head(BGH)</th>
+                                <th>Status</th>
+                                <th>By User</th>
+                                <th *ngIf="isadmin">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let repo of repositories()">
+                                <td *ngIf="isadmin">
+                                    <input type="checkbox"
+                                        [checked]="isRepoSelected(repo)"
+                                        (change)="onCheckboxChange(repo, $event)"
+                                        [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
+                                </td>
+                                <td *ngIf="customervalid" style="white-space: nowrap;">{{ repo.customer_name }}</td>
+                                <td style="white-space: nowrap;">{{ repo.domain }}</td>
+                                <td style="white-space: nowrap;">{{ repo.sector }}</td>
+                                <td style="white-space: nowrap;">{{ repo.module_name }}</td>
+                                <td>{{ repo.detailed_requirement }}</td>
+                                <td>{{ repo.standard_custom }}</td>
+                                <td>{{ repo.technical_details }}</td>
+                                <td>{{ repo.customer_benefit }}</td>
+                                <td>
+                                    <div class="flex" style="min-width: 300px; gap: 0.5rem;">
+                                        <app-secure-file-viewer
+                                            [repoId]="repo.id"
+                                            [filename]="repo.attachment_filename || ''"
+                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'"
+                                            apiBase="http://10.6.102.245:5002">
+                                        </app-secure-file-viewer>
+                                        <ng-container *ngIf="isAdmin; else normalUserBlock">
                                             <p-button
                                                 label="Download"
                                                 icon="pi pi-download"
@@ -327,63 +496,240 @@ interface ExportColumn {
                                                 [disabled]="repo.attach_code_or_document === 'UPLOADED'">
                                             </p-button>
                                         </ng-container>
-
-                                        <ng-template #requestBlock>
-                                            <p-button
-                                                label="Request"
-                                                icon="pi pi-send"
-                                                severity="help"
-                                                (click)="openDownloadRequestDialog(repo)"
-                                                [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                            </p-button>
+                                        <ng-template #normalUserBlock>
+                                            <ng-container *ngIf="repo.download_approved; else requestBlock">
+                                                <p-button
+                                                    label="Download"
+                                                    icon="pi pi-download"
+                                                    severity="primary"
+                                                    (click)="download_ref(repo, repo.id)"
+                                                    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                                </p-button>
+                                            </ng-container>
+                                            <ng-template #requestBlock>
+                                                <p-button
+                                                    label="Request"
+                                                    icon="pi pi-send"
+                                                    severity="help"
+                                                    (click)="openDownloadRequestDialog(repo)"
+                                                    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                                </p-button>
+                                            </ng-template>
                                         </ng-template>
+                                    </div>
+                                </td>
+                                <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
+                                <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
+                                <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>
+                                <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
+                                <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
+                                <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
+                                <td style="white-space: nowrap; text-align: center">
+                                    <p-tag
+                                        [value]="repo.Approval_status"
+                                        [severity]="getApprovalSeverity(repo.Approval_status)"
+                                        [rounded]="true">
+                                    </p-tag>
+                                </td>
+                                <td style="white-space: nowrap; text-align: center">
+                                    <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">
+                                        Solution with {{ repo.username }}
+                                    </ng-container>
+                                    <ng-template #validated>
+                                        Validated by {{ repo.Approver }}
                                     </ng-template>
-                                </div>
-                            </td>
-                            <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
-                            <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
-                            <td style="white-space: nowrap; text-align: center">
-                                <p-tag
-                                    [value]="repo.Approval_status"
-                                    [severity]="getApprovalSeverity(repo.Approval_status)"
-                                    [rounded]="true">
-                                </p-tag>
-                            </td>
-                            <td style="white-space: nowrap; text-align: center">
-                                <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">
-                                    Solution with {{ repo.username }}
-                                </ng-container>
-                                <ng-template #validated>
-                                    Validated by {{ repo.Approver }}
-                                </ng-template>
-                            </td>
-                            <td>
-                                <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                    <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="isadmin" (click)="upload_ref(repo)"></button>
-                                    <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" *ngIf="isadmin" (click)="delete_Repo(repo)"></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="repositories().length === 0 && !loading">
-                            <td colspan="19" style="text-align:center; padding: 2rem;">No Repositories found.</td>
-                        </tr>
-                        <tr *ngIf="loading">
-                            <td colspan="19" style="text-align:center; padding: 2rem;">Loading Data...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                </td>
+                                <td>
+                                    <div class="flex" style="min-width: 100px; gap: 0.5rem;">
+                                        <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="isadmin" (click)="upload_ref(repo)"></button>
+                                        <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" *ngIf="isadmin" (click)="delete_Repo(repo)"></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="repositories().length === 0 && !loading">
+                                <td colspan="19" style="text-align:center; padding: 2rem;">No Repositories found.</td>
+                            </tr>
+                            <tr *ngIf="loading">
+                                <td colspan="19" style="text-align:center; padding: 2rem;">Loading Data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </ng-container>
 
+            <!-- ══ CARD VIEW ══════════════════════════════════════════════════ -->
+            <ng-container *ngIf="viewMode === 'card'">
+                <!-- Loading state -->
+                <div *ngIf="loading" style="text-align:center; padding: 2rem; color:#666;">
+                    <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
+                    <p>Loading Data...</p>
+                </div>
+
+                <!-- Empty state -->
+                <div *ngIf="!loading && repositories().length === 0" style="text-align:center; padding: 3rem; color:#888;">
+                    <i class="pi pi-inbox" style="font-size:3rem; display:block; margin-bottom:1rem;"></i>
+                    No Repositories found.
+                </div>
+
+                <!-- Cards -->
+                <div class="card-grid" *ngIf="!loading && repositories().length > 0">
+                    <div
+                        class="repo-card"
+                        [class.has-checkbox]="isadmin"
+                        *ngFor="let repo of repositories()">
+
+                        <!-- Select checkbox (admin only) -->
+                        <input
+                            *ngIf="isadmin"
+                            type="checkbox"
+                            class="repo-card-select"
+                            [checked]="isRepoSelected(repo)"
+                            (change)="onCheckboxChange(repo, $event)"
+                            [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
+                        <br>
+                        <!-- Header: customer name + status tag -->
+                        <div class="repo-card-header">
+                            <div>
+                                <div class="repo-card-title">{{ repo.module_name }}</div>
+                                <div class="repo-card-subtitle" *ngIf="customervalid">{{ repo.customer_name }}</div>
+                            </div>
+                            <p-tag
+                                [value]="repo.Approval_status"
+                                [severity]="getApprovalSeverity(repo.Approval_status)"
+                                [rounded]="true"
+                                style="flex-shrink:0">
+                            </p-tag>
+                        </div>
+
+                        <!-- Domain / Sector badges -->
+                        <div class="repo-card-badges">
+                            <span class="badge badge-domain">Domain: {{ repo.domain }}</span>
+                            <span class="badge badge-sector">Sector: {{ repo.sector }}</span>
+                        </div>
+
+                        <hr class="repo-card-divider" />
+
+                        <!-- Key fields -->
+                        <div class="repo-card-field" *ngIf="repo.detailed_requirement">
+                            <strong>Detail Requirement:</strong> {{ repo.detailed_requirement || 'NA' }}
+                        </div>
+                        <div class="repo-card-field" *ngIf="repo.technical_details">
+                            <strong>Technical Details:</strong> {{ repo.technical_details || 'NA' }}
+                        </div>
+                        <div class="repo-card-field" *ngIf="repo.customer_benefit">
+                            <strong>Customer Benefit:</strong> {{ repo.customer_benefit || 'NA' }}
+                        </div>
+                        <div class="repo-card-field" *ngIf="repo.standard_custom">
+                            <strong>Object Type:</strong> {{ repo.standard_custom }}
+                        </div>
+
+                        <!-- Approval chain -->
+                        <div class="repo-card-field" >
+                            <strong>IRM:</strong> {{ repo.irm || 'NA' }} 
+                        </div>
+
+                        <hr class="repo-card-divider" />
+
+                        <!-- Footer: meta + actions -->
+                        <div class="repo-card-footer">
+                            <div class="repo-card-meta">
+                                
+                                <i class="pi pi-user" style="margin-right:4px"></i>{{ repo.username }}
+                                &nbsp;&nbsp;
+                                <i class="pi pi-calendar" style="margin-right:4px"></i>Created on: {{ formatDate(repo.created_at) }}
+                            </div>
+
+                            <div class="repo-card-actions">
+                                <!-- File viewer -->
+                                <app-secure-file-viewer
+                                    [repoId]="repo.id"
+                                    [filename]="repo.attachment_filename || ''"
+                                    [disabled]="repo.attach_code_or_document === 'UPLOADED'"
+                                    apiBase="http://127.0.0.1:5001">
+                                </app-secure-file-viewer>
+
+                                <!-- Download / Request -->
+                                <ng-container *ngIf="isAdmin; else cardNormalUser">
+                                    <p-button
+                                        icon="pi pi-download"
+                                        severity="primary"
+                                        [rounded]="true"
+                                        pTooltip="Download"
+                                        tooltipPosition="top"
+                                        (click)="download_ref(repo, repo.id)"
+                                        [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                    </p-button>
+                                </ng-container>
+
+                                <ng-template #cardNormalUser>
+                                    <ng-container *ngIf="repo.download_approved; else cardRequest">
+                                        <p-button
+                                            icon="pi pi-download"
+                                            severity="primary"
+                                            [rounded]="true"
+                                            pTooltip="Download"
+                                            tooltipPosition="top"
+                                            (click)="download_ref(repo, repo.id)"
+                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                        </p-button>
+                                    </ng-container>
+                                    <ng-template #cardRequest>
+                                        <p-button
+                                            icon="pi pi-send"
+                                            severity="help"
+                                            [rounded]="true"
+                                            pTooltip="Request Access"
+                                            tooltipPosition="top"
+                                            (click)="openDownloadRequestDialog(repo)"
+                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'">
+                                        </p-button>
+                                    </ng-template>
+                                </ng-template>
+
+                                <!-- Admin actions -->
+                                <ng-container *ngIf="isadmin">
+                                    <p-button
+                                        pButton pRipple
+                                        icon="pi pi-paperclip"
+                                        severity="info"
+                                        [rounded]="true"
+                                        pTooltip="Attach Document"
+                                        tooltipPosition="top"
+                                        (click)="upload_ref(repo)">
+                                    </p-button>
+                                    <p-button
+                                        pButton pRipple
+                                        icon="pi pi-trash"
+                                        [rounded]="true"
+                                        severity="danger"
+                                        pTooltip="Delete"
+                                        tooltipPosition="top"
+                                        (click)="delete_Repo(repo)">
+                                    </p-button>
+                                </ng-container>
+                            </div>
+                        </div>
+
+                        <!-- Validated by line -->
+                        <div class="repo-card-meta" style="margin-top:2px;">
+                            <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else cardValidated">
+                                <i class="pi pi-clock" style="margin-right:4px"></i>Solution with {{ repo.username }}
+                            </ng-container>
+                            <ng-template #cardValidated>
+                                <i class="pi pi-check-circle" style="margin-right:4px;color:#2e7d32"></i>Validated by {{ repo.Approver }}
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- Paginator (shared) -->
             <p-paginator
                 [totalRecords]="totalitems"
                 [first]="first"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
                 [showCurrentPageReport]="true"
-                [rows]="10"
+                [rows]="6"
                 (onPageChange)="onPageChange($event)">
             </p-paginator>
         </div>
@@ -645,6 +991,9 @@ export class ManageRepos implements OnInit {
     selectedDomain: string = '';
     file: any;
 
+    /** Controls which view is active: 'table' | 'card' */
+    viewMode: 'table' | 'card' = 'card';
+
     // ── Table search properties ──────────────────────────────────────────────
     tableSearchTerm: string = '';
     isTableSearchMode: boolean = false;
@@ -723,6 +1072,13 @@ export class ManageRepos implements OnInit {
             this.loadDemoData(this.CurrentPage);
             this.first = (this.CurrentPage - 1) * 10;
         }
+
+        // Restore last used view preference
+        const savedView = localStorage.getItem('repoViewMode');
+if (savedView === 'card' || savedView === 'table') {
+    this.viewMode = savedView;
+}
+
         this.form_records();
         this.repoForm = new FormGroup({
             customer_name: new FormControl('', Validators.required),
@@ -781,7 +1137,13 @@ export class ManageRepos implements OnInit {
         });
     }
 
-    // ── Existing onSearch — untouched, used by other components ─────────────
+    // ── View mode toggle with localStorage persistence ───────────────────────
+    setViewMode(mode: 'table' | 'card') {
+        this.viewMode = mode;
+        localStorage.setItem('repoViewMode', mode);
+    }
+
+    // ── Existing onSearch — untouched ────────────────────────────────────────
     onSearch(event: Event) {
         const value = (event.target as HTMLInputElement).value.toLowerCase();
         this.searchTerm = value;
@@ -799,9 +1161,7 @@ export class ManageRepos implements OnInit {
         }
     }
 
-    // ── NEW: Table search methods ────────────────────────────────────────────
-
-    /** Called on every keystroke in the search input. Debounces 400 ms. */
+    // ── Table search methods ─────────────────────────────────────────────────
     onTableSearch(event: Event) {
         const value = (event.target as HTMLInputElement).value.trim();
         this.tableSearchTerm = value;
@@ -817,7 +1177,6 @@ export class ManageRepos implements OnInit {
         }, 400);
     }
 
-    /** Calls the /table-search API with the current term and page. */
     doTableSearch(page: number) {
         if (!this.tableSearchTerm) return;
         this.loading = true;
@@ -842,7 +1201,6 @@ export class ManageRepos implements OnInit {
         });
     }
 
-    /** Clears the search and restores normal paginated browse. */
     clearTableSearch() {
         this.tableSearchTerm = '';
         this.isTableSearchMode = false;
@@ -852,7 +1210,6 @@ export class ManageRepos implements OnInit {
         this.loadDemoData(1);
         this.form_records();
     }
-
     // ────────────────────────────────────────────────────────────────────────
 
     openDownloadRequestDialog(repo: Repository) {
@@ -1138,13 +1495,11 @@ export class ManageRepos implements OnInit {
         });
     }
 
-    /** Page change — routes to search API or normal API depending on mode. */
     onPageChange(event: any) {
         this.CurrentPage = event.page + 1;
         this.first = event.first;
 
         if (this.isTableSearchMode) {
-            // Stay in search mode: fetch next page of search results
             this.doTableSearch(this.CurrentPage);
         } else {
             this.loadDemoData(this.CurrentPage);

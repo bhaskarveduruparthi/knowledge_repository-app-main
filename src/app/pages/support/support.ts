@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -6,31 +6,22 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { Router, RouterModule } from '@angular/router';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { User, ManageAdminsService } from '../service/manageadmins.service';
 import { AuthenticationService } from '../service/authentication.service';
-import { PanelModule } from 'primeng/panel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 import { PaginatorModule } from 'primeng/paginator';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import { FluidModule } from 'primeng/fluid';
 import { ManageReposService } from '../service/managerepos.service';
 import { Subject, takeUntil } from 'rxjs';
-import { Badge } from "primeng/badge";
 
 interface Question {
   id: number;
@@ -71,16 +62,10 @@ interface Answer {
     ToastModule,
     RouterModule,
     ToolbarModule,
-    RatingModule,
     FluidModule,
-    PanelModule,
-    AutoCompleteModule,
-    PaginatorModule,
     InputTextModule,
     TextareaModule,
     SelectModule,
-    RadioButtonModule,
-    InputNumberModule,
     DialogModule,
     TagModule,
     InputIconModule,
@@ -88,597 +73,994 @@ interface Answer {
     ConfirmDialogModule,
     PasswordModule,
     MessageModule,
-    Badge
+    PaginatorModule,
+    SelectModule,
   ],
   providers: [MessageService, ConfirmationService],
   styles: [`
     :host {
       display: block;
       min-height: 100vh;
-      padding: 1rem;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
-    .main-container {
-      max-width: 1400px;
+    /* ── Page Shell ── */
+    .page-wrapper {
+      max-width: 900px;
       margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
     }
 
-    .p-toolbar {
-      background: rgba(255, 255, 255, 0.95) !important;
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      margin-bottom: 2rem;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-      padding: 1rem 2rem;
-    }
-
-    .filters-section {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(20px);
-      padding: 2rem;
-      border-radius: 20px;
-      margin-bottom: 2rem;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    }
-
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .question-card {
-      background: rgba(255, 255, 255, 0.97);
-      backdrop-filter: blur(25px);
-      border-radius: 24px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      margin-bottom: 2.5rem;
-      overflow: hidden;
-      transition: all 0.4s ease;
-      min-height: 450px;
-      max-width: 100%;
-    }
-
-    .question-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 35px 80px rgba(0,0,0,0.2);
-    }
-
-    .question-header {
-      padding: 2.5rem 2.5rem 2rem;
-      border-bottom: 2px solid rgba(79, 70, 229, 0.1);
-      background: linear-gradient(135deg, rgba(248, 249, 255, 0.8), rgba(232, 236, 255, 0.8));
-      min-height: 120px;
-    }
-
-    .question-title {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #1e293b;
-      margin: 0 0 1rem 0;
-      line-height: 1.4;
-      max-width: 80%;
-    }
-
-    .question-meta {
+    /* ── Page Header ── */
+    .page-header {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      justify-content: space-between;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    .question-stats {
+    .page-header-left {
       display: flex;
-      gap: 2rem;
-      font-size: 1rem;
-      color: #475569;
+      align-items: center;
+      gap: 0.875rem;
     }
 
-    .stat-item {
+    .page-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #1a3a1a;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .page-icon-wrap i {
+      color: #4ade80;
+      font-size: 1.25rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a3a1a;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      font-size: 0.85rem;
+      color: #6b8f6b;
+      margin: 0;
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.625rem;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      padding: 0.55rem 1.25rem;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
       font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
     }
+    .btn-primary:hover { background: #15803d; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
 
-    .question-actions {
-      display: flex;
-      gap: 0.75rem;
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      background: #fff;
+      color: #374151;
+      border: 1.5px solid #d1fae5;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
     }
+    .btn-secondary:hover { background: #f0fdf4; border-color: #86efac; }
 
-    .answer-section {
-      padding: 2rem 2.5rem 2rem;
-      min-height: 200px;
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      background: transparent;
+      color: #16a34a;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 7px;
+      font-size: 0.825rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
     }
+    .btn-ghost:hover { background: #f0fdf4; }
+    .btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    .answer-item {
-      display: flex;
-      gap: 1.5rem;
-      padding: 2rem;
+    /* ── Search / Filter Bar ── */
+    .filter-bar {
+      background: #fff;
+      border: 1.5px solid #e7f5e7;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
       margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-      border-radius: 20px;
-      border-left: 5px solid #10b981;
-      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
-      transition: all 0.3s ease;
+      display: flex;
+      gap: 0.875rem;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 1px 4px rgba(22,163,74,0.06);
     }
 
-    .answer-item:hover {
-      transform: translateX(8px);
-      box-shadow: 0 15px 40px rgba(16, 185, 129, 0.15);
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
     }
 
-    .answer-avatar {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #10b981, #059669);
+    .search-wrap i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 0.875rem 0.5rem 2.25rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #111827;
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .search-input:focus { border-color: #4ade80; background: #fff; }
+
+    .filter-select {
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #374151;
+      background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 0.6rem center;
+      appearance: none;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .filter-select:focus { border-color: #4ade80; }
+
+    .filter-count {
+      font-size: 0.8rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    /* ── Loading ── */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 2rem;
+      gap: 1rem;
+      color: #6b7280;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #d1fae5;
+      border-top-color: #16a34a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      background: #fff;
+      border: 1.5px solid #e7f5e7;
+      border-radius: 16px;
+    }
+
+    .empty-icon {
+      width: 72px;
+      height: 72px;
+      background: #f0fdf4;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      color: white;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      margin: 0 auto 1.25rem;
     }
 
-    .answer-content {
+    .empty-icon i { font-size: 2rem; color: #86efac; }
+
+    .empty-state h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a3a1a;
+      margin: 0 0 0.5rem;
+    }
+
+    .empty-state p {
+      color: #6b7280;
+      margin: 0 0 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* ── Question Card ── */
+    .question-card {
+      background: #fff;
+      border: 1.5px solid #e7f5e7;
+      border-radius: 14px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+      box-shadow: 0 1px 4px rgba(22,163,74,0.06);
+    }
+
+    .question-card:hover {
+      border-color: #86efac;
+      box-shadow: 0 4px 20px rgba(22,163,74,0.1);
+      transform: translateY(-2px);
+    }
+
+    /* ── Card Header ── */
+    .card-header {
+      padding: 1.25rem 1.5rem 1rem;
+      border-bottom: 1px solid #f0fdf4;
+      background: linear-gradient(180deg, #f9fff9 0%, #fff 100%);
+    }
+
+    .card-header-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .status-badge {
+      flex-shrink: 0;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .badge-open    { background: #dcfce7; color: #15803d; }
+    .badge-progress { background: #fef9c3; color: #a16207; }
+    .badge-closed  { background: #fee2e2; color: #b91c1c; }
+    .badge-pending { background: #dbeafe; color: #1d4ed8; }
+
+    .card-question-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+      line-height: 1.45;
       flex: 1;
     }
 
-    .answer-text {
-      color: #1e293b;
-      line-height: 1.7;
-      margin-bottom: 1rem;
-      font-size: 1.05rem;
-    }
-
-    .answer-meta {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      font-size: 0.95rem;
-      color: #64748b;
-      font-weight: 500;
-    }
-
-    .vote-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 0.75rem 1.5rem;
-      border-radius: 30px;
-      border: 2px solid #e2e8f0;
-      backdrop-filter: blur(10px);
-    }
-
-    .vote-btn {
-      background: none;
-      border: none;
-      padding: 0.75rem;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .card-meta {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 1.25rem;
+      font-size: 0.78rem;
+      color: #6b7280;
+      flex-wrap: wrap;
+    }
+
+    .meta-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1a3a1a;
+      color: #4ade80;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .meta-dot { color: #d1d5db; }
+
+    /* ── Card Body ── */
+    .card-body {
+      padding: 1rem 1.5rem;
+    }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: #374151;
+      line-height: 1.65;
+      margin: 0 0 0.875rem;
+    }
+
+    .biz-justification {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .biz-justification i {
+      color: #16a34a;
+      font-size: 0.9rem;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .biz-justification-text {
+      font-size: 0.825rem;
+      color: #15803d;
+      line-height: 1.55;
+    }
+
+    .biz-label {
       font-weight: 600;
+      margin-right: 0.25rem;
     }
 
-    .vote-btn.upvote:hover:not(.voted) { 
-      color: #10b981; 
-      background: rgba(16,185,129,0.15);
-      transform: scale(1.1);
-    }
-    .vote-btn.downvote:hover:not(.voted) { 
-      color: #ef4444; 
-      background: rgba(239,68,68,0.15);
-      transform: scale(1.1);
-    }
-    .vote-btn.voted { 
-      background: rgba(16,185,129,0.25); 
-      color: #10b981; 
-      transform: scale(1.05);
+    /* ── Stats Row ── */
+    .card-stats {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.625rem 1.5rem;
+      border-top: 1px solid #f3f4f6;
+      border-bottom: 1px solid #f3f4f6;
+      background: #fafafa;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 6rem 3rem;
-      color: #64748b;
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: #6b7280;
+      font-weight: 500;
     }
 
-    .loading-skeleton {
-      animation: pulse 1.5s ease-in-out infinite;
+    .stat-pill i { font-size: 0.75rem; color: #9ca3af; }
+    .stat-pill .count { color: #374151; font-weight: 600; }
+
+    /* ── Top Answer Preview ── */
+    .answer-preview-wrap {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f3f4f6;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+    .answer-preview-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.625rem;
     }
+
+    .answer-preview {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      background: #f9fff9;
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      border-left: 3px solid #16a34a;
+    }
+
+    .answer-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #16a34a, #059669);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .answer-preview-content { flex: 1; min-width: 0; }
+
+    .answer-preview-text {
+      font-size: 0.85rem;
+      color: #374151;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .answer-preview-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .vote-row {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .vote-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.6rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .vote-btn.upvote:hover { border-color: #86efac; color: #16a34a; background: #f0fdf4; }
+    .vote-btn.downvote:hover { border-color: #fca5a5; color: #dc2626; background: #fff5f5; }
+    .vote-btn.voted-up { border-color: #4ade80; color: #16a34a; background: #f0fdf4; }
+    .vote-btn.voted-down { border-color: #f87171; color: #dc2626; background: #fff5f5; }
+
+    .no-answer-notice {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      background: #f9fafb;
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    /* ── Card Footer ── */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.625rem;
+      padding: 0.875rem 1.5rem;
+    }
+
+    /* ── Dialog Overrides ── */
+    .form-field { margin-bottom: 1.25rem; }
 
     .form-label {
+      display: block;
+      font-size: 0.825rem;
       font-weight: 600;
       color: #374151;
-      margin-bottom: 0.75rem;
-      display: block;
+      margin-bottom: 0.45rem;
     }
 
-    .p-button {
-      border-radius: 12px;
-      font-weight: 600;
+    .form-label .req { color: #dc2626; margin-left: 2px; }
+
+    .form-input {
+      width: 100%;
+      padding: 0.6rem 0.875rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #111827;
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+      font-family: inherit;
     }
 
-    .answers-dialog {
-      max-height: 70vh;
-      overflow-y: auto;
+    .form-input:focus { border-color: #4ade80; background: #fff; }
+    .form-input.invalid { border-color: #f87171; }
+
+    .form-error {
+      font-size: 0.78rem;
+      color: #dc2626;
+      margin-top: 0.3rem;
     }
 
-    .answers-list {
+    .reply-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 0.875rem;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      font-size: 0.825rem;
+      color: #1d4ed8;
+      margin-top: 0.75rem;
+    }
+
+    /* ── Answers Dialog ── */
+    .dialog-question-summary {
+      padding: 1rem 1.25rem;
+      background: #f9fff9;
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .dialog-question-summary h4 {
+      margin: 0 0 0.35rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .dialog-question-summary p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .answers-scroll {
       max-height: 400px;
       overflow-y: auto;
-      padding-right: 1rem;
+      padding-right: 4px;
     }
 
-    .answer-full {
-      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      border-left: 4px solid #10b981;
+    .answers-scroll::-webkit-scrollbar { width: 5px; }
+    .answers-scroll::-webkit-scrollbar-track { background: #f9fafb; border-radius: 4px; }
+    .answers-scroll::-webkit-scrollbar-thumb { background: #d1fae5; border-radius: 4px; }
+
+    .answer-full-item {
+      padding: 1rem 1.125rem;
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-left: 3px solid #16a34a;
+      border-radius: 10px;
+      margin-bottom: 0.875rem;
     }
 
-    @media (max-width: 768px) {
-      :host { padding: 0.5rem; }
-      .question-card { margin-bottom: 1.5rem; border-radius: 16px; }
-      .question-header { padding: 1.5rem; min-height: 100px; }
-      .question-title { font-size: 1.3rem; max-width: 100%; }
-      .answer-section { padding: 1.5rem; }
-      .filters-grid { grid-template-columns: 1fr; }
+    .answer-full-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.625rem;
+    }
+
+    .answer-full-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .answer-full-text {
+      font-size: 0.875rem;
+      color: #374151;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .dialog-footer-actions {
+      display: flex;
+      gap: 0.625rem;
+      padding-top: 1rem;
+      border-top: 1px solid #f3f4f6;
+      margin-top: 1rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .page-wrapper { padding: 1rem; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .card-footer { flex-wrap: wrap; }
+      .card-stats { flex-wrap: wrap; gap: 0.75rem; }
     }
   `],
   template: `
-    <div class="main-container">
-      <!-- Header Toolbar -->
-      <p-toolbar class="mb-6">
-        <ng-template pTemplate="start">
-          <div class="flex align-items-center gap-3">
-            <i class="pi pi-comments text-3xl text-primary"></i>
-            <div>
-              <h2 class="m-0 font-bold text-3xl">Support Community</h2>
-              <p class="m-0 text-lg text-600">{{ filteredQuestions?.length || 0 }} Questions Found</p>
-            </div>
-          </div>
-        </ng-template>
-        <ng-template pTemplate="end">
-          <div class="flex align-items-center gap-2">
-            <p-button 
-              label="Post Question" 
-              icon="pi pi-plus-circle" 
-              size="large"
-              (onClick)="showNewQuestionDialog()"
-              styleClass="mr-3 p-button-success p-button-raised"
-            ></p-button>
-            <p-button 
-              label="Refresh" 
-              icon="pi pi-refresh" 
-              severity="secondary"
-              size="large"
-              (onClick)="loadQuestions()"
-              [loading]="loading"
-            ></p-button>
-          </div>
-        </ng-template>
-      </p-toolbar>
+    <div class="page-wrapper">
 
-      <!-- Loading State -->
-      <div *ngIf="loading" class="flex justify-content-center align-items-center py-8">
-        <i class="pi pi-spin pi-spinner text-6xl text-primary"></i>
-        <span class="ml-3 text-xl">Loading questions...</span>
+      <!-- ── Page Header ── -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon-wrap">
+            <i class="pi pi-comments"></i>
+          </div>
+          <div>
+            <h1 class="page-title">Support Community</h1>
+            <p class="page-subtitle">Ask questions, share knowledge, help others</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary" (click)="loadQuestions()" [disabled]="loading">
+            <i class="pi" [class.pi-refresh]="!loading" [class.pi-spin]="loading" [class.pi-spinner]="loading"></i>
+            Refresh
+          </button>
+          <button class="btn-primary" (click)="showNewQuestionDialog()">
+            <i class="pi pi-plus"></i>
+            Post Question
+          </button>
+        </div>
       </div>
 
-      <!-- Questions List -->
+      <!-- ── Filter Bar ── -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <i class="pi pi-search"></i>
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Search questions, descriptions, authors…"
+            [(ngModel)]="filters.search"
+            (input)="applyFilters()"
+          />
+        </div>
+        <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
+          <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+        <select class="filter-select" [(ngModel)]="filters.sort" (change)="applyFilters()">
+          <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+        <span class="filter-count">{{ filteredQuestions.length }} result{{ filteredQuestions.length !== 1 ? 's' : '' }}</span>
+      </div>
+
+      <!-- ── Loading ── -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <span style="font-size:0.875rem;color:#6b7280;">Loading questions…</span>
+      </div>
+
+      <!-- ── Content ── -->
       <div *ngIf="!loading">
+
+        <!-- Empty -->
         <div *ngIf="filteredQuestions.length === 0; else questionsList" class="empty-state">
-          <i class="pi pi-inbox text-8xl text-400 mb-6 block"></i>
-          <h2 class="text-3xl font-bold mb-4 text-700">No questions found</h2>
-          <p class="text-xl mb-6">Try adjusting your filters or be the first to ask a question!</p>
-          <p-button 
-            label="Start Asking" 
-            icon="pi pi-plus-circle" 
-            size="large"
-            (onClick)="showNewQuestionDialog()"
-            class="p-button-text"
-          ></p-button>
+          <div class="empty-icon"><i class="pi pi-inbox"></i></div>
+          <h3>No questions found</h3>
+          <p>Try adjusting your filters or be the first to ask a question!</p>
+          <button class="btn-primary" (click)="showNewQuestionDialog()">
+            <i class="pi pi-plus"></i> Start Asking
+          </button>
         </div>
 
+        <!-- Questions -->
         <ng-template #questionsList>
           <div *ngFor="let question of filteredQuestions; trackBy: trackByQuestionId" class="question-card">
-            <!-- Question Header -->
-            <div class="question-header">
-              <div class="flex flex-column lg:flex-row justify-content-between align-items-start lg:align-items-center gap-4 flex-1">
-                <div class="flex align-items-start gap-4 flex-1">
-                  <p-tag 
-                    [value]="question.question_status" 
-                    [severity]="getStatusSeverity(question.question_status)"
-                    class="text-lg px-4 py-2 font-bold"
-                  ></p-tag>
-                  <div class="flex-1">
-                    <h3 class="question-title m-0">{{ question.question }}</h3>
+
+            <!-- Header -->
+            <div class="card-header">
+              <div class="card-header-top">
+                <span class="status-badge" [ngClass]="getStatusClass(question.question_status)">
+                  {{ question.question_status }}
+                </span>
+                <h3 class="card-question-title">{{ question.question }}</h3>
+              </div>
+              <div class="card-meta">
+                <div class="meta-avatar">{{ getUserInitials(question.username) }}</div>
+                <span>{{ question.username }}</span>
+                <span class="meta-dot">·</span>
+                <span>{{ question.created_at | date:'MMM d, y' }}</span>
+                <span class="meta-dot">·</span>
+                <span>{{ question.created_at | date:'h:mm a' }}</span>
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body">
+              <p class="card-description">
+                {{ question.description.length > 260
+                    ? (question.description | slice:0:260) + '…'
+                    : question.description }}
+              </p>
+              <div *ngIf="question.business_justification" class="biz-justification">
+                <i class="pi pi-briefcase"></i>
+                <span class="biz-justification-text">
+                  <span class="biz-label">Business Justification:</span>
+                  {{ question.business_justification }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="card-stats">
+              <div class="stat-pill">
+                <i class="pi pi-comments"></i>
+                <span class="count">{{ question.answers_count }}</span>
+                <span>{{ question.answers_count === 1 ? 'Answer' : 'Answers' }}</span>
+              </div>
+              <div class="stat-pill">
+                <i class="pi pi-eye"></i>
+                <span class="count">{{ question.view_count }}</span>
+                <span>Views</span>
+              </div>
+              <div class="stat-pill" style="margin-left:auto;">
+                <i class="pi pi-clock"></i>
+                <span>Updated {{ question.updated_at | date:'MMM d' }}</span>
+              </div>
+            </div>
+
+            <!-- Top Answer Preview -->
+            <div *ngIf="question.answers && question.answers.length > 0" class="answer-preview-wrap">
+              <div class="answer-preview-label">Top Answer</div>
+              <div class="answer-preview">
+                <div class="answer-avatar">{{ getUserInitials(question.answers[0].username) }}</div>
+                <div class="answer-preview-content">
+                  <p class="answer-preview-text">{{ question.answers[0].description }}</p>
+                  <div class="answer-preview-meta">
+                    <span style="font-weight:600;color:#374151;">{{ question.answers[0].username }}</span>
+                    <span style="color:#d1d5db;">·</span>
+                    <span>{{ question.answers[0].created_at | date:'MMM d' }}</span>
                   </div>
                 </div>
-              </div>
-              <div class="question-meta mt-4">
-                <div class="flex align-items-center gap-3 flex-wrap">
-                  <span class="text-lg font-semibold text-700">Posted by {{ question.username }}</span>
-                  <span class="text-500 mx-3">•</span>
-                  <span class="text-lg text-600">{{ question.created_at | date:'MMM d, y • h:mm a' }}</span>
+                <div class="vote-row">
+                  <button
+                    class="vote-btn upvote"
+                    [class.voted-up]="question.answers[0].is_upvoted"
+                    (click)="voteAnswer(question.answers[0], 'up')"
+                    title="Helpful"
+                  >
+                    <i class="pi pi-thumbs-up" style="font-size:0.75rem;"></i>
+                    {{ question.answers[0].upvotes }}
+                  </button>
+                  <button
+                    class="vote-btn downvote"
+                    [class.voted-down]="question.answers[0].is_downvoted"
+                    (click)="voteAnswer(question.answers[0], 'down')"
+                    title="Not helpful"
+                  >
+                    <i class="pi pi-thumbs-down" style="font-size:0.75rem;"></i>
+                    {{ question.answers[0].downvotes }}
+                  </button>
                 </div>
               </div>
             </div>
 
-            <!-- Question Content Preview -->
-            <div class="p-5 border-top-1 surface-border" style="min-height: 150px;">
-              <div class="text-xl font-semibold mb-4 text-800">Description:</div>
-              <div class="line-height-3 text-lg text-900 mb-4" style="max-height: 120px; overflow: hidden;">
-                {{question.description.length > 250 ? (question.description | slice:0:250) + '...' : question.description}}
-              </div>
-              <div *ngIf="question.business_justification" class="p-4 bg-green-50 border-round-xl surface-border">
-                <i class="pi pi-briefcase text-2xl text-green-600 mr-3"></i>
-                <strong class="text-lg text-green-800">Business Justification:</strong>
-                <div class="mt-2 text-green-700">{{ question.business_justification }}</div>
+            <!-- No answer notice -->
+            <div *ngIf="!question.answers || question.answers.length === 0" class="answer-preview-wrap">
+              <div class="no-answer-notice">
+                <i class="pi pi-info-circle" style="color:#d1d5db;"></i>
+                No answers yet — be the first to help!
               </div>
             </div>
 
-            <!-- Top Answer Preview + Answer Button -->
-            <div class="answer-section border-top-1 surface-border">
-              <div *ngIf="question.answers && question.answers.length > 0; else noAnswers" class="flex flex-column gap-4">
-                <div class="flex align-items-center gap-3 mb-4 text-xl font-bold text-800">
-                  <i class="pi pi-check-circle text-2xl text-green-500"></i>
-                  <span>{{ question.answers.length }} {{ question.answers.length === 1 ? 'Answer' : 'Answers' }}</span>
-                </div>
-                <div class="answer-item">
-                  <div class="answer-avatar">{{ getUserInitials(question.answers[0].username) }}</div>
-                  <div class="answer-content">
-                    <div class="answer-text">{{ question.answers[0].description | slice:0:200 }}{{ question.answers[0].description.length > 200 ? '...' : '' }}</div>
-                    <div class="answer-meta">
-                      <span class="font-semibold">{{ question.answers[0].username }}</span>
-                      <span class="mx-3 text-500">•</span>
-                      <span>{{ question.answers[0].created_at | date:'MMM d • h:mm a' }}</span>
-                    </div>
-                  </div>
-                  <div class="vote-controls">
-                    <button 
-                      class="vote-btn upvote" 
-                      [class.voted]="question.answers[0].is_upvoted"
-                      (click)="voteAnswer(question.answers[0], 'up')"
-                      pTooltip="Helpful"
-                    >
-                      <i class="pi pi-thumbs-up"></i>
-                      <span class="font-bold">{{ question.answers[0].upvotes }}</span>
-                    </button>
-                    <button 
-                      class="vote-btn downvote" 
-                      [class.voted]="question.answers[0].is_downvoted"
-                      (click)="voteAnswer(question.answers[0], 'down')"
-                      pTooltip="Not helpful"
-                    >
-                      <i class="pi pi-thumbs-down"></i>
-                      <span class="font-bold">{{ question.answers[0].downvotes }}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <ng-template #noAnswers>
-                <div class="text-center py-8 text-600">
-                  <i class="pi pi-comments text-5xl text-400 mb-3 block"></i>
-                  <p class="text-xl mb-4">Be the first to answer this question!</p>
-                </div>
-              </ng-template>
-              
-              <!-- Answer Button -->
-              <div class="flex justify-content-center pt-4 border-top-1 surface-border">
-                <p-button 
-                  label="Reply" 
-                  icon="pi pi-plus-circle" 
-                  (onClick)="openAnswerDialog(question.id)"
-                  class="p-button-text"
-                  [disabled]="!currentUserId"
-                ></p-button>
-              </div>
-              
-              <!-- View All Answers Button -->
-              <div class="text-center pt-4">
-                <p-button 
-                  label="View All Replies" 
-                  severity="secondary"
-                  icon="pi pi-comments"
-                  (onClick)="openAnswersDialog(question)"
-                  class="w-full"
-                  pTooltip="See complete discussion"
-                ></p-button>
-              </div>
+            <!-- Footer Actions -->
+            <div class="card-footer">
+              <button class="btn-ghost" (click)="openAnswersDialog(question)">
+                <i class="pi pi-comments" style="font-size:0.8rem;"></i>
+                View All Replies
+              </button>
+              <button class="btn-ghost" (click)="openAnswerDialog(question.id)" [disabled]="!currentUserId">
+                <i class="pi pi-reply" style="font-size:0.8rem;"></i>
+                Reply
+              </button>
             </div>
+
           </div>
         </ng-template>
       </div>
     </div>
 
-    <!-- New Question Dialog -->
-    <p-dialog 
-      header="Ask a New Question" 
-      [(visible)]="showQuestionDialog" 
-      [modal]="true" 
-      [style]="{width: '70vw', height: '80vh'}" 
+    <!-- ── New Question Dialog ── -->
+    <p-dialog
+      header="Post a New Question"
+      [(visible)]="showQuestionDialog"
+      [modal]="true"
+      [style]="{width: '600px'}"
       [baseZIndex]="10000"
-      [resizable]="true"
     >
-      <form [formGroup]="questionForm" (ngSubmit)="submitQuestion()">
-        <div class="grid">
-          <div class="col-12">
-            <label class="form-label">Question Title <span class="text-red-500">*</span></label>
-            <input pInputText formControlName="question" class="w-full p-inputtext-lg" [class.p-invalid]="questionForm.get('question')?.invalid && questionForm.get('question')?.touched" />
-            <small *ngIf="questionForm.get('question')?.invalid && questionForm.get('question')?.touched" class="p-error">
-              Title is required (min 10 characters)
-            </small>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Detailed Description <span class="text-red-500">*</span></label>
-            <textarea pInputTextarea formControlName="description" rows="6" class="w-full" [class.p-invalid]="questionForm.get('description')?.invalid && questionForm.get('description')?.touched"></textarea>
-            <small *ngIf="questionForm.get('description')?.invalid && questionForm.get('description')?.touched" class="p-error">
-              Description is required (min 20 characters)
-            </small>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Business Justification (Optional)</label>
-            <textarea pInputTextarea formControlName="business_justification" rows="4" class="w-full" placeholder="Explain why this question is important for business..."></textarea>
+      <form [formGroup]="questionForm">
+        <div class="form-field">
+          <label class="form-label">Question Title <span class="req">*</span></label>
+          <input
+            class="form-input"
+            [class.invalid]="questionForm.get('question')?.invalid && questionForm.get('question')?.touched"
+            formControlName="question"
+            placeholder="What would you like to know?"
+          />
+          <div *ngIf="questionForm.get('question')?.invalid && questionForm.get('question')?.touched" class="form-error">
+            Title is required (min 10 characters)
           </div>
         </div>
+
+        <div class="form-field">
+          <label class="form-label">Detailed Description <span class="req">*</span></label>
+          <textarea
+            class="form-input"
+            [class.invalid]="questionForm.get('description')?.invalid && questionForm.get('description')?.touched"
+            formControlName="description"
+            rows="5"
+            placeholder="Provide as much context as possible…"
+          ></textarea>
+          <div *ngIf="questionForm.get('description')?.invalid && questionForm.get('description')?.touched" class="form-error">
+            Description required (min 20 characters)
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:0;">
+          <label class="form-label">Business Justification <span style="color:#9ca3af;font-weight:400;">(optional)</span></label>
+          <textarea
+            class="form-input"
+            formControlName="business_justification"
+            rows="3"
+            placeholder="Why is this question important for the business?"
+          ></textarea>
+        </div>
       </form>
+
       <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" class="p-button-text" (onClick)="hideQuestionDialog()"></p-button>
-        <p-button 
-          label="Post Question" 
-          icon="pi pi-check-circle" 
+        <button class="btn-secondary" (click)="hideQuestionDialog()">
+          <i class="pi pi-times" style="font-size:0.8rem;"></i> Cancel
+        </button>
+        <button
+          class="btn-primary"
           [disabled]="questionForm.invalid || postingQuestion"
-          (onClick)="submitQuestion()"
-          [loading]="postingQuestion"
-        ></p-button>
+          (click)="submitQuestion()"
+        >
+          <i class="pi" [class.pi-check-circle]="!postingQuestion" [class.pi-spin]="postingQuestion" [class.pi-spinner]="postingQuestion" style="font-size:0.85rem;"></i>
+          {{ postingQuestion ? 'Posting…' : 'Post Question' }}
+        </button>
       </ng-template>
     </p-dialog>
 
-    <!-- Answer Dialog -->
-    <p-dialog 
-      header="Add Your Answer" 
+    <!-- ── Answer Dialog ── -->
+    <p-dialog
+      header="Add Your Reply"
       [(visible)]="isAnswerDialogVisible"
-      [modal]="true" 
-      [style]="{width: '65vw', height: '70vh'}" 
+      [modal]="true"
+      [style]="{width: '560px'}"
       [baseZIndex]="10000"
-      [resizable]="true"
     >
-      <form [formGroup]="answerForm" (ngSubmit)="submitAnswer()">
-        <div class="grid">
-          <div class="col-12">
-            <label class="form-label">Your Answer <span class="text-red-500">*</span></label>
-            <textarea 
-              pInputTextarea 
-              formControlName="description" 
-              rows="10" 
-              class="w-full" 
-              placeholder="Provide a detailed answer to help the community..."
-              [class.p-invalid]="answerForm.get('description')?.invalid && answerForm.get('description')?.touched"
-            ></textarea>
-            <small *ngIf="answerForm.get('description')?.invalid && answerForm.get('description')?.touched" class="p-error">
-              Answer must be at least 10 characters
-            </small>
+      <form [formGroup]="answerForm">
+        <div *ngIf="selectedQuestionId" class="reply-info" style="margin-bottom:1rem;">
+          <i class="pi pi-info-circle"></i>
+          Replying to Question #{{ selectedQuestionId }}
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label class="form-label">Your Answer <span class="req">*</span></label>
+          <textarea
+            class="form-input"
+            [class.invalid]="answerForm.get('description')?.invalid && answerForm.get('description')?.touched"
+            formControlName="description"
+            rows="8"
+            placeholder="Provide a clear, helpful answer to assist the community…"
+          ></textarea>
+          <div *ngIf="answerForm.get('description')?.invalid && answerForm.get('description')?.touched" class="form-error">
+            Answer must be at least 10 characters
           </div>
         </div>
-        <div class="mt-4 p-3 surface-50 border-round" *ngIf="selectedQuestionId">
-          <i class="pi pi-info-circle text-blue-500 mr-2"></i>
-          <strong>Replying to:</strong> Question #{{ selectedQuestionId }}
-        </div>
       </form>
+
       <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" class="p-button-text" (onClick)="hideAnswerDialog()"></p-button>
-        <p-button 
-          label="Post Answer" 
-          icon="pi pi-check-circle" 
+        <button class="btn-secondary" (click)="hideAnswerDialog()">
+          <i class="pi pi-times" style="font-size:0.8rem;"></i> Cancel
+        </button>
+        <button
+          class="btn-primary"
           [disabled]="answerForm.invalid || !selectedQuestionId || postingAnswer"
-          (onClick)="submitAnswer()"
-          [loading]="postingAnswer"
-        ></p-button>
+          (click)="submitAnswer()"
+        >
+          <i class="pi" [class.pi-send]="!postingAnswer" [class.pi-spin]="postingAnswer" [class.pi-spinner]="postingAnswer" style="font-size:0.85rem;"></i>
+          {{ postingAnswer ? 'Posting…' : 'Post Reply' }}
+        </button>
       </ng-template>
     </p-dialog>
 
-    <!-- ✅ NEW: Answers Dialog - Full View of All Answers -->
-    <p-dialog 
-      header="All Answers" 
+    <!-- ── All Answers Dialog ── -->
+    <p-dialog
+      header="All Replies"
       [(visible)]="showAnswersDialog"
-      [modal]="true" 
-      [style]="{width: '80vw', height: '85vh'}" 
+      [modal]="true"
+      [style]="{width: '680px'}"
       [baseZIndex]="10001"
-      [resizable]="true"
-      class="answers-dialog"
     >
-      <div *ngIf="selectedQuestionForAnswersDialog" class="flex flex-column h-full">
-        <!-- Question Summary -->
-        <div class="p-4 surface-50 border-round mb-4">
-          <h3 class="m-0 mb-2 text-xl font-bold">{{ selectedQuestionForAnswersDialog.question }}</h3>
-          <p class="m-0 text-600">{{ selectedQuestionForAnswersDialog.answers_count }} answers • Posted by {{ selectedQuestionForAnswersDialog.username }}</p>
+      <div *ngIf="selectedQuestionForAnswersDialog">
+
+        <div class="dialog-question-summary">
+          <h4>{{ selectedQuestionForAnswersDialog.question }}</h4>
+          <p>
+            {{ selectedQuestionForAnswersDialog.answers_count }} replies &nbsp;·&nbsp;
+            Posted by {{ selectedQuestionForAnswersDialog.username }}
+          </p>
         </div>
 
-        <!-- Answers List -->
-        <div class="answers-list">
-          <div *ngFor="let answer of selectedQuestionForAnswersDialog.answers; trackBy: trackByAnswerId" class="answer-full">
-            <div class="flex justify-content-between align-items-start mb-3">
-              <div class="answer-avatar text-xl">{{ getUserInitials(answer.username) }}</div>
-              <div class="flex align-items-center gap-3 ml-auto">
-                <div class="vote-controls">
-                  <button 
-                    class="vote-btn upvote" 
-                    [class.voted]="answer.is_upvoted"
-                    (click)="voteAnswer(answer, 'up')"
-                    pTooltip="Helpful"
-                  >
-                    <i class="pi pi-thumbs-up"></i>
-                    <span>{{ answer.upvotes }}</span>
-                  </button>
-                  <button 
-                    class="vote-btn downvote" 
-                    [class.voted]="answer.is_downvoted"
-                    (click)="voteAnswer(answer, 'down')"
-                    pTooltip="Not helpful"
-                  >
-                    <i class="pi pi-thumbs-down"></i>
-                    <span>{{ answer.downvotes }}</span>
-                  </button>
+        <div class="answers-scroll">
+          <div
+            *ngFor="let answer of selectedQuestionForAnswersDialog.answers; trackBy: trackByAnswerId"
+            class="answer-full-item"
+          >
+            <div class="answer-full-header">
+              <div class="answer-full-user">
+                <div class="answer-avatar" style="width:30px;height:30px;font-size:0.7rem;">
+                  {{ getUserInitials(answer.username) }}
+                </div>
+                <div>
+                  <div style="font-size:0.825rem;font-weight:600;color:#111827;">{{ answer.username }}</div>
+                  <div style="font-size:0.75rem;color:#9ca3af;">{{ answer.created_at | date:'MMM d, y · h:mm a' }}</div>
                 </div>
               </div>
+              <div class="vote-row">
+                <button
+                  class="vote-btn upvote"
+                  [class.voted-up]="answer.is_upvoted"
+                  (click)="voteAnswer(answer, 'up')"
+                >
+                  <i class="pi pi-thumbs-up" style="font-size:0.7rem;"></i>
+                  {{ answer.upvotes }}
+                </button>
+                <button
+                  class="vote-btn downvote"
+                  [class.voted-down]="answer.is_downvoted"
+                  (click)="voteAnswer(answer, 'down')"
+                >
+                  <i class="pi pi-thumbs-down" style="font-size:0.7rem;"></i>
+                  {{ answer.downvotes }}
+                </button>
+              </div>
             </div>
-            
-            <div class="answer-text mb-4">{{ answer.description }}</div>
-            
-            <div class="answer-meta">
-              <span class="font-semibold text-900">{{ answer.username }}</span>
-              <span class="mx-2 text-500">•</span>
-              <span class="text-600">{{ answer.created_at | date:'MMM d, y • h:mm a' }}</span>
-            </div>
+            <p class="answer-full-text">{{ answer.description }}</p>
           </div>
-          
-          <div *ngIf="selectedQuestionForAnswersDialog.answers?.length === 0" class="text-center py-8 text-600">
-            <i class="pi pi-comments text-5xl text-400 mb-3 block"></i>
-            <p class="text-xl mb-4">No answers yet. Be the first to help!</p>
-            <p-button 
-              label="Add Answer" 
-              icon="pi pi-plus-circle" 
-              severity="secondary"
-              (onClick)="openAnswerDialog(selectedQuestionForAnswersDialog.id); hideAnswersDialog()"
-            ></p-button>
+
+          <div *ngIf="selectedQuestionForAnswersDialog.answers?.length === 0" class="empty-state" style="padding:3rem 1rem;">
+            <div class="empty-icon"><i class="pi pi-comments"></i></div>
+            <h3 style="font-size:1rem;">No replies yet</h3>
+            <p>Be the first to help answer this question!</p>
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-2 mt-4 pt-4 border-top-1 surface-border">
-          <p-button 
-            label="Add Answer" 
-            icon="pi pi-plus-circle" 
-            severity="success"
-            (onClick)="openAnswerDialog(selectedQuestionForAnswersDialog.id); hideAnswersDialog()"
+        <div class="dialog-footer-actions">
+          <button
+            class="btn-primary"
             [disabled]="!currentUserId"
-            class="flex-1"
-          ></p-button>
-          <p-button 
-            label="Close" 
-            icon="pi pi-times" 
-            severity="secondary"
-            (onClick)="hideAnswersDialog()"
-            class="flex-1"
-          ></p-button>
+            (click)="openAnswerDialog(selectedQuestionForAnswersDialog.id); hideAnswersDialog()"
+            style="flex:1;"
+          >
+            <i class="pi pi-plus" style="font-size:0.8rem;"></i> Add Reply
+          </button>
+          <button class="btn-secondary" (click)="hideAnswersDialog()">
+            Close
+          </button>
         </div>
+
       </div>
     </p-dialog>
 
@@ -704,11 +1086,7 @@ export class Support implements OnInit, OnDestroy {
   questionForm!: FormGroup;
   answerForm!: FormGroup;
 
-  filters = {
-    status: '',
-    sort: 'newest',
-    search: ''
-  };
+  filters = { status: '', sort: 'newest', search: '' };
 
   statusOptions = [
     { label: 'All Statuses', value: '' },
@@ -752,7 +1130,6 @@ export class Support implements OnInit, OnDestroy {
       description: ['', [Validators.required, Validators.minLength(20)]],
       business_justification: ['']
     });
-
     this.answerForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(10)]]
     });
@@ -767,146 +1144,81 @@ export class Support implements OnInit, OnDestroy {
 
   loadQuestions() {
     this.loading = true;
-    this.manageReposService.getQuestions().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
+    this.manageReposService.getQuestions().pipe(takeUntil(this.destroy$)).subscribe({
       next: (data: Question[]) => {
-        this.questions = data.map(q => ({
-          ...q,
-          answers: q.answers || []
-        }));
-        this.filteredQuestions = [...this.questions];
+        this.questions = data.map(q => ({ ...q, answers: q.answers || [] }));
+        this.applyFilters();
         this.loading = false;
       },
       error: () => {
         this.loading = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error!',
-          detail: 'Failed to load questions. Please try again.'
-        });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load questions.' });
       }
     });
   }
 
-  applyFilters(event?: any) {
+  applyFilters() {
     let filtered = [...this.questions];
-
-    if (this.filters.status) {
-      filtered = filtered.filter(q => q.question_status === this.filters.status);
-    }
-
+    if (this.filters.status) filtered = filtered.filter(q => q.question_status === this.filters.status);
     if (this.filters.search.trim()) {
-      const search = this.filters.search.toLowerCase();
-      filtered = filtered.filter(q => 
-        q.question.toLowerCase().includes(search) ||
-        q.description.toLowerCase().includes(search) ||
-        q.username.toLowerCase().includes(search)
+      const s = this.filters.search.toLowerCase();
+      filtered = filtered.filter(q =>
+        q.question.toLowerCase().includes(s) ||
+        q.description.toLowerCase().includes(s) ||
+        q.username.toLowerCase().includes(s)
       );
     }
-
     filtered.sort((a, b) => {
-      switch (this.filters.sort) {
-        case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case 'answers':
-          return b.answers_count - a.answers_count;
-        case 'views':
-          return b.view_count - a.view_count;
-        default:
-          return 0;
-      }
+      if (this.filters.sort === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (this.filters.sort === 'answers') return b.answers_count - a.answers_count;
+      if (this.filters.sort === 'views') return b.view_count - a.view_count;
+      return 0;
     });
-
     this.filteredQuestions = filtered;
-  }
-
-  clearFilters() {
-    this.filters = { status: '', sort: 'newest', search: '' };
-    this.filteredQuestions = [...this.questions];
   }
 
   showNewQuestionDialog() {
     if (!this.currentUserId) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Login Required',
-        detail: 'Please log in to ask a question'
-      });
+      this.messageService.add({ severity: 'warn', summary: 'Login Required', detail: 'Please log in to ask a question' });
       return;
     }
     this.questionForm.reset();
     this.showQuestionDialog = true;
   }
 
-  hideQuestionDialog() {
-    this.showQuestionDialog = false;
-    this.questionForm.reset();
-  }
+  hideQuestionDialog() { this.showQuestionDialog = false; this.questionForm.reset(); }
 
   submitQuestion() {
     if (this.questionForm.invalid) {
-      Object.keys(this.questionForm.controls).forEach(key => {
-        const control = this.questionForm.get(key);
-        control?.markAsTouched();
-      });
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill all required fields correctly'
-      });
+      Object.values(this.questionForm.controls).forEach(c => c.markAsTouched());
       return;
     }
-
     this.postingQuestion = true;
-    const payload = {
-      ...this.questionForm.value,
-      user_created_id: this.currentUserId!
-    };
-
-    this.manageReposService.createQuestion(payload).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success!',
-          detail: 'Your question has been posted successfully!'
-        });
-        this.hideQuestionDialog();
-        this.loadQuestions();
-        this.postingQuestion = false;
-      },
-      error: (err) => {
-        console.error('Post question error:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error!',
-          detail: 'Failed to post question. Please try again.'
-        });
-        this.postingQuestion = false;
-      }
-    });
+    this.manageReposService.createQuestion({ ...this.questionForm.value, user_created_id: this.currentUserId! })
+      .pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Posted!', detail: 'Your question was posted.' });
+          this.hideQuestionDialog();
+          this.loadQuestions();
+          this.postingQuestion = false;
+        },
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to post question.' });
+          this.postingQuestion = false;
+        }
+      });
   }
 
-  // ✅ NEW: Open full answers dialog
   openAnswersDialog(question: Question) {
     this.selectedQuestionForAnswersDialog = { ...question };
     this.showAnswersDialog = true;
   }
 
-  hideAnswersDialog() {
-    this.showAnswersDialog = false;
-    this.selectedQuestionForAnswersDialog = null;
-  }
+  hideAnswersDialog() { this.showAnswersDialog = false; this.selectedQuestionForAnswersDialog = null; }
 
   openAnswerDialog(questionId: number) {
     if (!this.currentUserId) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Login Required',
-        detail: 'Please log in to answer questions'
-      });
+      this.messageService.add({ severity: 'warn', summary: 'Login Required', detail: 'Please log in to answer' });
       return;
     }
     this.selectedQuestionId = questionId;
@@ -914,117 +1226,61 @@ export class Support implements OnInit, OnDestroy {
     this.isAnswerDialogVisible = true;
   }
 
-  hideAnswerDialog() {
-    this.isAnswerDialogVisible = false;
-    this.selectedQuestionId = null;
-    this.answerForm.reset();
-  }
+  hideAnswerDialog() { this.isAnswerDialogVisible = false; this.selectedQuestionId = null; this.answerForm.reset(); }
 
   submitAnswer() {
-    if (this.answerForm.invalid || !this.selectedQuestionId) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please provide a valid answer'
-      });
-      return;
-    }
-
+    if (this.answerForm.invalid || !this.selectedQuestionId) return;
     this.postingAnswer = true;
-    const payload = {
+    this.manageReposService.createAnswer({
       description: this.answerForm.value.description,
       user_created_id: this.currentUserId!,
       question_id: this.selectedQuestionId,
       upvotes: 0,
       downvotes: 0
-    };
-
-    this.manageReposService.createAnswer(payload).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success!',
-          detail: 'Your answer has been posted successfully!'
-        });
+        this.messageService.add({ severity: 'success', summary: 'Posted!', detail: 'Your reply was posted.' });
         this.hideAnswerDialog();
         this.loadQuestions();
         this.postingAnswer = false;
       },
-      error: (err) => {
-        console.error('Post answer error:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error!',
-          detail: 'Failed to post answer. Please try again.'
-        });
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to post reply.' });
         this.postingAnswer = false;
       }
     });
   }
 
   voteAnswer(answer: Answer, type: 'up' | 'down') {
-    const endpoint = type === 'up' ? 
-      this.manageReposService.upvoteAnswer(answer.id) : 
-      this.manageReposService.downvoteAnswer(answer.id);
-
-    endpoint.pipe(takeUntil(this.destroy$)).subscribe({
+    const req$ = type === 'up'
+      ? this.manageReposService.upvoteAnswer(answer.id)
+      : this.manageReposService.downvoteAnswer(answer.id);
+    req$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (res: any) => {
         answer.upvotes = res.upvotes || 0;
         answer.downvotes = res.downvotes || 0;
-        if (type === 'up') {
-          answer.is_upvoted = true;
-          answer.is_downvoted = false;
-        } else {
-          answer.is_downvoted = true;
-          answer.is_upvoted = false;
-        }
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Voted!',
-          detail: `Answer ${type}voted successfully`,
-          life: 1500
-        });
+        answer.is_upvoted = type === 'up';
+        answer.is_downvoted = type === 'down';
+        this.messageService.add({ severity: 'success', summary: 'Voted!', detail: `${type === 'up' ? 'Upvoted' : 'Downvoted'}`, life: 1500 });
       },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error!',
-          detail: `Failed to ${type}vote answer`
-        });
-      }
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Vote failed' })
     });
   }
 
-  viewQuestion(question: Question) {
-    this.router.navigate(['/support', question.id]);
+  getStatusClass(status: string): string {
+    return { 'Open': 'badge-open', 'In Progress': 'badge-progress', 'Closed': 'badge-closed', 'Pending': 'badge-pending' }[status] || 'badge-pending';
   }
 
   getStatusSeverity(status: string): 'success' | 'warning' | 'danger' | 'info' {
-    const severityMap: Record<string, 'success' | 'warning' | 'danger' | 'info'> = {
-      'Open': 'success',
-      'In Progress': 'warning',
-      'Closed': 'danger',
-      'Pending': 'info'
-    };
-    return severityMap[status] || 'info';
+    return ({ 'Open': 'success', 'In Progress': 'warning', 'Closed': 'danger', 'Pending': 'info' } as any)[status] || 'info';
   }
 
   getUserInitials(username: string): string {
     if (!username) return '?';
-    const names = username.split(' ');
-    return names.length === 1 ? 
-      names[0].charAt(0).toUpperCase() : 
-      (names[0].charAt(0) + names[1].charAt(0)).toUpperCase();
+    const parts = username.trim().split(' ');
+    return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  trackByQuestionId(index: number, question: Question): number {
-    return question.id;
-  }
-
-  // ✅ NEW: Track by answer ID
-  trackByAnswerId(index: number, answer: Answer): number {
-    return answer.id;
-  }
+  trackByQuestionId(_: number, q: Question) { return q.id; }
+  trackByAnswerId(_: number, a: Answer) { return a.id; }
 }

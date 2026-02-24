@@ -4,7 +4,6 @@ import { MenuItem, MessageService } from 'primeng/api';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
-import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { AuthenticationService } from '@/pages/service/authentication.service';
 import { DialogModule } from 'primeng/dialog';
@@ -12,8 +11,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { Menu } from 'primeng/menu';
-import { Toast } from "primeng/toast";
-import { Panel } from "primeng/panel";
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-topbar',
@@ -29,210 +27,462 @@ import { Panel } from "primeng/panel";
     FormsModule,
     Menu,
     Toast,
-    
-],
-styles:`
-  .profile-initials-circle {
-  width: 6.42rem;
-  height: 6.42rem;
-  border-radius: 50%;
-  background-color: #11224E; /* Example dark blue background */
-  color: white;
-  font-weight: bold;
-  font-size: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  text-transform: uppercase;
-}
+  ],
+  styles: `
+    :host {
+      --topbar-height: 64px;
+      --brand-navy: #1a3a2e;
+      --brand-navy-light: #245c45;
+      --brand-accent: #4ade80;
+      --brand-accent-soft: rgba(74,222,128,0.15);
+      --surface-glass: rgba(18, 46, 36, 0.96);
+      --shadow-topbar: 0 1px 0 rgba(18,46,36,0.18), 0 4px 24px rgba(18,46,36,0.22);
+      --radius-avatar: 50%;
+      --radius-btn: 10px;
+      --transition-speed: 180ms;
+    }
 
-::ng-deep .p-table thead th {
-  font-weight: bold;
-  color: #11224E;
-}
-.profile-initials-circle.text-sm {
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 1rem;
-}
+    .layout-topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: var(--topbar-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem 0 1rem;
+      background: var(--surface-glass);
+      backdrop-filter: blur(14px) saturate(1.6);
+      -webkit-backdrop-filter: blur(14px) saturate(1.6);
+      box-shadow: var(--shadow-topbar);
+      border-bottom: 1px solid rgba(74,222,128,0.12);
+      gap: 1rem;
+    }
 
-.layout-topbar-menu-content span {
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    /* ── Logo section ── */
+    .layout-topbar-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
 
+    .layout-menu-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-btn);
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      transition: background var(--transition-speed), color var(--transition-speed);
+      font-size: 1.1rem;
+    }
+    .layout-menu-button:hover {
+      background: var(--brand-accent-soft);
+      color: var(--brand-accent);
+    }
 
-`,
+    .layout-topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-btn);
+      transition: background var(--transition-speed);
+    }
+    .layout-topbar-logo:hover {
+      background: var(--brand-accent-soft);
+    }
+
+    .logo-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(74,222,128,0.2);
+      border: 1px solid rgba(74,222,128,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon-wrap i {
+      color: var(--brand-accent);
+      font-size: 0.95rem;
+    }
+
+    .logo-text {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .logo-text span {
+      color: var(--brand-accent);
+    }
+
+    /* ── Divider ── */
+    .topbar-divider {
+      width: 1px;
+      height: 28px;
+      background: rgba(255,255,255,0.12);
+      flex-shrink: 0;
+    }
+
+    /* ── Right actions ── */
+    .layout-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+    }
+
+    /* ── User chip ── */
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.07);
+      cursor: default;
+      transition: border-color var(--transition-speed), background var(--transition-speed);
+    }
+    .user-chip:hover {
+      background: var(--brand-accent-soft);
+      border-color: rgba(74,222,128,0.4);
+    }
+
+    .avatar-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(74,222,128,0.25);
+      color: var(--brand-accent);
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(74,222,128,0.5);
+    }
+
+    .user-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Settings button ── */
+    .settings-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-btn);
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: background var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
+      font-size: 1rem;
+    }
+    .settings-btn:hover {
+      background: var(--brand-accent-soft);
+      color: var(--brand-accent);
+      transform: rotate(20deg);
+    }
+
+    /* ── Mobile ellipsis button ── */
+    .layout-topbar-menu-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-btn);
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background var(--transition-speed);
+    }
+    .layout-topbar-menu-button:hover {
+      background: var(--brand-accent-soft);
+    }
+
+    /* ── Profile avatar (large, dialog) ── */
+    .profile-initials-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--brand-navy);
+      color: var(--brand-accent);
+      font-weight: 700;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      text-transform: uppercase;
+      border: 3px solid rgba(74,222,128,0.35);
+      box-shadow: 0 0 0 4px rgba(26,58,46,0.12);
+      flex-shrink: 0;
+    }
+
+    /* ── Profile dialog layout ── */
+    .profile-content {
+      padding: 1.5rem 1rem 1rem;
+    }
+    .profile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .profile-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+    .profile-field label {
+      font-size: 0.75rem;
+      color: #8892a4;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .profile-field .value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--brand-navy);
+    }
+    .profile-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--brand-navy);
+      margin: 0 0 0.2rem;
+      letter-spacing: -0.01em;
+    }
+    .profile-role-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(74,222,128,0.12);
+      color: #166534;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(74,222,128,0.35);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 992px) {
+      .user-name { display: none; }
+      .logo-text { font-size: 0.9rem; }
+    }
+    @media (max-width: 576px) {
+      .logo-text { display: none; }
+    }
+  `,
 
   template: `
-    <p-toast/>
+    <p-toast />
+
     <div class="layout-topbar">
+
+      <!-- Left: hamburger + logo -->
       <div class="layout-topbar-logo-container">
-        <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
+        <button class="layout-menu-button" (click)="layoutService.onMenuToggle()" title="Toggle menu">
           <i class="pi pi-bars"></i>
         </button>
-        <a class="layout-topbar-logo" routerLink="/app">
- 
-  <span><strong style="color:#11224E">Knowledge Repository</strong></span>
-</a>
 
-      </div>
-      
-      <div class="layout-topbar-actions">
-       
-        <div class="layout-config-menu">
-          <!--<button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
-            <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
-          </button>-->
+        <a class="layout-topbar-logo" routerLink="/app">
           
+          <span class="logo-text">Knowledge <span>Repository</span></span>
+        </a>
+      </div>
+
+      <!-- Right: user + settings -->
+      <div class="layout-topbar-actions">
+
+        <!-- User chip (desktop) -->
+        <div class="user-chip" *ngIf="userName">
+          <div class="avatar-circle">{{ getUserInitials() }}</div>
+          <span class="user-name">{{ userName }}</span>
         </div>
-         
+
+        <!-- Settings cog -->
+        <p-menu #menu [model]="items" [popup]="true" />
+        <button class="settings-btn" (click)="menu.toggle($event)" title="Settings">
+          <i class="pi pi-cog"></i>
+        </button>
+
+        <!-- Mobile overflow -->
         <button
-          class="layout-topbar-menu-button layout-topbar-action"
+          class="layout-topbar-menu-button lg:hidden"
           pStyleClass="@next"
           enterFromClass="hidden"
           enterActiveClass="animate-scalein"
           leaveToClass="hidden"
           leaveActiveClass="animate-fadeout"
           [hideOnOutsideClick]="true"
+          title="More options"
         >
           <i class="pi pi-ellipsis-v"></i>
         </button>
 
-        <div class="layout-topbar-menu hidden lg:block">
-          <div class="layout-topbar-menu-content">
-            <!--<button type="button" class="layout-topbar-action" (click)="changeUser_Password()">
-              <i class="pi pi-key"></i>
-              <span>Change Password</span>
-            </button>
-            <button type="button" class="layout-topbar-action" (click)="togglelogout()">
-              <i class="pi pi-user"></i>
-              <span>Profile</span>
-            </button>-->
-             <div class="flex align-items-center gap-3 mr-3" *ngIf="userName">
-    <div class="profile-initials-circle text-sm">
-      {{ getUserInitials() }}
-    </div>
-    <span class="text-900 font-semibold hidden lg:inline whitespace-nowrap">{{ userName }}</span>
-  </div>
-    <p-menu #menu [model]="items" [popup]="true" />
-    <button  type="button" class="layout-topbar-action"  (click)="menu.toggle($event)">
-      <i class="pi pi-cog"></i>
-      <span>Profile Menu</span>
-
-    </button>
-
-          </div>
-        </div>
       </div>
     </div>
 
-    <p-dialog [(visible)]="changePasswordDialog" [style]="{width: '450px'}" header="Change Password" [modal]="true" class="p-fluid">
+    <!-- ── Change Password Dialog ── -->
+    <p-dialog
+      [(visible)]="changePasswordDialog"
+      [style]="{ width: '440px' }"
+      header="Change Password"
+      [modal]="true"
+      styleClass="p-fluid"
+    >
       <ng-template pTemplate="content">
-        <div class="flex flex-column align-items-center justify-content-center">
-          <div>
-            <label for="oldPassword" class="block text-900 text-xl font-medium mb-2">Old Password</label>
+        <div class="flex flex-column gap-4 pt-2">
+
+          <div class="flex flex-column gap-1">
+            <label class="text-sm font-semibold text-700">Current Password</label>
             <p-password
-              id="oldPassword"
               [(ngModel)]="old_password"
               [feedback]="false"
-              placeholder="Enter Old Password"
+              placeholder="Enter current password"
               [toggleMask]="true"
-              styleClass="mb-5"
-              inputStyleClass="w-full p-3 md:w-30rem"
-            ></p-password>
+              inputStyleClass="w-full"
+            />
+          </div>
 
-            <label for="newPassword" class="block text-900 font-medium text-xl mb-2">New Password</label>
+          <div class="flex flex-column gap-1">
+            <label class="text-sm font-semibold text-700">New Password</label>
             <p-password
-              id="newPassword"
               [(ngModel)]="new_password"
               [feedback]="false"
-              placeholder="Enter New Password"
+              placeholder="Enter new password"
               [toggleMask]="true"
-              styleClass="mb-5"
-              inputStyleClass="w-full p-3 md:w-30rem"
-            ></p-password>
-            <small *ngIf="new_password && !isPasswordValid()" class="p-error" style="color:red">
-              Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+              inputStyleClass="w-full"
+            />
+            <small *ngIf="new_password && !isPasswordValid()" class="p-error">
+              Must be 8+ chars with uppercase, lowercase, number &amp; special character.
             </small>
+          </div>
 
-            <label for="confirmPassword" class="block text-900 font-medium text-xl mb-2">Confirm Password</label>
+          <div class="flex flex-column gap-1">
+            <label class="text-sm font-semibold text-700">Confirm New Password</label>
             <p-password
-              id="confirmPassword"
               [(ngModel)]="retype_password"
               [feedback]="false"
-              placeholder="Confirm New Password"
+              placeholder="Confirm new password"
               [toggleMask]="true"
-              styleClass="mb-5"
-              inputStyleClass="w-full p-3 md:w-30rem"
-            ></p-password>
-            <small *ngIf="retype_password && !doPasswordsMatch()" class="p-error" style="color:red">
+              inputStyleClass="w-full"
+            />
+            <small *ngIf="retype_password && !doPasswordsMatch()" class="p-error">
               Passwords do not match.
             </small>
           </div>
+
         </div>
       </ng-template>
+
       <ng-template pTemplate="footer">
-        <p-button type="button" icon="pi pi-times" (click)="hideDialog()" label="Cancel"></p-button>
-        <p-button type="button" icon="pi pi-check" label="Confirm" (click)="confirmChangePassword(old_password,new_password,retype_password)"  [disabled]="!isFormValid()"></p-button>
+        <div class="flex justify-content-end gap-2">
+          <p-button icon="pi pi-times" label="Cancel" severity="secondary" (click)="hideDialog()" />
+          <p-button icon="pi pi-check" label="Update Password"
+            (click)="confirmChangePassword(old_password, new_password, retype_password)"
+            [disabled]="!isFormValid()" />
+        </div>
       </ng-template>
     </p-dialog>
 
-    <p-dialog [(visible)]="logoutdialog" header="Confirm" [modal]="true" [style]="{ width: '450px' }">
-      <div class="flex align-items-center justify-content-center">
-        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-        <span>Are you sure you want to <b>Logout</b>?</span>
+    <!-- ── Logout Confirm Dialog ── -->
+    <p-dialog
+      [(visible)]="logoutdialog"
+      header="Confirm Logout"
+      [modal]="true"
+      [style]="{ width: '400px' }"
+    >
+      <div class="flex align-items-center gap-3 py-2">
+        <i class="pi pi-sign-out text-2xl text-orange-500"></i>
+        <span>Are you sure you want to <strong>sign out</strong>?</span>
       </div>
       <ng-template pTemplate="footer">
-        <p-button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="hidelogout()"></p-button>
-        <p-button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="logout()"></p-button>
+        <div class="flex justify-content-end gap-2">
+          <p-button icon="pi pi-times" label="Cancel" severity="secondary" (click)="hidelogout()" />
+          <p-button icon="pi pi-check" label="Sign Out" severity="danger" (click)="logout()" />
+        </div>
       </ng-template>
     </p-dialog>
 
-    <p-dialog [(visible)]="profiledialog" header="Profile" [modal]="true" [maximizable]="true" [resizable]="true" [style]="{ width: '1000px' }">
-  <ng-template pTemplate="content">
-    <div class="bg-surface-0 dark:bg-surface-950 px-6 py-8 md:px-12 lg:px-20">
-      <div class="flex items-center flex-col lg:flex-row lg:justify-between">
-        <div class="flex items-start flex-col md:flex-row gap-8">
-           <div 
-          class="profile-initials-circle"
-          aria-label="User profile initials"
-        >
-          {{ getUserInitials() }}
-        </div>
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center">
-              <span class="text-surface-900 dark:text-surface-0 font-bold text-3xl">{{ userName }}</span>
-            </div>
-            <div class="flex items-center flex-wrap gap-8">
-              <div>
-                <span class="text-surface-500 dark:text-surface-300">Employee Id</span>
-                <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ userYashId }}</div>
-              </div>
-              <div>
-                <span class="text-surface-500 dark:text-surface-300">Email</span>
-                <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ userEmail }}</div>
-              </div>
-              <div>
-                <span class="text-surface-500 dark:text-surface-300">Business Unit</span>
-                <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ userBusinessUnit }}</div>
-              </div>
-              <div>
-                <span class="text-surface-500 dark:text-surface-300">Role</span>
-                <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ userRole }}</div>
-              </div>
+    <!-- ── Profile Dialog ── -->
+    <p-dialog
+      [(visible)]="profiledialog"
+      header="My Profile"
+      [modal]="true"
+      [maximizable]="true"
+      [resizable]="true"
+      [style]="{ width: '800px' }"
+    >
+      <ng-template pTemplate="content">
+        <div class="profile-content">
+
+          <div class="profile-header">
+            <div class="profile-initials-circle">{{ getUserInitials() }}</div>
+            <div class="flex flex-column gap-1 justify-content-center">
+              <h2 class="profile-name">{{ userName }}</h2>
+              <span class="profile-role-badge">
+                <i class="pi pi-shield mr-1" style="font-size:0.7rem"></i>
+                {{ userRole }}
+              </span>
             </div>
           </div>
-        </div>
-        
-      </div>
-      
-    </div>
-  </ng-template>
-</p-dialog>
 
+          <div class="profile-info-grid">
+            <div class="profile-field">
+              <label>Employee ID</label>
+              <span class="value">{{ userYashId }}</span>
+            </div>
+            <div class="profile-field">
+              <label>Email</label>
+              <span class="value">{{ userEmail }}</span>
+            </div>
+            <div class="profile-field">
+              <label>Business Unit</label>
+              <span class="value">{{ userBusinessUnit }}</span>
+            </div>
+            <div class="profile-field">
+              <label>Role</label>
+              <span class="value">{{ userRole }}</span>
+            </div>
+          </div>
+
+        </div>
+      </ng-template>
+    </p-dialog>
   `,
 })
 export class AppTopbar implements OnInit {
@@ -240,7 +490,7 @@ export class AppTopbar implements OnInit {
   new_password: string = '';
   retype_password: string = '';
   changePasswordDialog: boolean = false;
-  profiledialog:boolean= false;
+  profiledialog: boolean = false;
   logoutdialog: boolean = false;
 
   items: MenuItem[] | undefined;
@@ -251,41 +501,38 @@ export class AppTopbar implements OnInit {
   userBusinessUnit: string = '';
   userRole: string = '';
 
-  constructor(public layoutService: LayoutService,public messageservice: MessageService, private authservice: AuthenticationService, private loginservice: LoginService) {}
+  constructor(
+    public layoutService: LayoutService,
+    public messageservice: MessageService,
+    private authservice: AuthenticationService,
+    private loginservice: LoginService
+  ) {}
 
   ngOnInit(): void {
-   const darkTheme = JSON.parse(localStorage.getItem('darkTheme') ?? 'false');
-    this.layoutService.layoutConfig.update((state) => ({
-      ...state,
-      darkTheme,
-    }));
-
+    const darkTheme = JSON.parse(localStorage.getItem('darkTheme') ?? 'false');
+    this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme }));
     this.initializeMenuItems(darkTheme);
     this.loadUserDetails();
   }
 
-    initializeMenuItems(isDarkMode: boolean) {
+  initializeMenuItems(isDarkMode: boolean) {
     this.items = [
       {
-        label: 'Settings',
+        label: 'Account',
         items: [
           {
-            label: 'Profile',
+            label: 'View Profile',
             icon: 'pi pi-user',
             command: () => this.openprofile(),
           },
-          /*{
-            label: isDarkMode ? 'Turn Dark Mode Off' : 'Turn Dark Mode On',
-            icon: 'pi pi-moon',
-            command: () => this.toggleDarkMode(),
-          },*/
           {
             label: 'Change Password',
             icon: 'pi pi-key',
             command: () => this.changeUser_Password(),
           },
+          { separator: true },
           {
-            label: 'Logout',
+            label: 'Sign Out',
             icon: 'pi pi-sign-out',
             command: () => this.togglelogout(),
           },
@@ -293,64 +540,57 @@ export class AppTopbar implements OnInit {
       },
     ];
   }
-  
+
   loadUserDetails() {
-  this.loginservice.getUserDetails().subscribe({
-    next: (user: any) => {
-      // Assuming user has the properties you need
-      this.userName = user.name || 'Unknown User';
-      this.userEmail = user.email || 'No Email';
-      this.userYashId = user.yash_id || 'No Id';
-      this.userBusinessUnit = user.b_unit || 'N/A';
-      this.userRole = user.type || 'N/A';
-    },
-    error: () => {
-      // Handle error or set default values
-      this.userName = 'Unknown User';
-      this.userEmail = 'No Email';
-      this.userYashId = 'No Id';
-      this.userBusinessUnit = 'N/A';
-      this.userRole = 'N/A';
-    }
-  });
-}
-
-getUserInitials(): string {
-  if (!this.userName) return '';
-  const words = this.userName.trim().split(' ');
-  const firstLetter = words[0]?.charAt(0).toUpperCase() || '';
-  const secondLetter = words.length > 1 ? words[1].charAt(0).toUpperCase() : '';
-  return firstLetter + secondLetter;
-}
-
-
- toggleDarkMode() {
-    this.layoutService.layoutConfig.update((state) => {
-      const newDarkTheme = !state.darkTheme;
-      localStorage.setItem('darkTheme', JSON.stringify(newDarkTheme));
-      this.initializeMenuItems(newDarkTheme); // update menu label on theme change
-      return { ...state, darkTheme: newDarkTheme };
+    this.loginservice.getUserDetails().subscribe({
+      next: (user: any) => {
+        this.userName = user.name || 'Unknown User';
+        this.userEmail = user.email || 'No Email';
+        this.userYashId = user.yash_id || 'No Id';
+        this.userBusinessUnit = user.b_unit || 'N/A';
+        this.userRole = user.type || 'N/A';
+      },
+      error: () => {
+        this.userName = 'Unknown User';
+        this.userEmail = 'No Email';
+        this.userYashId = 'No Id';
+        this.userBusinessUnit = 'N/A';
+        this.userRole = 'N/A';
+      },
     });
   }
 
-  openprofile(){
-    this.profiledialog = true;
-
+  getUserInitials(): string {
+    if (!this.userName) return '';
+    const words = this.userName.trim().split(' ');
+    const first = words[0]?.charAt(0).toUpperCase() || '';
+    const second = words.length > 1 ? words[1].charAt(0).toUpperCase() : '';
+    return first + second;
   }
+
+  toggleDarkMode() {
+    this.layoutService.layoutConfig.update((state) => {
+      const newDark = !state.darkTheme;
+      localStorage.setItem('darkTheme', JSON.stringify(newDark));
+      this.initializeMenuItems(newDark);
+      return { ...state, darkTheme: newDark };
+    });
+  }
+
+  openprofile() { this.profiledialog = true; }
 
   isPasswordValid(): boolean {
-    const password = this.new_password;
-    const lengthCheck = password.length >= 8;
-    const upperCaseCheck = /[A-Z]/.test(password);
-    const lowerCaseCheck = /[a-z]/.test(password);
-    const numberCheck = /[0-9]/.test(password);
-    const specialCharCheck = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    return lengthCheck && upperCaseCheck && lowerCaseCheck && numberCheck && specialCharCheck;
+    const p = this.new_password;
+    return (
+      p.length >= 8 &&
+      /[A-Z]/.test(p) &&
+      /[a-z]/.test(p) &&
+      /[0-9]/.test(p) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(p)
+    );
   }
 
-  doPasswordsMatch(): boolean {
-    return this.new_password === this.retype_password;
-  }
+  doPasswordsMatch(): boolean { return this.new_password === this.retype_password; }
 
   isFormValid(): boolean {
     return this.isPasswordValid() && this.doPasswordsMatch() && this.old_password.length > 0;
@@ -363,37 +603,29 @@ getUserInitials(): string {
     this.retype_password = '';
   }
 
-  changeUser_Password() {
-    this.changePasswordDialog = true;
-  }
+  changeUser_Password() { this.changePasswordDialog = true; }
 
-  confirmChangePassword(old_password:string, new_password:string, retype_password:string) {
+  confirmChangePassword(old_password: string, new_password: string, retype_password: string) {
     if (this.isFormValid()) {
-      this.loginservice.changePassword(this.old_password, this.new_password).subscribe((data:any)=>{
-        this.messageservice.add({ severity: 'success', summary: 'Success', detail: 'Password Updated Successfully' });
-        this.changePasswordDialog = false;
-      },(err)=>{
-        this.messageservice.add({ severity: 'error', summary: 'Error', detail: 'Error Changing Password' });
-      });
+      this.loginservice.changePassword(this.old_password, this.new_password).subscribe(
+        () => {
+          this.messageservice.add({ severity: 'success', summary: 'Success', detail: 'Password updated successfully.' });
+          this.changePasswordDialog = false;
+        },
+        () => {
+          this.messageservice.add({ severity: 'error', summary: 'Error', detail: 'Failed to update password. Please try again.' });
+        }
+      );
     }
   }
 
-  togglelogout() {
-    this.logoutdialog = true;
-  }
-
-  hidelogout() {
-    this.logoutdialog = false;
-  }
+  togglelogout() { this.logoutdialog = true; }
+  hidelogout() { this.logoutdialog = false; }
 
   logout() {
     this.authservice.logout();
-    localStorage.removeItem('CurrentPage');
-    localStorage.removeItem('ApprovalCurrentPage');
-    localStorage.removeItem('LHistoryCurrentPage');
-    localStorage.removeItem('PendingCurrentPage');
-    localStorage.removeItem('RejectedCurrentPage');
-    localStorage.removeItem('UnApprovedCurrentPage');
-    
+    ['CurrentPage', 'ApprovalCurrentPage', 'LHistoryCurrentPage',
+     'PendingCurrentPage', 'RejectedCurrentPage', 'UnApprovedCurrentPage']
+      .forEach(k => localStorage.removeItem(k));
   }
 }
