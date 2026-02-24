@@ -83,10 +83,10 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         margin: 0;
                         padding: 0;
                         box-sizing: border-box;
-                        user-select: none;
                         -webkit-user-select: none;
                         -moz-user-select: none;
                         -ms-user-select: none;
+                        user-select: none;
                     }
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -141,7 +141,6 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         height: 100vh;
                         border: none;
                         display: block;
-                        pointer-events: auto;
                     }
                     .image-container {
                         display: flex;
@@ -155,6 +154,11 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         max-height: 100vh;
                         object-fit: contain;
                         pointer-events: none;
+                        -webkit-user-drag: none;
+                        -khtml-user-drag: none;
+                        -moz-user-drag: none;
+                        -o-user-drag: none;
+                        user-drag: none;
                     }
                     .doc-viewer {
                         width: 100%;
@@ -245,90 +249,153 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         <div class="loading-text">Loading file...</div>
                     </div>
                 </div>
-                <script>
-                    // Disable right-click
-                    document.addEventListener('contextmenu', function(e) {
-                        e.preventDefault();
-                        return false;
-                    });
-
-                    // Disable copy (Ctrl+C, Cmd+C)
-                    document.addEventListener('keydown', function(e) {
-                        // Ctrl+C or Cmd+C
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+A or Cmd+A (select all)
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+X or Cmd+X (cut)
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+U or Cmd+U (view source)
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+S or Cmd+S (save)
-                        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // F12 (DevTools)
-                        if (e.key === 'F12') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+Shift+I or Cmd+Shift+I (DevTools)
-                        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+Shift+J or Cmd+Shift+J (DevTools Console)
-                        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'J') {
-                            e.preventDefault();
-                            return false;
-                        }
-                        // Ctrl+Shift+C or Cmd+Shift+C (DevTools Inspect)
-                        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
-                            e.preventDefault();
-                            return false;
-                        }
-                    });
-
-                    // Disable copy event
-                    document.addEventListener('copy', function(e) {
-                        e.preventDefault();
-                        return false;
-                    });
-
-                    // Disable cut event
-                    document.addEventListener('cut', function(e) {
-                        e.preventDefault();
-                        return false;
-                    });
-
-                    // Disable text selection via mouse
-                    document.addEventListener('selectstart', function(e) {
-                        e.preventDefault();
-                        return false;
-                    });
-
-                    // Disable drag
-                    document.addEventListener('dragstart', function(e) {
-                        e.preventDefault();
-                        return false;
-                    });
-                </script>
             </body>
             </html>
         `);
         doc.close();
+
+        // Apply security protections
+        this.applySecurityProtections();
+    }
+
+    private applySecurityProtections() {
+        if (!this.newWindow || this.newWindow.closed) return;
+
+        const win = this.newWindow;
+
+        // Disable right-click
+        win.document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+
+        // Disable keyboard shortcuts
+        win.document.addEventListener('keydown', function(e) {
+            // Ctrl+C or Cmd+C (copy)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+A or Cmd+A (select all)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+X or Cmd+X (cut)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'x' || e.key === 'X')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+V or Cmd+V (paste)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+U or Cmd+U (view source)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+S or Cmd+S (save)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+P or Cmd+P (print)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // F12 (DevTools)
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+Shift+I or Cmd+Shift+I (DevTools)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+Shift+J or Cmd+Shift+J (DevTools Console)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+Shift+C or Cmd+Shift+C (DevTools Inspect)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+
+        // Disable copy event
+        win.document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.clipboardData?.setData('text/plain', '');
+            return false;
+        }, true);
+
+        // Disable cut event
+        win.document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.clipboardData?.setData('text/plain', '');
+            return false;
+        }, true);
+
+        // Disable paste event
+        win.document.addEventListener('paste', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+
+        // Disable text selection
+        win.document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+
+        // Disable drag
+        win.document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+
+        // Disable mouse selection
+        win.document.addEventListener('mousedown', function(e) {
+            if (e.detail > 1) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+
+        // Additional protection: Clear clipboard periodically
+        setInterval(() => {
+            if (win && !win.closed) {
+                try {
+                    win.navigator.clipboard?.writeText('').catch(() => {});
+                } catch (e) {
+                    // Ignore clipboard errors
+                }
+            }
+        }, 1000);
     }
 
     private updateContent(html: string) {
@@ -337,6 +404,11 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         const contentDiv = this.newWindow.document.getElementById('content');
         if (contentDiv) {
             contentDiv.innerHTML = html;
+            
+            // Reapply protections to new content
+            setTimeout(() => {
+                this.applySecurityProtections();
+            }, 100);
         }
     }
 
@@ -413,7 +485,7 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         const url = URL.createObjectURL(blob);
         this.objectUrls.push(url);
         this.updateContent(`
-            <iframe src="${url}#toolbar=0"></iframe>
+            <iframe src="${url}#toolbar=0" onload="parent.postMessage('iframe-loaded', '*')"></iframe>
         `);
     }
 
@@ -422,7 +494,7 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         this.objectUrls.push(url);
         this.updateContent(`
             <div class="image-container">
-                <img src="${url}" alt="Preview" />
+                <img src="${url}" alt="Preview" draggable="false" />
             </div>
         `);
     }
@@ -431,7 +503,7 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         const url = URL.createObjectURL(blob);
         this.objectUrls.push(url);
         this.updateContent(`
-            <iframe src="${url}"></iframe>
+            <iframe src="${url}" onload="parent.postMessage('iframe-loaded', '*')"></iframe>
         `);
     }
 
