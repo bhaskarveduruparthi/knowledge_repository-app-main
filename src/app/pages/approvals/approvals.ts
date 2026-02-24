@@ -30,6 +30,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { User } from '../service/manageadmins.service';
+import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer";
 
 interface Column {
     field: string;
@@ -207,33 +208,34 @@ interface ExportColumn {
         }
     `],
     imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        RouterModule,
-        ToolbarModule,
-        RatingModule,
-        FluidModule,
-        PanelModule,
-        AutoCompleteModule,
-        PaginatorModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        PasswordModule,
-        MessageModule
-    ],
+    CommonModule,
+    TableModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    RippleModule,
+    ToastModule,
+    RouterModule,
+    ToolbarModule,
+    RatingModule,
+    FluidModule,
+    PanelModule,
+    AutoCompleteModule,
+    PaginatorModule,
+    InputTextModule,
+    TextareaModule,
+    SelectModule,
+    RadioButtonModule,
+    InputNumberModule,
+    DialogModule,
+    TagModule,
+    InputIconModule,
+    IconFieldModule,
+    ConfirmDialogModule,
+    PasswordModule,
+    MessageModule,
+    SecureFileViewerComponent
+],
     template: `
         <div class="card">
             <p-toast />
@@ -338,6 +340,12 @@ interface ExportColumn {
                 <p><b>Technical Details:</b> {{ selectedRepo.technical_details }}</p>
                 <p><b>Customer Benefit:</b> {{ selectedRepo.customer_benefit }}</p>
                 <p><b>Created by:</b> {{ selectedRepo.username }}</p>
+                <app-secure-file-viewer
+      [repoId]="selectedRepo.id"
+      [filename]="selectedRepo.attachment_filename || ''"
+      [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
+      apiBase="http://10.6.102.245:5002">
+    </app-secure-file-viewer>
             </div>
         </p-dialog>
 
