@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
+import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer';
 import { RatingModule } from 'primeng/rating';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { InputTextModule } from 'primeng/inputtext';
@@ -210,6 +211,7 @@ interface ExportColumn {
         SelectModule,
         RadioButtonModule,
         InputNumberModule,
+        SecureFileViewerComponent,
         DialogModule,
         TagModule,
         InputIconModule,
@@ -279,6 +281,12 @@ interface ExportColumn {
                             <td>{{ repo.customer_benefit }}</td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
+                                   <app-secure-file-viewer
+      [repoId]="repo.id"
+      [filename]="repo.attachment_filename || ''"
+      [disabled]="repo.attach_code_or_document === 'UPLOADED'"
+      apiBase="http://10.6.102.245:5002">
+    </app-secure-file-viewer>
                                     <ng-container *ngIf="isAdmin; else normalUserBlock">
                                         <p-button
                                             label="Download"
@@ -300,7 +308,7 @@ interface ExportColumn {
                                         </ng-container>
                                         <ng-template #requestBlock>
                                             <p-button
-                                                label="Request Download"
+                                                label="Request"
                                                 icon="pi pi-send"
                                                 severity="help"
                                                 (click)="openDownloadRequestDialog(repo)"
@@ -672,7 +680,7 @@ export class AddSolutions implements OnInit {
     approvedialog: boolean = false;
     createdialog: boolean = false;
     messages: any[] = [];
-    CurrentPage!: number;
+    AddSolCurrentPage!: number;
     page!: number;
     first!: number;
     customervalid: boolean = false;
@@ -770,16 +778,16 @@ export class AddSolutions implements OnInit {
 
     ngOnInit() {
         this.loadDomainsAndSectors();
-        const storedPage = localStorage.getItem('CurrentPage');
+        const storedPage = localStorage.getItem('AddSolCurrentPage');
         if (storedPage) {
-            this.CurrentPage = parseInt(storedPage);
-            this.loadDemoData(this.CurrentPage);
-            this.first = (this.CurrentPage - 1) * 10;
+            this.AddSolCurrentPage = parseInt(storedPage);
+            this.loadDemoData(this.AddSolCurrentPage);
+            this.first = (this.AddSolCurrentPage - 1) * 10;
         } else {
-            this.CurrentPage = 1;
-            localStorage.setItem('CurrentPage', this.CurrentPage.toString());
-            this.loadDemoData(this.CurrentPage);
-            this.first = (this.CurrentPage - 1) * 10;
+            this.AddSolCurrentPage = 1;
+            localStorage.setItem('AddSolCurrentPage', this.AddSolCurrentPage.toString());
+            this.loadDemoData(this.AddSolCurrentPage);
+            this.first = (this.AddSolCurrentPage - 1) * 10;
         }
         this.form_records();
         this.repoForm = new FormGroup({
@@ -1165,7 +1173,7 @@ export class AddSolutions implements OnInit {
         this.file = null;
         this.pendingRepoData = null;
         this.repoForm.reset();
-        this.loadDemoData(this.CurrentPage);
+        this.loadDemoData(this.AddSolCurrentPage);
     }
 
     /**
@@ -1194,7 +1202,7 @@ export class AddSolutions implements OnInit {
                     summary: 'Uploaded File Successfully',
                     detail: 'Via UploadService'
                 });
-                this.loadDemoData(this.CurrentPage);
+                this.loadDemoData(this.AddSolCurrentPage);
             },
             (err) => {
                 this.messageservice.add({
@@ -1233,9 +1241,9 @@ export class AddSolutions implements OnInit {
     }
 
     onPageChange(event: any) {
-        this.CurrentPage = event.page + 1;
-        this.loadDemoData(this.CurrentPage);
-        localStorage.setItem('CurrentPage', this.CurrentPage.toString());
+        this.AddSolCurrentPage = event.page + 1;
+        this.loadDemoData(this.AddSolCurrentPage);
+        localStorage.setItem('AddSolCurrentPage', this.AddSolCurrentPage.toString());
     }
 
     cancelEdit() {

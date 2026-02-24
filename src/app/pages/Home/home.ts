@@ -30,6 +30,7 @@ import { ManageReposService } from '../service/managerepos.service';
 import { AuthenticationService } from '../service/authentication.service';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer";
 
 @Component({
   selector: 'app-home',
@@ -60,8 +61,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
     IconFieldModule,
     ConfirmDialogModule,
     PasswordModule,
-    MessageModule
-  ],
+    MessageModule,
+    SecureFileViewerComponent
+],
   providers: [
     MessageService,
     ConfirmationService
@@ -385,44 +387,84 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
       </div>
 
       <!-- ── Details dialog ── -->
-      <p-dialog
-        header="Repository Details"
-        [(visible)]="dialogVisible"
-        [modal]="true"
-        [style]="{width: '700px'}"
-        (onHide)="closeDetails()"
-      >
-        <div *ngIf="selectedRepo">
-          <p><b>Domain:</b>               {{ selectedRepo.domain }}</p>
-          <p><b>Sector:</b>               {{ selectedRepo.sector }}</p>
-          <p><b>Module Name:</b>          {{ selectedRepo.module_name }}</p>
-          <p><b>Detailed Requirement:</b> {{ selectedRepo.detailed_requirement }}</p>
-          <p><b>Standard/Custom:</b>      {{ selectedRepo.standard_custom }}</p>
-          <p><b>Technical Details:</b>    {{ selectedRepo.technical_details }}</p>
-          <p><b>Customer Benefit:</b>     {{ selectedRepo.customer_benefit }}</p>
-        </div>
-        <div style="margin-top: 2rem; text-align: right;">
-          <!-- Button for Superadmin: always visible if attachment exists -->
-  <button
-    pButton
-    type="button"
-    [label]="isAttachmentLoading ? 'Loading...' : 'Open Solution Attachment'"
-    [disabled]="isAttachmentLoading"
-    (click)="openAttachment(selectedRepo)"
-    *ngIf="selectedRepo?.attach_code_or_document === 'ATTACHED' && selectedRepo?.download_approved === true"
-  ></button>
+      <!-- ── Details dialog ── -->
+<p-dialog
+  header="Repository Details"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{width: '90vw', height: '90vh'}"
+  [contentStyle]="{height: 'calc(100% - 60px)', overflow: 'auto'}"
+  (onHide)="closeDetails()"
+>
+  <ng-template pTemplate="content">
+    <div *ngIf="selectedRepo" style="padding: 1rem;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tbody>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 600; width: 200px; background-color: #f9fafb;">Domain:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.domain }}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Sector:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.sector }}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Module Name:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.module_name }}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Detailed Requirement:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.detailed_requirement }}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Standard/Custom:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.standard_custom }}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Technical Details:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.technical_details }}</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem; font-weight: 600; background-color: #f9fafb;">Customer Benefit:</td>
+            <td style="padding: 0.75rem;">{{ selectedRepo.customer_benefit }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-template>
 
-  <!-- Button for regular users: show Request Download if not yet approved -->
-  <button
-    pButton
-    type="button"
-    label="Request Download Access"
-    severity="secondary"
-    (click)="requestDownload(selectedRepo)"
-    *ngIf="selectedRepo?.attach_code_or_document === 'ATTACHED' && selectedRepo?.download_approved !== true"
-  ></button>
-        </div>
-      </p-dialog>
+  <ng-template pTemplate="footer">
+    <ng-container *ngIf="selectedRepo">
+      <!-- Secure File Viewer -->
+      <app-secure-file-viewer
+        [repoId]="selectedRepo.id"
+        [filename]="selectedRepo.attachment_filename || ''"
+        [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
+        apiBase="http://10.6.102.245:5002">
+      </app-secure-file-viewer>
+      
+      <!-- Button for Superadmin: visible if attachment exists and approved -->
+      <button
+        pButton
+        type="button"
+        [label]="isAttachmentLoading ? 'Loading...' : 'Open Solution Attachment'"
+        [disabled]="isAttachmentLoading"
+        (click)="openAttachment(selectedRepo)"
+        *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved === true"
+      ></button>
+
+      <!-- Button for regular users: show Request Download if not yet approved -->
+      <button
+        pButton
+        type="button"
+        label="Request Download Access"
+        severity="secondary"
+        (click)="requestDownload(selectedRepo)"
+        *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved !== true"
+      ></button>
+    </ng-container>
+  </ng-template>
+</p-dialog>
 
     </div>
   `

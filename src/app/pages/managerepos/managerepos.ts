@@ -28,6 +28,7 @@ import { ManageReposService, Repository } from '../service/managerepos.service';
 import { PaginatorModule } from 'primeng/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer";
 
 interface Column {
     field: string;
@@ -186,32 +187,33 @@ interface ExportColumn {
         }
     `,
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        RouterModule,
-        ToolbarModule,
-        RatingModule,
-        FluidModule,
-        PanelModule,
-        AutoCompleteModule,
-        PaginatorModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        PasswordModule,
-        MessageModule
-    ],
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    RippleModule,
+    ToastModule,
+    RouterModule,
+    ToolbarModule,
+    RatingModule,
+    FluidModule,
+    PanelModule,
+    AutoCompleteModule,
+    PaginatorModule,
+    InputTextModule,
+    TextareaModule,
+    SelectModule,
+    RadioButtonModule,
+    InputNumberModule,
+    DialogModule,
+    TagModule,
+    InputIconModule,
+    IconFieldModule,
+    ConfirmDialogModule,
+    PasswordModule,
+    MessageModule,
+    SecureFileViewerComponent
+],
     template: `
         <p-toast />
         <div class="card">
@@ -298,7 +300,13 @@ interface ExportColumn {
                             <td>{{ repo.technical_details }}</td>
                             <td>{{ repo.customer_benefit }}</td>
                             <td>
-                                <div class="flex" style="min-width: 100px; gap: 0.5rem;">
+                                <div class="flex" style="min-width: 300px; gap: 0.5rem;">
+                                     <app-secure-file-viewer
+      [repoId]="repo.id"
+      [filename]="repo.attachment_filename || ''"
+      [disabled]="repo.attach_code_or_document === 'UPLOADED'"
+      apiBase="http://10.6.102.245:5002">
+    </app-secure-file-viewer>
                                     <ng-container *ngIf="isAdmin; else normalUserBlock">
                                         <p-button
                                             label="Download"
@@ -322,7 +330,7 @@ interface ExportColumn {
 
                                         <ng-template #requestBlock>
                                             <p-button
-                                                label="Request Download"
+                                                label="Request"
                                                 icon="pi pi-send"
                                                 severity="help"
                                                 (click)="openDownloadRequestDialog(repo)"
@@ -355,7 +363,7 @@ interface ExportColumn {
                             </td>
                             <td>
                                 <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                    <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="attachvalid" (click)="upload_ref(repo)"></button>
+                                    <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="isadmin" (click)="upload_ref(repo)"></button>
                                     <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" *ngIf="isadmin" (click)="delete_Repo(repo)"></button>
                                 </div>
                             </td>

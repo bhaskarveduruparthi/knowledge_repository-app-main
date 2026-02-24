@@ -14,6 +14,7 @@ export interface Repository {
   technical_details?: string;
   customer_benefit?: string;
   attach_code_or_document?: string;
+  attachment_filename?: string;
   Approver?: string;
   Approval_status?: string;
   Approval_date?: string;
@@ -217,6 +218,10 @@ export class ManageReposService {
 
   download_reference(id: any) {
     return this.http.get(`${this.url}/repos/refdownload/${id}`);
+  }
+
+  refview(id: any) {
+    return this.http.get(`${this.url}/repos/refview/${id}`);
   }
 
   getdatabydomain() {
