@@ -13,6 +13,7 @@ import { DownloadHistory } from './downloadhistory/downloadhistory';
 import { ManageManagers } from './manage_managers/manage_managers';
 import { ManageDownloads } from './downloads/downloads';
 import { AddSolutions } from './addsolutions/addsolutions';
+import { UserWiseReportComponent } from './user-wisereport/user-wisereport';
 
 
 export default [
@@ -27,6 +28,7 @@ export default [
      {path: 'rejected', component: ManageRejectedReport},
      {path: 'support', component: Support},
      {path: 'home', component: Home},
+     {path: 'userwise', component: UserWiseReportComponent},
      {path:'login-history', component: LoginHistory},
      {path: 'manage-managers', component: ManageManagers},
      {path: 'download-history', component: DownloadHistory},

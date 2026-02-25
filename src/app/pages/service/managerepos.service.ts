@@ -180,6 +180,10 @@ export class ManageReposService {
     return this.http.get(`${this.url}/repos/getalladdedreporecords`);
   }
 
+  get_allrepos() {
+    return this.http.get(`${this.url}/repos/getrepos`);
+  }
+
   get_log_records() {
     return this.http.get(`${this.url}/repos/getlogrecords`);
   }

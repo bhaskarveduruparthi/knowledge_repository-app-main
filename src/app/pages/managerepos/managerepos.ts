@@ -1568,7 +1568,7 @@ if (savedView === 'card' || savedView === 'table') {
         const parsed = JSON.parse(raw);
         const jwt = parsed.access_token;
 
-        const url = `http://10.6.102.245:5002/repos/refdownload/${id}?access_token=${jwt}`;
+        const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
         window.open(url, '_blank');
     }
 
