@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
 import { AuthenticationService } from '../service/authentication.service';
 import { ManageReposService } from '../service/managerepos.service';
 import { ManageAdminsService } from '../service/manageadmins.service';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { saveAs } from 'file-saver';
 import { forkJoin } from 'rxjs';
 
@@ -51,12 +51,13 @@ interface MonthOption {
     ],
     providers: [MessageService, ManageAdminsService, ManageReposService],
     styles: `
-       
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
         :host {
             display: block;
             min-height: 100vh;
             background: #f4f7f5;
-            font-family: 'Arial', sans-serif;
+            font-family: 'DM Sans', sans-serif;
         }
 
         /* ─── CSS Variables ─── */
@@ -1538,27 +1539,155 @@ export class UserWiseReportComponent implements OnInit {
 
     exportToExcel() {
         try {
-            const summary = this.filteredStats.map(s => ({
-                'User ID': s.yash_id, 'Name': s.name, 'Email': s.email, 'IRM': s.irm,
-                'Logins': s.login_count, 'Last Login': this.formatDateOnly(s.last_login),
-                'Total': s.total_solutions, 'Approved': s.approved, 'Pending': s.pending, 'Rejected': s.rejected
-            }));
-            const details = this.filteredStats.flatMap(s => s.solutions.map(sol => ({
-                'User ID': s.yash_id, 'Name': s.name, 'IRM': s.irm,
-                'Customer': sol.customer_name, 'Module': sol.module_name,
-                'Domain': sol.domain, 'Sector': sol.sector,
-                'Created': this.formatDate(sol.created_at),
-                'Status': sol.Approval_status || 'Pending',
-                'Approver': sol.Approver || 'N/A', 'Approval Date': sol.Approval_date || 'N/A'
-            })));
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'User Summary');
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(details), 'Detailed Solutions');
+
+            // ── Shared style helpers ──────────────────────────────────────────
+            const headerStyle = (bgHex: string) => ({
+                font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bgHex } },
+                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                border: {
+                    top:    { style: 'thin', color: { rgb: 'FFFFFF' } },
+                    bottom: { style: 'thin', color: { rgb: 'FFFFFF' } },
+                    left:   { style: 'thin', color: { rgb: 'FFFFFF' } },
+                    right:  { style: 'thin', color: { rgb: 'FFFFFF' } }
+                }
+            });
+
+            const cellStyle = (bgHex: string, fgHex = '1A3D2E', bold = false) => ({
+                font: { bold, color: { rgb: fgHex }, sz: 10, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bgHex } },
+                alignment: { horizontal: 'center', vertical: 'center' },
+                border: {
+                    top:    { style: 'hair', color: { rgb: 'C8DDD1' } },
+                    bottom: { style: 'hair', color: { rgb: 'C8DDD1' } },
+                    left:   { style: 'hair', color: { rgb: 'C8DDD1' } },
+                    right:  { style: 'hair', color: { rgb: 'C8DDD1' } }
+                }
+            });
+
+            const leftCellStyle = (bgHex: string, fgHex = '1A3D2E', bold = false) => ({
+                ...cellStyle(bgHex, fgHex, bold),
+                alignment: { horizontal: 'left', vertical: 'center' }
+            });
+
+            // ── SHEET 1: User Summary ────────────────────────────────────────
+            const s1Headers = ['User ID', 'Name', 'Email', 'IRM', 'Logins', 'Last Login', 'Total', 'Approved', 'Pending', 'Rejected'];
+            const s1HeaderBg = '1C4535'; // forest green
+
+            const s1Rows = this.filteredStats.map((s, i) => {
+                const rowBg = i % 2 === 0 ? 'F4F7F5' : 'E3F2EB'; // alternating cream / light mint
+                return [
+                    { v: s.yash_id,                        s: leftCellStyle(rowBg) },
+                    { v: s.name,                           s: leftCellStyle(rowBg, '1A3D2E', true) },
+                    { v: s.email || '',                    s: leftCellStyle(rowBg) },
+                    { v: s.irm || 'N/A',                   s: cellStyle(rowBg) },
+                    { v: s.login_count,                    s: cellStyle(rowBg, '1565C0', true) },
+                    { v: this.formatDateOnly(s.last_login), s: cellStyle(rowBg) },
+                    { v: s.total_solutions,                s: cellStyle(rowBg, '2E7D52', true) },
+                    { v: s.approved,                       s: cellStyle(s.approved  > 0 ? 'E8F5E9' : rowBg, '1B5E20', true) },
+                    { v: s.pending,                        s: cellStyle(s.pending   > 0 ? 'FFF8E1' : rowBg, 'E65100', true) },
+                    { v: s.rejected,                       s: cellStyle(s.rejected  > 0 ? 'FFEBEE' : rowBg, 'B71C1C', true) },
+                ];
+            });
+
+            const ws1 = this.buildStyledSheet(
+                s1Headers.map(h => ({ v: h, s: headerStyle(s1HeaderBg) })),
+                s1Rows,
+                [12, 22, 28, 14, 9, 14, 9, 11, 11, 11]
+            );
+
+            // Title row above headers
+            this.addTitleRow(ws1, 'User Activity Report — Summary', s1Headers.length, '1C4535');
+            XLSX.utils.book_append_sheet(wb, ws1, 'User Summary');
+
+            // ── SHEET 2: Detailed Solutions ──────────────────────────────────
+            const s2Headers = ['User ID', 'Name', 'IRM', 'Customer', 'Module', 'Domain', 'Sector', 'Created', 'Status', 'Approver', 'Approval Date'];
+            const s2HeaderBg = '245C41'; // pine green
+
+            const statusColor = (status: string) => {
+                const s = status?.toLowerCase();
+                if (s === 'approved')          return { bg: 'E8F5E9', fg: '1B5E20' };
+                if (s === 'rejected')          return { bg: 'FFEBEE', fg: 'B71C1C' };
+                return                                { bg: 'FFF8E1', fg: 'E65100' }; // pending
+            };
+
+            const s2Rows = this.filteredStats.flatMap((s, ui) =>
+                s.solutions.map((sol, si) => {
+                    const rowBg = (ui + si) % 2 === 0 ? 'F4F7F5' : 'EBF5EF';
+                    const sc = statusColor(sol.Approval_status);
+                    return [
+                        { v: s.yash_id,                          s: leftCellStyle(rowBg) },
+                        { v: s.name,                             s: leftCellStyle(rowBg, '1A3D2E', true) },
+                        { v: s.irm || 'N/A',                     s: cellStyle(rowBg, '2E7D52') },
+                        { v: sol.customer_name || '',            s: leftCellStyle(rowBg) },
+                        { v: sol.module_name || '',              s: leftCellStyle(rowBg) },
+                        { v: sol.domain || '',                   s: cellStyle(rowBg) },
+                        { v: sol.sector || '',                   s: cellStyle(rowBg) },
+                        { v: this.formatDate(sol.created_at),    s: cellStyle(rowBg) },
+                        { v: sol.Approval_status || 'Pending',   s: cellStyle(sc.bg, sc.fg, true) },
+                        { v: sol.Approver || 'N/A',              s: leftCellStyle(rowBg) },
+                        { v: sol.Approval_date || 'N/A',         s: cellStyle(rowBg) },
+                    ];
+                })
+            );
+
+            const ws2 = this.buildStyledSheet(
+                s2Headers.map(h => ({ v: h, s: headerStyle(s2HeaderBg) })),
+                s2Rows,
+                [12, 20, 14, 22, 26, 14, 14, 18, 14, 22, 14]
+            );
+
+            this.addTitleRow(ws2, 'User Activity Report — Detailed Solutions', s2Headers.length, '245C41');
+            XLSX.utils.book_append_sheet(wb, ws2, 'Detailed Solutions');
+
+            // ── Write & Download ─────────────────────────────────────────────
             const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             saveAs(new Blob([out], { type: 'application/octet-stream' }), `User_Activity_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
             this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'Report downloaded successfully' });
-        } catch {
+        } catch (err) {
+            console.error(err);
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Export failed' });
         }
+    }
+
+    /** Build a worksheet from a header row + data rows, with column widths */
+    private buildStyledSheet(headers: any[], rows: any[][], colWidths: number[]): any {
+        const ws: any = {};
+        const R_OFFSET = 2; // row 0 = title, row 1 = headers, rows start at 2
+
+        // Write headers at row index 1 (after title)
+        headers.forEach((cell, c) => {
+            const addr = XLSX.utils.encode_cell({ r: 1, c });
+            ws[addr] = cell;
+        });
+
+        // Write data rows
+        rows.forEach((row, r) => {
+            row.forEach((cell, c) => {
+                const addr = XLSX.utils.encode_cell({ r: r + R_OFFSET, c });
+                ws[addr] = cell;
+            });
+        });
+
+        ws['!ref'] = XLSX.utils.encode_range({ r: 0, c: 0 }, { r: rows.length + R_OFFSET, c: headers.length - 1 });
+        ws['!cols'] = colWidths.map(w => ({ wch: w }));
+        ws['!rows'] = [{ hpt: 30 }, { hpt: 22 }, ...rows.map(() => ({ hpt: 18 }))];
+        return ws;
+    }
+
+    /** Insert a merged title cell at row 0 with a dark green banner */
+    private addTitleRow(ws: any, title: string, colCount: number, bgHex: string): void {
+        const addr = XLSX.utils.encode_cell({ r: 0, c: 0 });
+        ws[addr] = {
+            v: title,
+            s: {
+                font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 14, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bgHex } },
+                alignment: { horizontal: 'left', vertical: 'center' }
+            }
+        };
+        if (!ws['!merges']) ws['!merges'] = [];
+        ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
     }
 }
