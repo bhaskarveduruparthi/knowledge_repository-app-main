@@ -31,12 +31,12 @@ import { ManageAdminsService } from '../service/manageadmins.service';
     ConfirmationService
   ],
   styles: `
-    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+    
 
     :host {
       display: block;
       padding: 2.5rem 2.8rem;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Arial', sans-serif;
       min-height: 100vh;
       background: #f4f8f5;
       background-image:

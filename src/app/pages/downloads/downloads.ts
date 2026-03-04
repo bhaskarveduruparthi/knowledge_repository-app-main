@@ -34,7 +34,7 @@ import { CardModule } from "primeng/card";
   standalone: true,
   styles: [`
     
-    * { font-family: 'DM Sans', sans-serif; }
+    * { font-family: 'Arial', sans-serif; }
 
     :host { display: block; }
 

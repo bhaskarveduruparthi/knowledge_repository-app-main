@@ -55,7 +55,7 @@ interface ExportColumn {
     styles: [`
         
         * {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Arial', sans-serif;
         }
 
         :host {

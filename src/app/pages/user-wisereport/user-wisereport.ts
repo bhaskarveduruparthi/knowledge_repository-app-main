@@ -51,13 +51,12 @@ interface MonthOption {
     ],
     providers: [MessageService, ManageAdminsService, ManageReposService],
     styles: `
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
+       
         :host {
             display: block;
             min-height: 100vh;
             background: #f4f7f5;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Arial', sans-serif;
         }
 
         /* ─── CSS Variables ─── */
