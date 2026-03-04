@@ -51,532 +51,503 @@ interface MonthOption {
     ],
     providers: [MessageService, ManageAdminsService, ManageReposService],
     styles: `
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
         :host {
             display: block;
             min-height: 100vh;
-            background: #f4f7f5;
-            font-family: 'DM Sans', sans-serif;
+            background: #f0f4f8;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        /* ─── CSS Variables ─── */
-        :root {
-            --forest:    #1a3d2e;
-            --pine:      #245c41;
-            --fern:      #2e7d52;
-            --moss:      #3a9465;
-            --sage:      #5aad7a;
-            --mint:      #86c99e;
-            --dew:       #b8e0c6;
-            --frost:     #e3f2eb;
-            --cream:     #f4f7f5;
-            --leaf-gold: #a8b87a;
-            --amber:     #d4872a;
-            --clay:      #c5614a;
+        /* ── Page Wrapper ── */
+        .page-wrap {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0;
         }
 
-        /* ─── Layout Shell ─── */
-        .shell {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-        }
-
-        /* ─── Left Sidebar ─── */
-        .sidebar {
-            background: #1c4535;
-            padding: 2rem 1.5rem;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            border-right: 1px solid #163828;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-        }
-
-        .sidebar-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .sidebar-icon {
-            width: 46px;
-            height: 46px;
-            background: rgba(255,255,255,0.18);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            color: #ffffff;
-            margin-bottom: 0.65rem;
-            border: 1px solid rgba(255,255,255,0.25);
-        }
-
-        .sidebar-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.25rem;
-            color: #ffffff;
-            line-height: 1.2;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-
-        .sidebar-subtitle {
-            font-size: 0.7rem;
-            color: #a8d5b8;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        /* Sidebar Stat Pills */
-        .sidebar-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .sidebar-stat-label {
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #a8d5b8;
-            margin-bottom: 0.4rem;
-            font-weight: 700;
-        }
-
-        .sidebar-pill {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.7rem 0.9rem;
-            border-radius: 9px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.14);
-            transition: background 0.2s;
-        }
-
-        .sidebar-pill:hover {
-            background: rgba(255,255,255,0.16);
-        }
-
-        .sidebar-pill-left {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .sidebar-pill-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .sidebar-pill-text {
-            font-size: 0.82rem;
-            color: #e0f0e8;
-            font-weight: 500;
-        }
-
-        .sidebar-pill-num {
-            font-size: 1.05rem;
-            font-weight: 800;
-        }
-
-        .sidebar-pill.total .sidebar-pill-dot    { background: #7dd4a0; }
-        .sidebar-pill.approved .sidebar-pill-dot { background: #5de87a; }
-        .sidebar-pill.pending .sidebar-pill-dot  { background: #ffd060; }
-        .sidebar-pill.rejected .sidebar-pill-dot { background: #ff7f7a; }
-        .sidebar-pill.users .sidebar-pill-dot    { background: #a0dfc0; }
-
-        .sidebar-pill.total .sidebar-pill-num    { color: #7dd4a0; }
-        .sidebar-pill.approved .sidebar-pill-num { color: #5de87a; }
-        .sidebar-pill.pending .sidebar-pill-num  { color: #ffd060; }
-        .sidebar-pill.rejected .sidebar-pill-num { color: #ff7f7a; }
-        .sidebar-pill.users .sidebar-pill-num    { color: #a0dfc0; }
-
-        /* Sidebar Filters */
-        .sidebar-filters {
-            display: flex;
-            flex-direction: column;
-            gap: 0.65rem;
-            flex: 1;
-        }
-
-        .sidebar-filter-label {
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #a8d5b8;
-            margin-bottom: 0.2rem;
-            font-weight: 700;
-        }
-
-        .sidebar-filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .sidebar-filter-group label {
-            font-size: 0.78rem;
-            color: #c8e8d4;
-            font-weight: 600;
-        }
-
-        ::ng-deep .sidebar-filters .p-select {
-            background: rgba(255,255,255,0.12) !important;
-            border: 1px solid rgba(255,255,255,0.22) !important;
-            border-radius: 8px !important;
-            width: 100%;
-        }
-
-        ::ng-deep .sidebar-filters .p-select:hover {
-            border-color: rgba(255,255,255,0.4) !important;
-        }
-
-        ::ng-deep .sidebar-filters .p-select .p-select-label {
-            color: #ffffff !important;
-            font-size: 0.82rem !important;
-            padding: 0.6rem 0.9rem !important;
-            font-weight: 500;
-        }
-
-        ::ng-deep .sidebar-filters .p-select .p-select-dropdown {
-            color: #c8e8d4 !important;
-        }
-
-        .sidebar-search {
-            background: rgba(255,255,255,0.12) !important;
-            border: 1px solid rgba(255,255,255,0.22) !important;
-            border-radius: 8px !important;
-            color: #ffffff !important;
-            font-size: 0.82rem !important;
-            padding: 0.62rem 0.9rem !important;
-            width: 100%;
-            box-sizing: border-box;
-            font-weight: 500;
-        }
-
-        .sidebar-search::placeholder {
-            color: rgba(255,255,255,0.45) !important;
-        }
-
-        .sidebar-search:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.5) !important;
-            background: rgba(255,255,255,0.16) !important;
-        }
-
-        .sidebar-btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .btn-clear {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.65rem 1rem;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.25);
-            background: rgba(255,255,255,0.1);
-            color: #e0f0e8;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .btn-clear:hover {
-            background: rgba(255,255,255,0.18);
-            color: #ffffff;
-            border-color: rgba(255,255,255,0.4);
-        }
-
-        .btn-export {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.65rem 1rem;
-            border-radius: 8px;
-            border: none;
-            background: linear-gradient(135deg, #3aab66, #5de87a);
-            color: #0d2b1a;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-            box-shadow: 0 2px 10px rgba(61,200,110,0.35);
-        }
-
-        .btn-export:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(61,200,110,0.5);
-            background: linear-gradient(135deg, #45bc74, #68f08a);
-        }
-
-        .btn-export:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* ─── Main Content ─── */
-        .main {
-            display: flex;
-            flex-direction: column;
+        /* ── Hero Header ── */
+        .hero {
+            background: linear-gradient(135deg, #1c4535 0%, #2e7d52 50%, #1565a8 100%);
+            padding: 2.25rem 3rem 0 3rem;
+            position: relative;
             overflow: hidden;
         }
 
-        /* Top Bar */
-        .topbar {
-            background: white;
-            padding: 1.25rem 2.5rem;
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; left: 40%;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .hero-top {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #e4ede8;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
         }
 
-        .topbar-breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.82rem;
-            color: #7a9a87;
-        }
-
-        .topbar-breadcrumb span:last-child {
-            color: #1c4535;
-            font-weight: 600;
-        }
-
-        .topbar-actions {
+        .hero-brand {
             display: flex;
             align-items: center;
             gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        .refresh-btn {
+        .hero-icon {
+            width: 52px; height: 52px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .hero-title-wrap h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 0.25rem 0;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-title-wrap p {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.72);
+            margin: 0;
+        }
+
+        .hero-actions {
             display: flex;
+            gap: 0.75rem;
             align-items: center;
-            gap: 0.4rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            border: 1px solid #c8ddd1;
-            background: white;
-            color: #245c41;
-            font-size: 0.82rem;
-            font-weight: 500;
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 9px;
+            font-size: 0.83rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border: none;
         }
 
-        .refresh-btn:hover {
-            background: #e3f2eb;
-            border-color: #2e7d52;
+        .btn-hero.outline {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.28);
         }
 
-        /* Content Area */
-        .content {
-            padding: 2rem 2.5rem;
-            overflow-y: auto;
-            flex: 1;
+        .btn-hero.outline:hover {
+            background: rgba(255,255,255,0.2);
         }
 
-        /* Page Heading */
-        .page-heading {
-            margin-bottom: 2rem;
+        .btn-hero.excel {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(34,197,94,0.4);
         }
 
-        .page-heading h1 {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2rem;
-            color: #1c4535;
-            margin: 0 0 0.4rem 0;
-            line-height: 1.15;
+        .btn-hero.excel:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(34,197,94,0.5);
         }
 
-        .page-heading p {
-            color: #7a9a87;
-            font-size: 0.9rem;
-            margin: 0;
-            font-weight: 400;
-        }
+        .btn-hero.excel:disabled { opacity: 0.45; cursor: not-allowed; }
 
-        /* ─── Charts Grid ─── */
-        .charts-grid {
+        /* ── KPI Strip (inside hero, at bottom) ── */
+        .kpi-strip {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0;
+            position: relative;
+            z-index: 2;
+            margin-top: 1.5rem;
+        }
+
+        .kpi-tile {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            cursor: default;
+            transition: background 0.2s;
+        }
+
+        .kpi-tile:last-child { border-right: none; }
+        .kpi-tile:hover { background: rgba(255,255,255,0.06); }
+
+        .kpi-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+
+        .kpi-tile.k-users   .kpi-value { color: #7ee8a2; }
+        .kpi-tile.k-total   .kpi-value { color: #93c5fd; }
+        .kpi-tile.k-approve .kpi-value { color: #86efac; }
+        .kpi-tile.k-pending .kpi-value { color: #fde68a; }
+        .kpi-tile.k-reject  .kpi-value { color: #fca5a5; }
+
+        .kpi-sub {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.45);
+        }
+
+        /* ── Filter Bar ── */
+        .filter-bar {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .filter-bar-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .filter-divider {
+            width: 1px;
+            height: 28px;
+            background: #e2e8f0;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 180px;
+            max-width: 260px;
+        }
+
+        .filter-item i {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        ::ng-deep .filter-item .p-select {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            background: #f8fafc !important;
+            width: 100%;
+        }
+
+        ::ng-deep .filter-item .p-select:hover {
+            border-color: #2e7d52 !important;
+        }
+
+        ::ng-deep .filter-item .p-select .p-select-label {
+            font-size: 0.83rem !important;
+            color: #334155 !important;
+            padding: 0.55rem 0.85rem !important;
+        }
+
+        .search-wrap {
+            flex: 1;
+            min-width: 200px;
+            max-width: 280px;
+            position: relative;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            font-size: 0.83rem;
+            color: #334155;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2e7d52;
+            background: #fff;
+        }
+
+        .search-input::placeholder { color: #94a3b8; }
+
+        .btn-clear-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            white-space: nowrap;
+        }
+
+        .btn-clear-filter:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        /* ── Content Area ── */
+        .content {
+            padding: 2rem 3rem;
+        }
+
+        /* ── Charts Section ── */
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        /* 2-column charts grid */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .charts-row-2 {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 1.25rem;
             margin-bottom: 2rem;
         }
 
         .chart-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-            border: 1px solid #e4ede8;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
+            border: 1px solid #e8edf2;
+            position: relative;
+            overflow: hidden;
         }
 
-        .chart-card.full-width {
-            grid-column: 1 / -1;
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
         }
+
+        .chart-card.accent-green::before  { background: linear-gradient(90deg, #1c4535, #22c55e); }
+        .chart-card.accent-blue::before   { background: linear-gradient(90deg, #1565a8, #38bdf8); }
+        .chart-card.accent-purple::before { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+        .chart-card.accent-orange::before { background: linear-gradient(90deg, #c2410c, #fb923c); }
+        .chart-card.accent-teal::before   { background: linear-gradient(90deg, #0f766e, #2dd4bf); }
 
         .chart-card-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 1.25rem;
         }
 
         .chart-card-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.05rem;
-            color: #1c4535;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            line-height: 1.3;
         }
 
-        .chart-card-title i {
-            color: #2e7d52;
-            font-size: 1rem;
+        .chart-icon {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
+
+        .chart-icon.green  { background: #dcfce7; color: #16a34a; }
+        .chart-icon.blue   { background: #dbeafe; color: #1d4ed8; }
+        .chart-icon.purple { background: #ede9fe; color: #7c3aed; }
+        .chart-icon.orange { background: #ffedd5; color: #c2410c; }
+        .chart-icon.teal   { background: #ccfbf1; color: #0f766e; }
 
         .chart-badge {
-            font-size: 0.72rem;
-            background: #e3f2eb;
-            color: #245c41;
-            padding: 0.25rem 0.65rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
             border-radius: 20px;
-            font-weight: 600;
-            border: 1px solid #b8e0c6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
+        .badge-green  { background: #dcfce7; color: #15803d; }
+        .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+        .badge-purple { background: #ede9fe; color: #7c3aed; }
+        .badge-orange { background: #ffedd5; color: #c2410c; }
+        .badge-teal   { background: #ccfbf1; color: #0f766e; }
 
         ::ng-deep .chart-card .p-chart {
-            height: 280px !important;
+            height: 320px !important;
         }
 
-        /* ─── Data Table ─── */
+        ::ng-deep .chart-card.tall .p-chart {
+            height: 320px !important;
+        }
+
+        /* ── Table Section ── */
         .table-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-            border: 1px solid #e4ede8;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
+            border: 1px solid #e8edf2;
+            overflow: hidden;
         }
 
         .table-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            padding: 1.4rem 1.75rem;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .table-card-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.15rem;
-            color: #1c4535;
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #1e293b;
         }
 
         .count-chip {
             background: #1c4535;
             color: white;
-            padding: 0.2rem 0.7rem;
+            padding: 0.18rem 0.65rem;
             border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
 
+        /* Table styles */
         ::ng-deep .p-datatable .p-datatable-thead > tr > th,
         ::ng-deep .p-datatable-thead > tr > th,
         ::ng-deep th.p-sortable-column,
         ::ng-deep th[psortablecolumn] {
-            background: #1c4535 !important;
-            background-color: #1c4535 !important;
+            background: #1e293b !important;
+            background-color: #1e293b !important;
             color: #ffffff !important;
             font-weight: 700 !important;
-            padding: 0.95rem 1rem !important;
+            padding: 0.9rem 1.25rem !important;
             border: none !important;
-            border-bottom: 3px solid #163828 !important;
-            font-size: 0.78rem !important;
+            border-bottom: 2px solid #0f172a !important;
+            font-size: 0.75rem !important;
             text-transform: uppercase !important;
             letter-spacing: 0.6px !important;
-            font-family: 'DM Sans', sans-serif !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
             white-space: nowrap;
         }
 
         ::ng-deep .p-datatable .p-datatable-thead > tr > th .p-sortable-column-icon,
         ::ng-deep .p-datatable .p-datatable-thead > tr > th .p-icon,
         ::ng-deep .p-datatable .p-datatable-thead > tr > th svg {
-            color: rgba(255,255,255,0.65) !important;
-            fill: rgba(255,255,255,0.65) !important;
+            color: rgba(255,255,255,0.5) !important;
+            fill: rgba(255,255,255,0.5) !important;
         }
 
-        ::ng-deep .p-datatable .p-datatable-thead > tr > th.p-sortable-column:hover,
         ::ng-deep .p-datatable .p-datatable-thead > tr > th:hover {
-            background: #245c41 !important;
-            background-color: #245c41 !important;
-            color: #ffffff !important;
-        }
-
-        ::ng-deep .p-datatable .p-datatable-thead > tr > th:first-child {
-            border-radius: 10px 0 0 0 !important;
-        }
-
-        ::ng-deep .p-datatable .p-datatable-thead > tr > th:last-child {
-            border-radius: 0 10px 0 0 !important;
+            background: #334155 !important;
+            background-color: #334155 !important;
         }
 
         ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
-            padding: 1rem !important;
-            border-bottom: 1px solid #eef4f0 !important;
+            padding: 0.95rem 1.25rem !important;
+            border-bottom: 1px solid #f1f5f9 !important;
             vertical-align: middle;
             font-size: 0.875rem;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
             border-bottom: none !important;
         }
 
-        ::ng-deep .p-datatable .p-datatable-tbody > tr {
-            transition: background 0.15s;
-        }
-
         ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
-            background: #f7faf8 !important;
+            background: #f8fafc !important;
         }
 
         ::ng-deep .p-datatable .p-paginator {
             border: none !important;
-            border-top: 1px solid #eef4f0 !important;
-            padding: 1rem 0 0 0 !important;
+            border-top: 1px solid #f1f5f9 !important;
+            padding: 1rem 1.25rem !important;
         }
 
         /* User Cell */
@@ -587,167 +558,103 @@ interface MonthOption {
         }
 
         .avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #245c41, #2e7d52);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
             color: white;
-            font-weight: 700;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(36,92,65,0.25);
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #1c4535;
-            font-size: 0.88rem;
-            line-height: 1.2;
-        }
-
-        .user-id {
+            font-weight: 800;
             font-size: 0.75rem;
-            color: #99b5a5;
-            font-weight: 400;
+            flex-shrink: 0;
         }
 
-        /* Stat Cell Badges */
-        .num-total {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #2e7d52;
-        }
+        .avatar-0 { background: linear-gradient(135deg, #1c4535, #22c55e); }
+        .avatar-1 { background: linear-gradient(135deg, #1565a8, #38bdf8); }
+        .avatar-2 { background: linear-gradient(135deg, #6d28d9, #a78bfa); }
+        .avatar-3 { background: linear-gradient(135deg, #c2410c, #fb923c); }
+        .avatar-4 { background: linear-gradient(135deg, #0f766e, #2dd4bf); }
+
+        .user-name { font-weight: 700; color: #1e293b; font-size: 0.875rem; }
+        .user-id   { font-size: 0.72rem; color: #94a3b8; }
+
+        /* Badges */
+        .num-total { font-size: 1rem; font-weight: 800; color: #1c4535; }
 
         .num-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 28px;
-            height: 24px;
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 32px; height: 24px;
             border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 0 0.45rem;
+            font-size: 0.78rem; font-weight: 700;
+            padding: 0 0.5rem;
         }
 
-        .num-badge.approved { background: #e6f9ec; color: #1e8c3a; }
-        .num-badge.pending  { background: #fff8e6; color: #c47c00; }
-        .num-badge.rejected { background: #fdecea; color: #c03520; }
+        .num-badge.approved { background: #dcfce7; color: #15803d; }
+        .num-badge.pending  { background: #fef9c3; color: #a16207; }
+        .num-badge.rejected { background: #fee2e2; color: #b91c1c; }
 
         .login-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            background: #e8f0fe;
-            color: #2c5fbf;
-            padding: 0.3rem 0.7rem;
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: #dbeafe; color: #1d4ed8;
+            padding: 0.28rem 0.65rem;
             border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
+            font-size: 0.78rem; font-weight: 700;
         }
 
-        .date-text {
-            font-size: 0.8rem;
-            color: #7a9a87;
-            font-weight: 400;
+        .irm-tag {
+            display: inline-block;
+            padding: 0.22rem 0.65rem;
+            background: #f0fdf4; color: #15803d;
+            border-radius: 6px;
+            font-size: 0.78rem; font-weight: 600;
+            border: 1px solid #bbf7d0;
         }
+
+        .date-text { font-size: 0.8rem; color: #94a3b8; }
+
+        .view-btn {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.38rem 0.85rem;
+            border-radius: 7px;
+            border: 1px solid #e2e8f0;
+            background: #fff; color: #1c4535;
+            font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .view-btn:hover { background: #f0fdf4; border-color: #22c55e; color: #15803d; }
 
         ::ng-deep .p-tag {
-            font-weight: 600 !important;
-            font-size: 0.75rem !important;
-            padding: 0.3rem 0.75rem !important;
+            font-weight: 700 !important;
+            font-size: 0.74rem !important;
+            padding: 0.28rem 0.7rem !important;
             border-radius: 20px !important;
         }
 
-        /* IRM Tag */
-        .irm-tag {
-            display: inline-block;
-            padding: 0.25rem 0.7rem;
-            background: #e3f2eb;
-            color: #245c41;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            border: 1px solid #b8e0c6;
-        }
-
-        /* View Button */
-        .view-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 7px;
-            border: 1px solid #c8ddd1;
-            background: white;
-            color: #245c41;
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .view-btn:hover {
-            background: #e3f2eb;
-            border-color: #2e7d52;
-            color: #1c4535;
-        }
-
-        /* ─── Loading ─── */
+        /* Loading */
         .loading-overlay {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 400px;
-            gap: 1.25rem;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 420px; gap: 1.25rem;
         }
 
         .leaf-spinner {
-            width: 52px;
-            height: 52px;
-            border: 3px solid #e3f2eb;
-            border-top: 3px solid #2e7d52;
+            width: 48px; height: 48px;
+            border: 3px solid #dcfce7;
+            border-top: 3px solid #22c55e;
             border-radius: 50%;
-            animation: spin 0.9s linear infinite;
+            animation: spin 0.85s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .loading-text {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.1rem;
-            color: #245c41;
-        }
+        .loading-text { font-size: 1rem; font-weight: 600; color: #475569; }
 
-        /* ─── Empty ─── */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #aac4b3;
-        }
+        /* Empty */
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; color: #cbd5e1; }
+        .empty-state p { font-size: 0.95rem; color: #94a3b8; }
 
-        .empty-state i {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 1rem;
-            color: #b8e0c6;
-        }
-
-        .empty-state p {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1rem;
-            color: #7a9a87;
-        }
-
-        /* ─── Dialog ─── */
+        /* Dialog */
         ::ng-deep .solutions-dialog .p-dialog {
             max-width: 92vw !important;
             width: 1100px !important;
@@ -757,15 +664,15 @@ interface MonthOption {
         }
 
         ::ng-deep .solutions-dialog .p-dialog-header {
-            background: linear-gradient(135deg, #1c4535 0%, #245c41 100%) !important;
+            background: linear-gradient(135deg, #1c4535 0%, #1565a8 100%) !important;
             color: white !important;
             padding: 1.5rem 2rem !important;
             border-radius: 0 !important;
         }
 
         ::ng-deep .solutions-dialog .p-dialog-header .p-dialog-title {
-            font-family: 'DM Serif Display', serif !important;
-            font-size: 1.3rem !important;
+            font-size: 1.2rem !important;
+            font-weight: 800 !important;
             color: #ffffff !important;
         }
 
@@ -775,7 +682,6 @@ interface MonthOption {
 
         ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon:hover {
             background: rgba(255,255,255,0.15) !important;
-            color: #ffffff !important;
             border-radius: 50% !important;
         }
 
@@ -785,7 +691,6 @@ interface MonthOption {
             border-radius: 0 0 16px 16px !important;
         }
 
-        /* Dialog table — contained inside dialog, no overflow */
         ::ng-deep .solutions-dialog .p-datatable {
             border-radius: 0 0 16px 16px !important;
             overflow: hidden !important;
@@ -796,10 +701,7 @@ interface MonthOption {
             overflow-x: auto !important;
         }
 
-        ::ng-deep .solutions-dialog .p-datatable .p-datatable-thead > tr > th:first-child {
-            border-radius: 0 !important;
-        }
-
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-thead > tr > th:first-child,
         ::ng-deep .solutions-dialog .p-datatable .p-datatable-thead > tr > th:last-child {
             border-radius: 0 !important;
         }
@@ -807,184 +709,65 @@ interface MonthOption {
         ::ng-deep .solutions-dialog .p-datatable .p-paginator {
             border-radius: 0 0 16px 16px !important;
             border: none !important;
-            border-top: 1px solid #eef4f0 !important;
+            border-top: 1px solid #f1f5f9 !important;
             padding: 1rem 1.5rem !important;
         }
 
         ::ng-deep .solutions-dialog .p-datatable .p-datatable-tbody > tr > td {
-            padding: 0.9rem 1rem !important;
+            padding: 0.9rem 1.25rem !important;
             font-size: 0.875rem !important;
         }
 
-        /* ─── Responsive Overrides ─── */
-        @media (max-width: 1200px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .charts-row { grid-template-columns: repeat(2, 1fr); }
         }
 
-        @media (max-width: 960px) {
-            .shell {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 1100px) {
+            .charts-row-2 { grid-template-columns: 1fr; }
+            .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+        }
 
-            .sidebar {
-                position: relative;
-                height: auto;
-                padding: 1.5rem;
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-
-            .sidebar-brand { 
-                width: 100%;
-                padding-bottom: 1rem;
-                margin-bottom: 0;
-            }
-
-            .sidebar-stats, .sidebar-filters {
-                flex: 1;
-                min-width: 220px;
-            }
-
-            .topbar {
-                padding: 1rem 1.5rem;
-            }
-
-            .content {
-                padding: 1.5rem;
-            }
+        @media (max-width: 900px) {
+            .hero { padding: 1.75rem 1.5rem 0 1.5rem; }
+            .filter-bar { padding: 0.85rem 1.5rem; }
+            .content { padding: 1.5rem; }
+            .charts-row { grid-template-columns: 1fr; }
+            .kpi-strip { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 640px) {
-            .sidebar {
-                flex-direction: column;
-            }
-
-            .page-heading h1 {
-                font-size: 1.6rem;
-            }
-
-            .charts-grid {
-                gap: 1rem;
-            }
+            .kpi-strip { grid-template-columns: 1fr 1fr; }
+            .hero-actions { flex-wrap: wrap; }
+            .filter-item { max-width: 100%; flex: 1 1 150px; }
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f4f7f5; }
-        ::-webkit-scrollbar-thumb { background: #b8e0c6; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #86c99e; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     `,
     template: `
         <p-toast />
+        <div class="page-wrap">
 
-        <div class="shell">
-
-            <!-- ── Left Sidebar ── -->
-            <aside class="sidebar">
-
-                <div class="sidebar-brand">
-                    <div class="sidebar-icon">
-                        <i class="pi pi-users"></i>
-                    </div>
-                    <div class="sidebar-title">User Activity<br>Report</div>
-                    <div class="sidebar-subtitle">Knowledge Repository</div>
-                </div>
-
-                <!-- Live Summary Pills -->
-                <div class="sidebar-stats" *ngIf="!loading">
-                    <div class="sidebar-stat-label">Summary</div>
-
-                    <div class="sidebar-pill users">
-                        <div class="sidebar-pill-left">
-                            <div class="sidebar-pill-dot"></div>
-                            <div class="sidebar-pill-text">Active Users</div>
+            <!-- ── Hero Header ── -->
+            <div class="hero">
+                <div class="hero-top">
+                    <div class="hero-brand">
+                        <div class="hero-icon"><i class="pi pi-users"></i></div>
+                        <div class="hero-title-wrap">
+                            <h1>User Activity &amp; Solutions Report</h1>
+                            <p>Track contributions, login patterns and solution performance</p>
                         </div>
-                        <div class="sidebar-pill-num">{{ filteredStats.length }}</div>
                     </div>
-
-                    <div class="sidebar-pill total">
-                        <div class="sidebar-pill-left">
-                            <div class="sidebar-pill-dot"></div>
-                            <div class="sidebar-pill-text">Total Solutions</div>
-                        </div>
-                        <div class="sidebar-pill-num">{{ getTotalSolutions() }}</div>
-                    </div>
-
-                    <div class="sidebar-pill approved">
-                        <div class="sidebar-pill-left">
-                            <div class="sidebar-pill-dot"></div>
-                            <div class="sidebar-pill-text">Approved</div>
-                        </div>
-                        <div class="sidebar-pill-num">{{ getTotalApproved() }}</div>
-                    </div>
-
-                    <div class="sidebar-pill pending">
-                        <div class="sidebar-pill-left">
-                            <div class="sidebar-pill-dot"></div>
-                            <div class="sidebar-pill-text">Pending</div>
-                        </div>
-                        <div class="sidebar-pill-num">{{ getTotalPending() }}</div>
-                    </div>
-
-                    <div class="sidebar-pill rejected">
-                        <div class="sidebar-pill-left">
-                            <div class="sidebar-pill-dot"></div>
-                            <div class="sidebar-pill-text">Rejected</div>
-                        </div>
-                        <div class="sidebar-pill-num">{{ getTotalRejected() }}</div>
-                    </div>
-                </div>
-
-                <!-- Filters -->
-                <div class="sidebar-filters">
-                    <div class="sidebar-filter-label">Filters</div>
-
-                    <div class="sidebar-filter-group">
-                        <label>Month</label>
-                        <p-select
-                            [options]="monthOptions"
-                            [(ngModel)]="selectedMonth"
-                            placeholder="All Months"
-                            [showClear]="true"
-                            optionLabel="label"
-                            optionValue="value"
-                            (onChange)="applyFilters()"
-                            styleClass="w-full"
-                        />
-                    </div>
-
-                    <div class="sidebar-filter-group">
-                        <label>IRM</label>
-                        <p-select
-                            [options]="irmOptions"
-                            [(ngModel)]="selectedIRM"
-                            placeholder="All IRMs"
-                            [showClear]="true"
-                            (onChange)="applyFilters()"
-                            styleClass="w-full"
-                        />
-                    </div>
-
-                    <div class="sidebar-filter-group">
-                        <label>Search</label>
-                        <input
-                            class="sidebar-search"
-                            type="text"
-                            [(ngModel)]="searchText"
-                            (input)="applyFilters()"
-                            placeholder="Name or User ID…"
-                        />
-                    </div>
-
-                    <div class="sidebar-btn-group">
-                        <button class="btn-clear" (click)="clearFilters()">
-                            <i class="pi pi-filter-slash"></i> Clear Filters
+                    <div class="hero-actions">
+                        <button class="btn-hero outline" (click)="loadReportData()">
+                            <i class="pi pi-refresh"></i> Refresh
                         </button>
                         <button
-                            class="btn-export"
+                            class="btn-hero excel"
                             (click)="exportToExcel()"
                             [disabled]="loading || filteredStats.length === 0">
                             <i class="pi pi-file-excel"></i> Export Excel
@@ -992,195 +775,221 @@ interface MonthOption {
                     </div>
                 </div>
 
-            </aside>
-
-            <!-- ── Main Content ── -->
-            <div class="main">
-
-                <!-- Top Bar -->
-                <div class="topbar">
-                    <div class="topbar-breadcrumb">
-                        <span>Reports</span>
-                        <i class="pi pi-angle-right" style="font-size: 0.7rem;"></i>
-                        <span>User Activity</span>
+                <!-- KPI Strip -->
+                <div class="kpi-strip" *ngIf="!loading">
+                    <div class="kpi-tile k-users">
+                        <div class="kpi-label">Active Users</div>
+                        <div class="kpi-value">{{ filteredStats.length }}</div>
+                        <div class="kpi-sub">in current filter</div>
                     </div>
-                    <div class="topbar-actions">
-                        <button class="refresh-btn" (click)="loadReportData()">
-                            <i class="pi pi-refresh"></i> Refresh
-                        </button>
+                    <div class="kpi-tile k-total">
+                        <div class="kpi-label">Total Solutions</div>
+                        <div class="kpi-value">{{ getTotalSolutions() }}</div>
+                        <div class="kpi-sub">all statuses</div>
+                    </div>
+                    <div class="kpi-tile k-approve">
+                        <div class="kpi-label">Approved</div>
+                        <div class="kpi-value">{{ getTotalApproved() }}</div>
+                        <div class="kpi-sub">ready to use</div>
+                    </div>
+                    <div class="kpi-tile k-pending">
+                        <div class="kpi-label">Pending</div>
+                        <div class="kpi-value">{{ getTotalPending() }}</div>
+                        <div class="kpi-sub">awaiting review</div>
+                    </div>
+                    <div class="kpi-tile k-reject">
+                        <div class="kpi-label">Rejected</div>
+                        <div class="kpi-value">{{ getTotalRejected() }}</div>
+                        <div class="kpi-sub">need revision</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Content -->
-                <div class="content">
+            <!-- ── Filter Bar ── -->
+            <div class="filter-bar">
+                <span class="filter-bar-label"><i class="pi pi-filter" style="margin-right:4px;"></i>Filters</span>
+                <div class="filter-divider"></div>
 
-                    <div class="page-heading">
-                        <h1>User Activity &amp; Solutions</h1>
-                        <p>Track contributions, login patterns and solution performance across your team.</p>
-                    </div>
-
-                    <!-- Loading -->
-                    <div *ngIf="loading" class="loading-overlay">
-                        <div class="leaf-spinner"></div>
-                        <div class="loading-text">Loading report data…</div>
-                    </div>
-
-                    <ng-container *ngIf="!loading">
-
-                        <!-- Charts Grid -->
-                        <div class="charts-grid">
-
-                            <div class="chart-card">
-                                <div class="chart-card-header">
-                                    <div class="chart-card-title">
-                                        <i class="pi pi-trophy"></i>
-                                        Top 10 Contributors
-                                    </div>
-                                    <span class="chart-badge">Stacked</span>
-                                </div>
-                                <p-chart type="bar" [data]="topContributorsChartData" [options]="barChartOptions" />
-                            </div>
-
-                            <div class="chart-card">
-                                <div class="chart-card-header">
-                                    <div class="chart-card-title">
-                                        <i class="pi pi-sign-in"></i>
-                                        Most Active Users
-                                    </div>
-                                    <span class="chart-badge">By Logins</span>
-                                </div>
-                                <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
-                            </div>
-
-                            <div class="chart-card" *ngIf="!selectedIRM">
-                                <div class="chart-card-header">
-                                    <div class="chart-card-title">
-                                        <i class="pi pi-sitemap"></i>
-                                        Solutions by IRM
-                                    </div>
-                                    <span class="chart-badge">Donut</span>
-                                </div>
-                                <p-chart type="doughnut" [data]="irmChartData" [options]="pieChartOptions" />
-                            </div>
-
-                            <div class="chart-card" [class.full-width]="!!selectedIRM">
-                                <div class="chart-card-header">
-                                    <div class="chart-card-title">
-                                        <i class="pi pi-calendar"></i>
-                                        Monthly Solutions Added
-                                    </div>
-                                    <span class="chart-badge">Trend</span>
-                                </div>
-                                <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
-                            </div>
-
-                        </div>
-
-                        <!-- Data Table -->
-                        <div class="table-card">
-                            <div class="table-card-header">
-                                <div class="table-card-title">
-                                    <i class="pi pi-table" style="color: #2e7d52; font-size: 1rem;"></i>
-                                    User Details
-                                    <span class="count-chip">{{ filteredStats.length }}</span>
-                                </div>
-                            </div>
-
-                            <p-table
-                                [value]="filteredStats"
-                                [paginator]="true"
-                                [rows]="10"
-                                [rowsPerPageOptions]="[10, 25, 50, 100]"
-                                [showCurrentPageReport]="true"
-                                currentPageReportTemplate="Showing {first}–{last} of {totalRecords}"
-                                responsiveLayout="scroll"
-                            >
-                                <ng-template pTemplate="header">
-                                    <tr>
-                                        <th pSortableColumn="name" style="min-width: 190px;">
-                                            User <p-sortIcon field="name" />
-                                        </th>
-                                        <th pSortableColumn="irm">
-                                            IRM <p-sortIcon field="irm" />
-                                        </th>
-                                        <th pSortableColumn="login_count" class="text-center">
-                                            Logins <p-sortIcon field="login_count" />
-                                        </th>
-                                        <th class="text-center">Last Login</th>
-                                        <th pSortableColumn="total_solutions" class="text-center">
-                                            Total <p-sortIcon field="total_solutions" />
-                                        </th>
-                                        <th pSortableColumn="approved" class="text-center">
-                                            Approved <p-sortIcon field="approved" />
-                                        </th>
-                                        <th pSortableColumn="pending" class="text-center">
-                                            Pending <p-sortIcon field="pending" />
-                                        </th>
-                                        <th pSortableColumn="rejected" class="text-center">
-                                            Rejected <p-sortIcon field="rejected" />
-                                        </th>
-                                        <th class="text-center">Actions</th>
-                                    </tr>
-                                </ng-template>
-
-                                <ng-template pTemplate="body" let-user>
-                                    <tr>
-                                        <td>
-                                            <div class="user-cell">
-                                                <div class="avatar">{{ getInitials(user.name) }}</div>
-                                                <div>
-                                                    <div class="user-name">{{ user.name }}</div>
-                                                    <div class="user-id">{{ user.yash_id }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="irm-tag">{{ user.irm || 'N/A' }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="login-badge">
-                                                <i class="pi pi-sign-in"></i>
-                                                {{ user.login_count }}
-                                            </span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="date-text">{{ formatDateOnly(user.last_login) }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="num-total">{{ user.total_solutions }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="num-badge approved">{{ user.approved }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="num-badge pending">{{ user.pending }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="num-badge rejected">{{ user.rejected }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="view-btn" (click)="viewUserSolutions(user)">
-                                                <i class="pi pi-eye"></i> View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </ng-template>
-
-                                <ng-template pTemplate="emptymessage">
-                                    <tr>
-                                        <td colspan="9">
-                                            <div class="empty-state">
-                                                <i class="pi pi-inbox"></i>
-                                                <p>No user data matches your current filters.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </ng-template>
-                            </p-table>
-                        </div>
-
-                    </ng-container>
+                <div class="filter-item">
+                    <i class="pi pi-calendar"></i>
+                    <p-select
+                        [options]="monthOptions"
+                        [(ngModel)]="selectedMonth"
+                        placeholder="All Months"
+                        [showClear]="true"
+                        optionLabel="label"
+                        optionValue="value"
+                        (onChange)="applyFilters()"
+                        styleClass="w-full"
+                    />
                 </div>
+
+                <div class="filter-item">
+                    <i class="pi pi-briefcase"></i>
+                    <p-select
+                        [options]="irmOptions"
+                        [(ngModel)]="selectedIRM"
+                        placeholder="All IRMs"
+                        [showClear]="true"
+                        (onChange)="applyFilters()"
+                        styleClass="w-full"
+                    />
+                </div>
+
+                <div class="search-wrap">
+                    <i class="pi pi-search"></i>
+                    <input
+                        class="search-input"
+                        type="text"
+                        [(ngModel)]="searchText"
+                        (input)="applyFilters()"
+                        placeholder="Search name or ID…"
+                    />
+                </div>
+
+                <button class="btn-clear-filter" (click)="clearFilters()">
+                    <i class="pi pi-times"></i> Clear
+                </button>
+            </div>
+
+            <!-- ── Content ── -->
+            <div class="content">
+
+                <!-- Loading -->
+                <div *ngIf="loading" class="loading-overlay">
+                    <div class="leaf-spinner"></div>
+                    <div class="loading-text">Loading report data…</div>
+                </div>
+
+                <ng-container *ngIf="!loading">
+
+                    <!-- Section: Charts -->
+                    <div class="section-label"><i class="pi pi-chart-bar"></i> Analytics Overview</div>
+
+                    <!-- Charts: 2 per row -->
+                    <div class="charts-row">
+                        <div class="chart-card accent-green">
+                            <div class="chart-card-header">
+                                <div class="chart-card-title">
+                                    <div class="chart-icon green"><i class="pi pi-trophy"></i></div>
+                                    Top Contributors
+                                </div>
+                                <span class="chart-badge badge-green">Stacked</span>
+                            </div>
+                            <p-chart type="bar" [data]="topContributorsChartData" [options]="barChartOptions" />
+                        </div>
+
+                        <div class="chart-card accent-blue">
+                            <div class="chart-card-header">
+                                <div class="chart-card-title">
+                                    <div class="chart-icon blue"><i class="pi pi-sign-in"></i></div>
+                                    Login Activity
+                                </div>
+                                <span class="chart-badge badge-blue">By Logins</span>
+                            </div>
+                            <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
+                        </div>
+
+                        <div class="chart-card accent-purple" *ngIf="!selectedIRM">
+                            <div class="chart-card-header">
+                                <div class="chart-card-title">
+                                    <div class="chart-icon purple"><i class="pi pi-sitemap"></i></div>
+                                    Solutions by IRM
+                                </div>
+                                <span class="chart-badge badge-purple">Donut</span>
+                            </div>
+                            <p-chart type="doughnut" [data]="irmChartData" [options]="pieChartOptions" />
+                        </div>
+
+                        <div class="chart-card accent-orange">
+                            <div class="chart-card-header">
+                                <div class="chart-card-title">
+                                    <div class="chart-icon orange"><i class="pi pi-calendar"></i></div>
+                                    Monthly Trend
+                                </div>
+                                <span class="chart-badge badge-orange">Trend</span>
+                            </div>
+                            <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
+                        </div>
+                    </div>
+
+                    <!-- Section: Table -->
+                    <div class="section-label"><i class="pi pi-table"></i> User Details</div>
+
+                    <div class="table-card">
+                        <div class="table-card-header">
+                            <div class="table-card-title">
+                                <i class="pi pi-users" style="color:#1c4535;"></i>
+                                All Users
+                                <span class="count-chip">{{ filteredStats.length }}</span>
+                            </div>
+                        </div>
+
+                        <p-table
+                            [value]="filteredStats"
+                            [paginator]="true"
+                            [rows]="10"
+                            [rowsPerPageOptions]="[10, 25, 50, 100]"
+                            [showCurrentPageReport]="true"
+                            currentPageReportTemplate="Showing {first}–{last} of {totalRecords}"
+                            responsiveLayout="scroll"
+                        >
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th pSortableColumn="name" style="min-width:200px;">User <p-sortIcon field="name" /></th>
+                                    <th pSortableColumn="irm">IRM <p-sortIcon field="irm" /></th>
+                                    <th pSortableColumn="login_count" class="text-center">Logins <p-sortIcon field="login_count" /></th>
+                                    <th class="text-center">Last Login</th>
+                                    <th pSortableColumn="total_solutions" class="text-center">Total <p-sortIcon field="total_solutions" /></th>
+                                    <th pSortableColumn="approved" class="text-center">Approved <p-sortIcon field="approved" /></th>
+                                    <th pSortableColumn="pending" class="text-center">Pending <p-sortIcon field="pending" /></th>
+                                    <th pSortableColumn="rejected" class="text-center">Rejected <p-sortIcon field="rejected" /></th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="avatar" [ngClass]="'avatar-' + (rowIndex % 5)">{{ getInitials(user.name) }}</div>
+                                            <div>
+                                                <div class="user-name">{{ user.name }}</div>
+                                                <div class="user-id">{{ user.yash_id }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="irm-tag">{{ user.irm || 'N/A' }}</span></td>
+                                    <td class="text-center">
+                                        <span class="login-badge"><i class="pi pi-sign-in"></i>{{ user.login_count }}</span>
+                                    </td>
+                                    <td class="text-center"><span class="date-text">{{ formatDateOnly(user.last_login) }}</span></td>
+                                    <td class="text-center"><span class="num-total">{{ user.total_solutions }}</span></td>
+                                    <td class="text-center"><span class="num-badge approved">{{ user.approved }}</span></td>
+                                    <td class="text-center"><span class="num-badge pending">{{ user.pending }}</span></td>
+                                    <td class="text-center"><span class="num-badge rejected">{{ user.rejected }}</span></td>
+                                    <td class="text-center">
+                                        <button class="view-btn" (click)="viewUserSolutions(user)">
+                                            <i class="pi pi-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="9">
+                                        <div class="empty-state">
+                                            <i class="pi pi-inbox"></i>
+                                            <p>No user data matches your current filters.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+
+                </ng-container>
             </div>
         </div>
 
@@ -1196,10 +1005,10 @@ interface MonthOption {
         >
             <ng-template pTemplate="header">
                 <div>
-                    <div style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.35rem;">
+                    <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.3rem; color:#fff;">
                         Solutions — {{ selectedUser?.name }}
                     </div>
-                    <div style="font-size: 0.85rem; opacity: 0.75;">
+                    <div style="font-size: 0.82rem; opacity: 0.7; color:#fff;">
                         {{ selectedUser?.yash_id }} &nbsp;·&nbsp; {{ selectedUser?.total_solutions }} Solutions &nbsp;·&nbsp; {{ selectedUser?.login_count }} Logins
                     </div>
                 </div>
@@ -1443,20 +1252,27 @@ export class UserWiseReportComponent implements OnInit {
     updateTopContributorsChart() {
         const top = [...this.filteredStats].slice(0, 10);
         this.topContributorsChartData = {
-            labels: top.map(s => s.name),
+            labels: top.map(s => s.name.split(' ')[0]),
             datasets: [
-                { label: 'Approved', data: top.map(s => s.approved),  backgroundColor: '#3aab66' },
-                { label: 'Pending',  data: top.map(s => s.pending),   backgroundColor: '#f0b429' },
-                { label: 'Rejected', data: top.map(s => s.rejected),  backgroundColor: '#e87870' }
+                { label: 'Approved', data: top.map(s => s.approved),  backgroundColor: '#22c55e', borderRadius: 4 },
+                { label: 'Pending',  data: top.map(s => s.pending),   backgroundColor: '#f59e0b', borderRadius: 4 },
+                { label: 'Rejected', data: top.map(s => s.rejected),  backgroundColor: '#ef4444', borderRadius: 4 }
             ]
         };
     }
 
     updateLoginActivityChart() {
         const top = [...this.filteredStats].sort((a, b) => b.login_count - a.login_count).slice(0, 10);
+        const blueGradientColors = ['#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#1d4ed8','#2563eb','#3b82f6','#60a5fa'];
         this.loginActivityChartData = {
-            labels: top.map(s => s.name),
-            datasets: [{ label: 'Logins', data: top.map(s => s.login_count), backgroundColor: '#2c6e9e', borderColor: '#1e4f75', borderWidth: 1 }]
+            labels: top.map(s => s.name.split(' ')[0]),
+            datasets: [{
+                label: 'Logins',
+                data: top.map(s => s.login_count),
+                backgroundColor: blueGradientColors.slice(0, top.length),
+                borderRadius: 5,
+                borderSkipped: false
+            }]
         };
     }
 
@@ -1464,10 +1280,11 @@ export class UserWiseReportComponent implements OnInit {
         const groups = new Map<string, number>();
         this.filteredStats.forEach(s => { const k = s.irm || 'N/A'; groups.set(k, (groups.get(k) || 0) + s.total_solutions); });
         const sorted = Array.from(groups.entries()).sort((a, b) => b[1] - a[1]);
-        const palette = ['#1a3d2e','#2e7d52','#3aab66','#5aad7a','#86c99e','#a8d8b8','#c8e6c9','#e3f2eb'];
+        const palette = ['#6d28d9','#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe','#4c1d95','#5b21b6'];
+        const hoverPalette = ['#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe','#ede9fe','#5b21b6','#6d28d9'];
         this.irmChartData = {
             labels: sorted.map(([k]) => k),
-            datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: palette, hoverBackgroundColor: palette }]
+            datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: palette, hoverBackgroundColor: hoverPalette, borderWidth: 2, borderColor: '#ffffff' }]
         };
     }
 
@@ -1483,24 +1300,69 @@ export class UserWiseReportComponent implements OnInit {
             }
         });
         const sorted = Array.from(monthly.keys()).sort();
+        const orangeShades = sorted.map((_, i) => {
+            const opacity = 0.5 + (i / Math.max(sorted.length - 1, 1)) * 0.5;
+            return `rgba(234, 88, 12, ${opacity})`;
+        });
         this.monthlySolutionsChartData = {
-            labels: sorted.map(mv => { const [y, m] = mv.split('-'); return new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }),
-            datasets: [{ label: 'Solutions', data: sorted.map(k => monthly.get(k) || 0), backgroundColor: '#2e7d52', borderColor: '#1a3d2e', borderWidth: 1 }]
+            labels: sorted.map(mv => { const [y, m] = mv.split('-'); return new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }); }),
+            datasets: [{
+                label: 'Solutions Added',
+                data: sorted.map(k => monthly.get(k) || 0),
+                backgroundColor: orangeShades,
+                borderColor: '#c2410c',
+                borderWidth: 1,
+                borderRadius: 5,
+                borderSkipped: false
+            }]
         };
     }
 
     initializeChartOptions() {
-        const base = {
+        const tooltipBase = {
+            backgroundColor: 'rgba(15,23,42,0.92)',
+            padding: 12,
+            titleFont: { size: 11, weight: '700' },
+            bodyFont: { size: 10 },
+            cornerRadius: 8,
+            titleColor: '#f1f5f9',
+            bodyColor: '#cbd5e1'
+        };
+        const legendBase = {
+            display: true,
+            position: 'top' as const,
+            labels: { usePointStyle: true, padding: 12, font: { size: 10, weight: '600' }, color: '#475569', pointStyleWidth: 8 }
+        };
+        const axisStyle = {
+            x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8', maxRotation: 35 } },
+            y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#94a3b8' }, grid: { color: '#f1f5f9' } }
+        };
+        this.barChartOptions = {
             responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11, weight: 600 }, color: '#1a3d2e' } },
-                tooltip: { backgroundColor: 'rgba(26,61,46,0.92)', padding: 10, titleFont: { size: 11, weight: 600 }, bodyFont: { size: 10 } }
+            plugins: { legend: legendBase, tooltip: tooltipBase },
+            scales: {
+                x: { ...axisStyle.x, stacked: true },
+                y: { ...axisStyle.y, stacked: true }
             }
         };
-        this.barChartOptions = { ...base, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 }, color: '#7a9a87' } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#7a9a87' }, grid: { color: '#eef4f0' } } } };
-        this.loginChartOptions = { ...base, plugins: { ...base.plugins, legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#7a9a87' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#7a9a87' }, grid: { color: '#eef4f0' } } } };
-        this.pieChartOptions  = { ...base, plugins: { ...base.plugins, legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font: { size: 10, weight: 600 }, color: '#1a3d2e' } } } };
-        this.monthlyBarChartOptions = { ...base, plugins: { ...base.plugins, legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#7a9a87' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#7a9a87' }, grid: { color: '#eef4f0' } } } };
+        this.loginChartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { title: (i: any[]) => i[0].label, label: (i: any) => ` ${i.raw} logins` } } },
+            scales: axisStyle
+        };
+        this.pieChartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { ...legendBase, position: 'bottom' as const, labels: { ...legendBase.labels, padding: 14 } },
+                tooltip: tooltipBase
+            },
+            cutout: '62%'
+        };
+        this.monthlyBarChartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: tooltipBase },
+            scales: axisStyle
+        };
     }
 
     viewUserSolutions(user: UserStats) { this.selectedUser = user; this.showSolutionsDialog = true; }
