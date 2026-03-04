@@ -53,8 +53,7 @@ interface ExportColumn {
     selector: 'app-approvals',
     standalone: true,
     styles: [`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap');
-
+        
         * {
             font-family: 'DM Sans', sans-serif;
         }
@@ -660,7 +659,7 @@ interface ExportColumn {
                     <!-- Header -->
                     <div class="card-header">
                         <div class="card-title-group">
-                            <div class="card-module" [title]="repo.module_name">{{ repo.module_name }}</div>
+                            <div class="card-module" [title]="repo.module_name"><strong>{{ repo.module_name }}</strong></div>
                             <div class="card-domain">{{ repo.domain }}</div>
                         </div>
                         <span class="status-chip"

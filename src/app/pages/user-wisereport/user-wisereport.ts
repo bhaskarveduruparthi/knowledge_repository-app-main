@@ -51,405 +51,669 @@ interface MonthOption {
     ],
     providers: [MessageService, ManageAdminsService, ManageReposService],
     styles: `
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
         :host {
             display: block;
             min-height: 100vh;
-            background: #f0f4f3;
+            background: #f4f7f5;
+            font-family: 'DM Sans', sans-serif;
         }
 
-        .report-container {
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 2rem;
+        /* ─── CSS Variables ─── */
+        :root {
+            --forest:    #1a3d2e;
+            --pine:      #245c41;
+            --fern:      #2e7d52;
+            --moss:      #3a9465;
+            --sage:      #5aad7a;
+            --mint:      #86c99e;
+            --dew:       #b8e0c6;
+            --frost:     #e3f2eb;
+            --cream:     #f4f7f5;
+            --leaf-gold: #a8b87a;
+            --amber:     #d4872a;
+            --clay:      #c5614a;
         }
 
-        /* Knowledge Repository Color Scheme */
-        .primary-color { color: #2d5f4f; }
-        .secondary-color { color: #3a7a63; }
-        .accent-color { color: #4caf50; }
-        .success-color { color: #4caf50; }
-        .warning-color { color: #ff9800; }
-        .danger-color { color: #f44336; }
-
-        /* Header Section */
-        .report-header {
-            background: linear-gradient(135deg, #2d5f4f 0%, #3a7a63 100%);
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(45, 95, 79, 0.15);
-            margin-bottom: 2rem;
-            color: white;
-        }
-
-        .report-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .report-title i {
-            font-size: 2.25rem;
-        }
-
-        .report-subtitle {
-            font-size: 1rem;
-            opacity: 0.95;
-            margin: 0;
-        }
-
-        /* Filters Section */
-        .filters-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
-            border-left: 4px solid #3a7a63;
-        }
-
-        .filters-header {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #2d5f4f;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .filters-grid {
+        /* ─── Layout Shell ─── */
+        .shell {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
         }
 
-        .filter-group {
+        /* ─── Left Sidebar ─── */
+        .sidebar {
+            background: #1c4535;
+            padding: 2rem 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            border-right: 1px solid #163828;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-icon {
+            width: 46px;
+            height: 46px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 0.65rem;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+
+        .sidebar-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            color: #ffffff;
+            line-height: 1.2;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.7rem;
+            color: #a8d5b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Sidebar Stat Pills */
+        .sidebar-stats {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
 
-        .filter-label {
-            font-weight: 600;
-            color: #2d5f4f;
-            font-size: 0.9rem;
+        .sidebar-stat-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #a8d5b8;
+            margin-bottom: 0.4rem;
+            font-weight: 700;
         }
 
-        .filter-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card.users { border-left-color: #2d5f4f; }
-        .stat-card.total { border-left-color: #3a7a63; }
-        .stat-card.approved { border-left-color: #4caf50; }
-        .stat-card.pending { border-left-color: #ff9800; }
-        .stat-card.rejected { border-left-color: #f44336; }
-
-        .stat-header {
+        .sidebar-pill {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            align-items: center;
+            padding: 0.7rem 0.9rem;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.14);
+            transition: background 0.2s;
         }
 
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
+        .sidebar-pill:hover {
+            background: rgba(255,255,255,0.16);
+        }
+
+        .sidebar-pill-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .sidebar-pill-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .sidebar-pill-text {
+            font-size: 0.82rem;
+            color: #e0f0e8;
+            font-weight: 500;
+        }
+
+        .sidebar-pill-num {
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .sidebar-pill.total .sidebar-pill-dot    { background: #7dd4a0; }
+        .sidebar-pill.approved .sidebar-pill-dot { background: #5de87a; }
+        .sidebar-pill.pending .sidebar-pill-dot  { background: #ffd060; }
+        .sidebar-pill.rejected .sidebar-pill-dot { background: #ff7f7a; }
+        .sidebar-pill.users .sidebar-pill-dot    { background: #a0dfc0; }
+
+        .sidebar-pill.total .sidebar-pill-num    { color: #7dd4a0; }
+        .sidebar-pill.approved .sidebar-pill-num { color: #5de87a; }
+        .sidebar-pill.pending .sidebar-pill-num  { color: #ffd060; }
+        .sidebar-pill.rejected .sidebar-pill-num { color: #ff7f7a; }
+        .sidebar-pill.users .sidebar-pill-num    { color: #a0dfc0; }
+
+        /* Sidebar Filters */
+        .sidebar-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            flex: 1;
+        }
+
+        .sidebar-filter-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #a8d5b8;
+            margin-bottom: 0.2rem;
+            font-weight: 700;
+        }
+
+        .sidebar-filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .sidebar-filter-group label {
+            font-size: 0.78rem;
+            color: #c8e8d4;
+            font-weight: 600;
+        }
+
+        ::ng-deep .sidebar-filters .p-select {
+            background: rgba(255,255,255,0.12) !important;
+            border: 1px solid rgba(255,255,255,0.22) !important;
+            border-radius: 8px !important;
+            width: 100%;
+        }
+
+        ::ng-deep .sidebar-filters .p-select:hover {
+            border-color: rgba(255,255,255,0.4) !important;
+        }
+
+        ::ng-deep .sidebar-filters .p-select .p-select-label {
+            color: #ffffff !important;
+            font-size: 0.82rem !important;
+            padding: 0.6rem 0.9rem !important;
+            font-weight: 500;
+        }
+
+        ::ng-deep .sidebar-filters .p-select .p-select-dropdown {
+            color: #c8e8d4 !important;
+        }
+
+        .sidebar-search {
+            background: rgba(255,255,255,0.12) !important;
+            border: 1px solid rgba(255,255,255,0.22) !important;
+            border-radius: 8px !important;
+            color: #ffffff !important;
+            font-size: 0.82rem !important;
+            padding: 0.62rem 0.9rem !important;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: 500;
+        }
+
+        .sidebar-search::placeholder {
+            color: rgba(255,255,255,0.45) !important;
+        }
+
+        .sidebar-search:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.5) !important;
+            background: rgba(255,255,255,0.16) !important;
+        }
+
+        .sidebar-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-clear {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .stat-card.users .stat-icon { background: rgba(45, 95, 79, 0.1); color: #2d5f4f; }
-        .stat-card.total .stat-icon { background: rgba(58, 122, 99, 0.1); color: #3a7a63; }
-        .stat-card.approved .stat-icon { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
-        .stat-card.pending .stat-icon { background: rgba(255, 152, 0, 0.1); color: #ff9800; }
-        .stat-card.rejected .stat-icon { background: rgba(244, 67, 54, 0.1); color: #f44336; }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: #666;
+            gap: 0.5rem;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.1);
+            color: #e0f0e8;
+            font-size: 0.82rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
         }
 
-        .stat-value {
-            font-size: 2.5rem;
+        .btn-clear:hover {
+            background: rgba(255,255,255,0.18);
+            color: #ffffff;
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .btn-export {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #3aab66, #5de87a);
+            color: #0d2b1a;
+            font-size: 0.82rem;
             font-weight: 700;
-            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: 0 2px 10px rgba(61,200,110,0.35);
         }
 
-        .stat-card.users .stat-value { color: #2d5f4f; }
-        .stat-card.total .stat-value { color: #3a7a63; }
-        .stat-card.approved .stat-value { color: #4caf50; }
-        .stat-card.pending .stat-value { color: #ff9800; }
-        .stat-card.rejected .stat-value { color: #f44336; }
+        .btn-export:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(61,200,110,0.5);
+            background: linear-gradient(135deg, #45bc74, #68f08a);
+        }
 
-        /* Charts Section */
-        .charts-section {
+        .btn-export:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ─── Main Content ─── */
+        .main {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .topbar {
+            background: white;
+            padding: 1.25rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e4ede8;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: #7a9a87;
+        }
+
+        .topbar-breadcrumb span:last-child {
+            color: #1c4535;
+            font-weight: 600;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #c8ddd1;
+            background: white;
+            color: #245c41;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .refresh-btn:hover {
+            background: #e3f2eb;
+            border-color: #2e7d52;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 2rem 2.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Page Heading */
+        .page-heading {
+            margin-bottom: 2rem;
+        }
+
+        .page-heading h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            color: #1c4535;
+            margin: 0 0 0.4rem 0;
+            line-height: 1.15;
+        }
+
+        .page-heading p {
+            color: #7a9a87;
+            font-size: 0.9rem;
+            margin: 0;
+            font-weight: 400;
+        }
+
+        /* ─── Charts Grid ─── */
+        .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 2rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .chart-card {
             background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #3a7a63;
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid #e4ede8;
         }
 
-        .chart-header {
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f4f3;
+            margin-bottom: 1.25rem;
         }
 
-        .chart-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #2d5f4f;
+        .chart-card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.05rem;
+            color: #1c4535;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .chart-title i {
-            color: #3a7a63;
+        .chart-card-title i {
+            color: #2e7d52;
+            font-size: 1rem;
         }
 
-        /* Table Section */
-        .table-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #3a7a63;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f4f3;
-        }
-
-        .table-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #2d5f4f;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .table-count {
-            background: #3a7a63;
-            color: white;
-            padding: 0.25rem 0.75rem;
+        .chart-badge {
+            font-size: 0.72rem;
+            background: #e3f2eb;
+            color: #245c41;
+            padding: 0.25rem 0.65rem;
             border-radius: 20px;
-            font-size: 0.85rem;
             font-weight: 600;
+            border: 1px solid #b8e0c6;
         }
 
-        ::ng-deep .p-datatable .p-datatable-thead > tr > th {
-            background: linear-gradient(135deg, #2d5f4f 0%, #3a7a63 100%);
+        ::ng-deep .chart-card .p-chart {
+            height: 280px !important;
+        }
+
+        /* ─── Data Table ─── */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid #e4ede8;
+        }
+
+        .table-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.15rem;
+            color: #1c4535;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .count-chip {
+            background: #1c4535;
             color: white;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
             font-weight: 600;
-            padding: 1rem;
-            border: none;
-            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th,
+        ::ng-deep .p-datatable-thead > tr > th,
+        ::ng-deep th.p-sortable-column,
+        ::ng-deep th[psortablecolumn] {
+            background: #1c4535 !important;
+            background-color: #1c4535 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            padding: 0.95rem 1rem !important;
+            border: none !important;
+            border-bottom: 3px solid #163828 !important;
+            font-size: 0.78rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.6px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            white-space: nowrap;
+        }
+
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th .p-sortable-column-icon,
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th .p-icon,
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th svg {
+            color: rgba(255,255,255,0.65) !important;
+            fill: rgba(255,255,255,0.65) !important;
+        }
+
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th.p-sortable-column:hover,
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th:hover {
+            background: #245c41 !important;
+            background-color: #245c41 !important;
+            color: #ffffff !important;
+        }
+
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th:first-child {
+            border-radius: 10px 0 0 0 !important;
+        }
+
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th:last-child {
+            border-radius: 0 10px 0 0 !important;
         }
 
         ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid #f0f4f3;
+            padding: 1rem !important;
+            border-bottom: 1px solid #eef4f0 !important;
             vertical-align: middle;
+            font-size: 0.875rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
+            border-bottom: none !important;
         }
 
         ::ng-deep .p-datatable .p-datatable-tbody > tr {
-            transition: background-color 0.2s ease;
+            transition: background 0.15s;
         }
 
         ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
-            background: #f0f4f3;
+            background: #f7faf8 !important;
         }
 
-        .user-info {
+        ::ng-deep .p-datatable .p-paginator {
+            border: none !important;
+            border-top: 1px solid #eef4f0 !important;
+            padding: 1rem 0 0 0 !important;
+        }
+
+        /* User Cell */
+        .user-cell {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.85rem;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
+        .avatar {
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #2d5f4f, #3a7a63);
+            background: linear-gradient(135deg, #245c41, #2e7d52);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 0.95rem;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(36,92,65,0.25);
         }
 
         .user-name {
             font-weight: 600;
-            color: #2d5f4f;
-            font-size: 0.95rem;
+            color: #1c4535;
+            font-size: 0.88rem;
+            line-height: 1.2;
         }
 
         .user-id {
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 0.75rem;
+            color: #99b5a5;
+            font-weight: 400;
         }
 
-        /* Progress Bar */
-        .progress-bar-container {
-            width: 100%;
-            height: 28px;
-            background: #f0f4f3;
-            border-radius: 14px;
-            overflow: visible;
-            position: relative;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        /* Stat Cell Badges */
+        .num-total {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2e7d52;
         }
 
-        .progress-bar {
-            height: 100%;
-            display: flex;
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .progress-segment {
-            display: flex;
+        .num-badge {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: white;
-            transition: all 0.3s ease;
-            position: relative;
-            min-width: 2px;
-        }
-
-        .progress-segment::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 0.5rem;
+            min-width: 28px;
+            height: 24px;
             border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            margin-bottom: 0.5rem;
-            z-index: 10;
-        }
-
-        .progress-segment:hover::after {
-            opacity: 1;
-        }
-
-        .progress-segment.approved { background: linear-gradient(135deg, #4caf50, #45a049); }
-        .progress-segment.pending { background: linear-gradient(135deg, #ff9800, #fb8c00); }
-        .progress-segment.rejected { background: linear-gradient(135deg, #f44336, #e53935); }
-
-        /* Small count badge for progress segments */
-        .progress-count-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            font-size: 0.65rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
-            text-align: center;
-            z-index: 5;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            padding: 0 0.45rem;
         }
 
-        /* Badge Styles */
-        ::ng-deep .p-tag {
-            font-weight: 600;
-            padding: 0.4rem 0.9rem;
-            font-size: 0.8rem;
+        .num-badge.approved { background: #e6f9ec; color: #1e8c3a; }
+        .num-badge.pending  { background: #fff8e6; color: #c47c00; }
+        .num-badge.rejected { background: #fdecea; color: #c03520; }
+
+        .login-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #e8f0fe;
+            color: #2c5fbf;
+            padding: 0.3rem 0.7rem;
             border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
         }
 
-        /* Loading State */
-        .loading-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #666;
+        .date-text {
+            font-size: 0.8rem;
+            color: #7a9a87;
+            font-weight: 400;
         }
 
-        .loading-spinner {
+        ::ng-deep .p-tag {
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            padding: 0.3rem 0.75rem !important;
+            border-radius: 20px !important;
+        }
+
+        /* IRM Tag */
+        .irm-tag {
             display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f0f4f3;
-            border-top: 4px solid #3a7a63;
+            padding: 0.25rem 0.7rem;
+            background: #e3f2eb;
+            color: #245c41;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid #b8e0c6;
+        }
+
+        /* View Button */
+        .view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 7px;
+            border: 1px solid #c8ddd1;
+            background: white;
+            color: #245c41;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .view-btn:hover {
+            background: #e3f2eb;
+            border-color: #2e7d52;
+            color: #1c4535;
+        }
+
+        /* ─── Loading ─── */
+        .loading-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            gap: 1.25rem;
+        }
+
+        .leaf-spinner {
+            width: 52px;
+            height: 52px;
+            border: 3px solid #e3f2eb;
+            border-top: 3px solid #2e7d52;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
+            animation: spin 0.9s linear infinite;
         }
 
         @keyframes spin {
@@ -458,163 +722,228 @@ interface MonthOption {
         }
 
         .loading-text {
+            font-family: 'DM Serif Display', serif;
             font-size: 1.1rem;
-            font-weight: 600;
-            color: #2d5f4f;
+            color: #245c41;
         }
 
-        /* Empty State */
+        /* ─── Empty ─── */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: #999;
+            color: #aac4b3;
         }
 
         .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 3rem;
             display: block;
-            color: #ddd;
+            margin-bottom: 1rem;
+            color: #b8e0c6;
         }
 
         .empty-state p {
-            font-size: 1.1rem;
-            margin: 0;
+            font-family: 'DM Serif Display', serif;
+            font-size: 1rem;
+            color: #7a9a87;
         }
 
-        /* Dialog Styles */
-        .solutions-dialog ::ng-deep .p-dialog {
-            max-width: 95vw;
-            width: 1400px;
+        /* ─── Dialog ─── */
+        ::ng-deep .solutions-dialog .p-dialog {
+            max-width: 92vw !important;
+            width: 1100px !important;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25) !important;
         }
 
-        .solutions-dialog ::ng-deep .p-dialog-header {
-            background: linear-gradient(135deg, #2d5f4f 0%, #3a7a63 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px 12px 0 0;
+        ::ng-deep .solutions-dialog .p-dialog-header {
+            background: linear-gradient(135deg, #1c4535 0%, #245c41 100%) !important;
+            color: white !important;
+            padding: 1.5rem 2rem !important;
+            border-radius: 0 !important;
         }
 
-        .solutions-dialog ::ng-deep .p-dialog-header .p-dialog-title {
-            font-size: 1.4rem;
-            font-weight: 700;
+        ::ng-deep .solutions-dialog .p-dialog-header .p-dialog-title {
+            font-family: 'DM Serif Display', serif !important;
+            font-size: 1.3rem !important;
+            color: #ffffff !important;
         }
 
-        .solutions-dialog ::ng-deep .p-dialog-content {
-            padding: 0;
+        ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon {
+            color: rgba(255,255,255,0.8) !important;
         }
 
-        /* Login Badge */
-        .login-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 0.3rem 0.8rem;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            font-weight: 600;
+        ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon:hover {
+            background: rgba(255,255,255,0.15) !important;
+            color: #ffffff !important;
+            border-radius: 50% !important;
         }
 
-        .login-badge i {
-            font-size: 0.9rem;
+        ::ng-deep .solutions-dialog .p-dialog-content {
+            padding: 0 !important;
+            overflow: hidden !important;
+            border-radius: 0 0 16px 16px !important;
         }
 
-        /* Responsive Design */
+        /* Dialog table — contained inside dialog, no overflow */
+        ::ng-deep .solutions-dialog .p-datatable {
+            border-radius: 0 0 16px 16px !important;
+            overflow: hidden !important;
+        }
+
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-wrapper {
+            border-radius: 0 !important;
+            overflow-x: auto !important;
+        }
+
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-thead > tr > th:first-child {
+            border-radius: 0 !important;
+        }
+
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-thead > tr > th:last-child {
+            border-radius: 0 !important;
+        }
+
+        ::ng-deep .solutions-dialog .p-datatable .p-paginator {
+            border-radius: 0 0 16px 16px !important;
+            border: none !important;
+            border-top: 1px solid #eef4f0 !important;
+            padding: 1rem 1.5rem !important;
+        }
+
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-tbody > tr > td {
+            padding: 0.9rem 1rem !important;
+            font-size: 0.875rem !important;
+        }
+
+        /* ─── Responsive Overrides ─── */
         @media (max-width: 1200px) {
-            .charts-section {
+            .charts-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 768px) {
-            .report-container {
-                padding: 1rem;
-            }
-
-            .report-title {
-                font-size: 1.5rem;
-            }
-
-            .filters-grid {
+        @media (max-width: 960px) {
+            .shell {
                 grid-template-columns: 1fr;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .sidebar {
+                position: relative;
+                height: auto;
+                padding: 1.5rem;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 1rem;
             }
 
-            .filter-actions {
+            .sidebar-brand { 
+                width: 100%;
+                padding-bottom: 1rem;
+                margin-bottom: 0;
+            }
+
+            .sidebar-stats, .sidebar-filters {
+                flex: 1;
+                min-width: 220px;
+            }
+
+            .topbar {
+                padding: 1rem 1.5rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
                 flex-direction: column;
             }
 
-            .filter-actions button {
-                width: 100%;
+            .page-heading h1 {
+                font-size: 1.6rem;
+            }
+
+            .charts-grid {
+                gap: 1rem;
             }
         }
 
-        /* Chart Container */
-        ::ng-deep .p-chart {
-            height: 350px;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f0f4f3;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #3a7a63;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2d5f4f;
-        }
-
-        /* Custom Button Styles */
-        ::ng-deep .p-button.p-button-success {
-            background: #4caf50;
-            border-color: #4caf50;
-        }
-
-        ::ng-deep .p-button.p-button-success:hover {
-            background: #45a049;
-            border-color: #45a049;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f4f7f5; }
+        ::-webkit-scrollbar-thumb { background: #b8e0c6; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #86c99e; }
     `,
     template: `
         <p-toast />
-        <div class="report-container">
-            
-            <!-- Header -->
-            <div class="report-header">
-                <h1 class="report-title">
-                    <i class="pi pi-users"></i>
-                    User Activity & Solutions Report
-                </h1>
-                <p class="report-subtitle">
-                    Track user contributions, login activity, and solution performance metrics
-                </p>
-            </div>
 
-            <!-- Filters -->
-            <div class="filters-section">
-                <div class="filters-header">
-                    <i class="pi pi-filter"></i>
-                    Filter Options
+        <div class="shell">
+
+            <!-- ── Left Sidebar ── -->
+            <aside class="sidebar">
+
+                <div class="sidebar-brand">
+                    <div class="sidebar-icon">
+                        <i class="pi pi-users"></i>
+                    </div>
+                    <div class="sidebar-title">User Activity<br>Report</div>
+                    <div class="sidebar-subtitle">Knowledge Repository</div>
                 </div>
-                <div class="filters-grid">
-                    <div class="filter-group">
-                        <label class="filter-label">
-                            <i class="pi pi-calendar"></i> Filter by Month
-                        </label>
+
+                <!-- Live Summary Pills -->
+                <div class="sidebar-stats" *ngIf="!loading">
+                    <div class="sidebar-stat-label">Summary</div>
+
+                    <div class="sidebar-pill users">
+                        <div class="sidebar-pill-left">
+                            <div class="sidebar-pill-dot"></div>
+                            <div class="sidebar-pill-text">Active Users</div>
+                        </div>
+                        <div class="sidebar-pill-num">{{ filteredStats.length }}</div>
+                    </div>
+
+                    <div class="sidebar-pill total">
+                        <div class="sidebar-pill-left">
+                            <div class="sidebar-pill-dot"></div>
+                            <div class="sidebar-pill-text">Total Solutions</div>
+                        </div>
+                        <div class="sidebar-pill-num">{{ getTotalSolutions() }}</div>
+                    </div>
+
+                    <div class="sidebar-pill approved">
+                        <div class="sidebar-pill-left">
+                            <div class="sidebar-pill-dot"></div>
+                            <div class="sidebar-pill-text">Approved</div>
+                        </div>
+                        <div class="sidebar-pill-num">{{ getTotalApproved() }}</div>
+                    </div>
+
+                    <div class="sidebar-pill pending">
+                        <div class="sidebar-pill-left">
+                            <div class="sidebar-pill-dot"></div>
+                            <div class="sidebar-pill-text">Pending</div>
+                        </div>
+                        <div class="sidebar-pill-num">{{ getTotalPending() }}</div>
+                    </div>
+
+                    <div class="sidebar-pill rejected">
+                        <div class="sidebar-pill-left">
+                            <div class="sidebar-pill-dot"></div>
+                            <div class="sidebar-pill-text">Rejected</div>
+                        </div>
+                        <div class="sidebar-pill-num">{{ getTotalRejected() }}</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="sidebar-filters">
+                    <div class="sidebar-filter-label">Filters</div>
+
+                    <div class="sidebar-filter-group">
+                        <label>Month</label>
                         <p-select
                             [options]="monthOptions"
                             [(ngModel)]="selectedMonth"
@@ -627,10 +956,8 @@ interface MonthOption {
                         />
                     </div>
 
-                    <div class="filter-group">
-                        <label class="filter-label">
-                            <i class="pi pi-user-plus"></i> Filter by IRM
-                        </label>
+                    <div class="sidebar-filter-group">
+                        <label>IRM</label>
                         <p-select
                             [options]="irmOptions"
                             [(ngModel)]="selectedIRM"
@@ -641,381 +968,280 @@ interface MonthOption {
                         />
                     </div>
 
-                    <div class="filter-group">
-                        <label class="filter-label">
-                            <i class="pi pi-search"></i> Search User
-                        </label>
+                    <div class="sidebar-filter-group">
+                        <label>Search</label>
                         <input
-                            pInputText
+                            class="sidebar-search"
                             type="text"
                             [(ngModel)]="searchText"
                             (input)="applyFilters()"
-                            placeholder="Search by name or ID..."
-                            class="w-full"
+                            placeholder="Name or User ID…"
                         />
                     </div>
-                </div>
 
-                <div class="filter-actions">
-                    <p-button
-                        label="Clear Filters"
-                        icon="pi pi-filter-slash"
-                        severity="secondary"
-                        [outlined]="true"
-                        (onClick)="clearFilters()"
-                    />
-                    <p-button
-                        label="Export to Excel"
-                        icon="pi pi-file-excel"
-                        severity="success"
-                        (onClick)="exportToExcel()"
-                        [disabled]="loading || filteredStats.length === 0"
-                    />
-                </div>
-            </div>
-
-            <!-- Loading State -->
-            <div *ngIf="loading" class="loading-state">
-                <div class="loading-spinner"></div>
-                <p class="loading-text">Loading user data...</p>
-            </div>
-
-            <!-- Report Content -->
-            <ng-container *ngIf="!loading">
-                
-                <!-- Summary Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card users">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-label">Active Users</div>
-                                <div class="stat-value">{{ filteredStats.length }}</div>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="pi pi-users"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card total">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-label">Total Solutions</div>
-                                <div class="stat-value">{{ getTotalSolutions() }}</div>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="pi pi-box"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card approved">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-label">Approved</div>
-                                <div class="stat-value">{{ getTotalApproved() }}</div>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="pi pi-check-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card pending">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-label">Pending</div>
-                                <div class="stat-value">{{ getTotalPending() }}</div>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="pi pi-clock"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card rejected">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-label">Rejected</div>
-                                <div class="stat-value">{{ getTotalRejected() }}</div>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="pi pi-times-circle"></i>
-                            </div>
-                        </div>
+                    <div class="sidebar-btn-group">
+                        <button class="btn-clear" (click)="clearFilters()">
+                            <i class="pi pi-filter-slash"></i> Clear Filters
+                        </button>
+                        <button
+                            class="btn-export"
+                            (click)="exportToExcel()"
+                            [disabled]="loading || filteredStats.length === 0">
+                            <i class="pi pi-file-excel"></i> Export Excel
+                        </button>
                     </div>
                 </div>
 
-                <!-- Charts -->
-                <div class="charts-section">
-                    <!-- Top Contributors -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <i class="pi pi-trophy"></i>
-                                Top 10 Contributors
-                            </div>
-                        </div>
-                        <p-chart type="bar" [data]="topContributorsChartData" [options]="barChartOptions" />
-                    </div>
+            </aside>
 
-                    <!-- Top Active Users (by login) -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <i class="pi pi-chart-line"></i>
-                                Most Active Users (Logins)
-                            </div>
-                        </div>
-                        <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
-                    </div>
+            <!-- ── Main Content ── -->
+            <div class="main">
 
-                    <!-- IRM-wise Distribution -->
-                    <div class="chart-card" *ngIf="!selectedIRM">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <i class="pi pi-sitemap"></i>
-                                Solutions by IRM
-                            </div>
-                        </div>
-                        <p-chart type="pie" [data]="irmChartData" [options]="pieChartOptions" />
+                <!-- Top Bar -->
+                <div class="topbar">
+                    <div class="topbar-breadcrumb">
+                        <span>Reports</span>
+                        <i class="pi pi-angle-right" style="font-size: 0.7rem;"></i>
+                        <span>User Activity</span>
                     </div>
-
-                    <!-- Monthly Solutions Added -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">
-                                <i class="pi pi-calendar"></i>
-                                Monthly Solutions Added
-                            </div>
-                        </div>
-                        <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
+                    <div class="topbar-actions">
+                        <button class="refresh-btn" (click)="loadReportData()">
+                            <i class="pi pi-refresh"></i> Refresh
+                        </button>
                     </div>
                 </div>
 
-                <!-- User Statistics Table -->
-                <div class="table-section">
-                    <div class="table-header">
-                        <div class="table-title">
-                            <i class="pi pi-table"></i>
-                            User Details
-                            <span class="table-count">{{ filteredStats.length }}</span>
-                        </div>
-                        <div class="action-buttons">
-                            <p-button
-                                label="Refresh"
-                                icon="pi pi-refresh"
-                                [outlined]="true"
-                                size="small"
-                                (onClick)="loadReportData()"
-                            />
-                        </div>
+                <!-- Content -->
+                <div class="content">
+
+                    <div class="page-heading">
+                        <h1>User Activity &amp; Solutions</h1>
+                        <p>Track contributions, login patterns and solution performance across your team.</p>
                     </div>
 
-                    <p-table
-                        [value]="filteredStats"
-                        [paginator]="true"
-                        [rows]="10"
-                        [rowsPerPageOptions]="[10, 25, 50, 100]"
-                        [showCurrentPageReport]="true"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
-                        responsiveLayout="scroll"
-                        [globalFilterFields]="['name', 'yash_id', 'email', 'irm']"
-                    >
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th pSortableColumn="name" style="min-width: 200px;">
-                                    User <p-sortIcon field="name" />
-                                </th>
-                                <th pSortableColumn="irm">
-                                    IRM <p-sortIcon field="irm" />
-                                </th>
-                                <th pSortableColumn="login_count" class="text-center">
-                                    Login Count <p-sortIcon field="login_count" />
-                                </th>
-                                <th class="text-center">Last Login</th>
-                                <th pSortableColumn="total_solutions" class="text-center">
-                                    Total <p-sortIcon field="total_solutions" />
-                                </th>
-                                <th style="min-width: 250px;">Status Breakdown</th>
-                                <th pSortableColumn="approved" class="text-center">
-                                    Approved <p-sortIcon field="approved" />
-                                </th>
-                                <th pSortableColumn="pending" class="text-center">
-                                    Pending <p-sortIcon field="pending" />
-                                </th>
-                                <th pSortableColumn="rejected" class="text-center">
-                                    Rejected <p-sortIcon field="rejected" />
-                                </th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-user>
-                            <tr>
-                                <td>
-                                    <div class="user-info">
-                                        <div class="user-avatar">
-                                            {{ getInitials(user.name) }}
-                                        </div>
-                                        <div class="user-details">
-                                            <div class="user-name">{{ user.name }}</div>
-                                            <div class="user-id">{{ user.yash_id }}</div>
-                                        </div>
+                    <!-- Loading -->
+                    <div *ngIf="loading" class="loading-overlay">
+                        <div class="leaf-spinner"></div>
+                        <div class="loading-text">Loading report data…</div>
+                    </div>
+
+                    <ng-container *ngIf="!loading">
+
+                        <!-- Charts Grid -->
+                        <div class="charts-grid">
+
+                            <div class="chart-card">
+                                <div class="chart-card-header">
+                                    <div class="chart-card-title">
+                                        <i class="pi pi-trophy"></i>
+                                        Top 10 Contributors
                                     </div>
-                                </td>
-                                <td>
-                                    <p-tag [value]="user.irm || 'N/A'" severity="info" />
-                                </td>
-                                <td class="text-center">
-                                    <div class="login-badge">
+                                    <span class="chart-badge">Stacked</span>
+                                </div>
+                                <p-chart type="bar" [data]="topContributorsChartData" [options]="barChartOptions" />
+                            </div>
+
+                            <div class="chart-card">
+                                <div class="chart-card-header">
+                                    <div class="chart-card-title">
                                         <i class="pi pi-sign-in"></i>
-                                        {{ user.login_count }}
+                                        Most Active Users
                                     </div>
-                                </td>
-                                <td class="text-center">
-                                    <span style="font-size: 0.85rem; color: #666;">
-                                        {{ formatDateOnly(user.last_login) }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <strong style="font-size: 1.1rem; color: #3a7a63;">{{ user.total_solutions }}</strong>
-                                </td>
-                                <td>
-                                    <div class="progress-bar-container" *ngIf="user.total_solutions > 0">
-                                        <div class="progress-bar">
-                                            <div
-                                                class="progress-segment approved"
-                                                [style.width.%]="(user.approved / user.total_solutions) * 100"
-                                                [attr.data-tooltip]="'Approved: ' + user.approved"
-                                            >
-                                                <span *ngIf="(user.approved / user.total_solutions) * 100 > 8">
-                                                    {{ user.approved }}
-                                                </span>
-                                                <div class="progress-count-badge" *ngIf="user.approved > 0 && (user.approved / user.total_solutions) * 100 <= 8">
-                                                    {{ user.approved }}
+                                    <span class="chart-badge">By Logins</span>
+                                </div>
+                                <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
+                            </div>
+
+                            <div class="chart-card" *ngIf="!selectedIRM">
+                                <div class="chart-card-header">
+                                    <div class="chart-card-title">
+                                        <i class="pi pi-sitemap"></i>
+                                        Solutions by IRM
+                                    </div>
+                                    <span class="chart-badge">Donut</span>
+                                </div>
+                                <p-chart type="doughnut" [data]="irmChartData" [options]="pieChartOptions" />
+                            </div>
+
+                            <div class="chart-card" [class.full-width]="!!selectedIRM">
+                                <div class="chart-card-header">
+                                    <div class="chart-card-title">
+                                        <i class="pi pi-calendar"></i>
+                                        Monthly Solutions Added
+                                    </div>
+                                    <span class="chart-badge">Trend</span>
+                                </div>
+                                <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
+                            </div>
+
+                        </div>
+
+                        <!-- Data Table -->
+                        <div class="table-card">
+                            <div class="table-card-header">
+                                <div class="table-card-title">
+                                    <i class="pi pi-table" style="color: #2e7d52; font-size: 1rem;"></i>
+                                    User Details
+                                    <span class="count-chip">{{ filteredStats.length }}</span>
+                                </div>
+                            </div>
+
+                            <p-table
+                                [value]="filteredStats"
+                                [paginator]="true"
+                                [rows]="10"
+                                [rowsPerPageOptions]="[10, 25, 50, 100]"
+                                [showCurrentPageReport]="true"
+                                currentPageReportTemplate="Showing {first}–{last} of {totalRecords}"
+                                responsiveLayout="scroll"
+                            >
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th pSortableColumn="name" style="min-width: 190px;">
+                                            User <p-sortIcon field="name" />
+                                        </th>
+                                        <th pSortableColumn="irm">
+                                            IRM <p-sortIcon field="irm" />
+                                        </th>
+                                        <th pSortableColumn="login_count" class="text-center">
+                                            Logins <p-sortIcon field="login_count" />
+                                        </th>
+                                        <th class="text-center">Last Login</th>
+                                        <th pSortableColumn="total_solutions" class="text-center">
+                                            Total <p-sortIcon field="total_solutions" />
+                                        </th>
+                                        <th pSortableColumn="approved" class="text-center">
+                                            Approved <p-sortIcon field="approved" />
+                                        </th>
+                                        <th pSortableColumn="pending" class="text-center">
+                                            Pending <p-sortIcon field="pending" />
+                                        </th>
+                                        <th pSortableColumn="rejected" class="text-center">
+                                            Rejected <p-sortIcon field="rejected" />
+                                        </th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template pTemplate="body" let-user>
+                                    <tr>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="avatar">{{ getInitials(user.name) }}</div>
+                                                <div>
+                                                    <div class="user-name">{{ user.name }}</div>
+                                                    <div class="user-id">{{ user.yash_id }}</div>
                                                 </div>
                                             </div>
-                                            <div
-                                                class="progress-segment pending"
-                                                [style.width.%]="(user.pending / user.total_solutions) * 100"
-                                                [attr.data-tooltip]="'Pending: ' + user.pending"
-                                            >
-                                                <span *ngIf="(user.pending / user.total_solutions) * 100 > 8">
-                                                    {{ user.pending }}
-                                                </span>
-                                                <div class="progress-count-badge" *ngIf="user.pending > 0 && (user.pending / user.total_solutions) * 100 <= 8">
-                                                    {{ user.pending }}
-                                                </div>
+                                        </td>
+                                        <td>
+                                            <span class="irm-tag">{{ user.irm || 'N/A' }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="login-badge">
+                                                <i class="pi pi-sign-in"></i>
+                                                {{ user.login_count }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="date-text">{{ formatDateOnly(user.last_login) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="num-total">{{ user.total_solutions }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="num-badge approved">{{ user.approved }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="num-badge pending">{{ user.pending }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="num-badge rejected">{{ user.rejected }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="view-btn" (click)="viewUserSolutions(user)">
+                                                <i class="pi pi-eye"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="9">
+                                            <div class="empty-state">
+                                                <i class="pi pi-inbox"></i>
+                                                <p>No user data matches your current filters.</p>
                                             </div>
-                                            <div
-                                                class="progress-segment rejected"
-                                                [style.width.%]="(user.rejected / user.total_solutions) * 100"
-                                                [attr.data-tooltip]="'Rejected: ' + user.rejected"
-                                            >
-                                                <span *ngIf="(user.rejected / user.total_solutions) * 100 > 8">
-                                                    {{ user.rejected }}
-                                                </span>
-                                                <div class="progress-count-badge" *ngIf="user.rejected > 0 && (user.rejected / user.total_solutions) * 100 <= 8">
-                                                    {{ user.rejected }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <p-tag [value]="user.approved.toString()" severity="success" />
-                                </td>
-                                <td class="text-center">
-                                    <p-tag [value]="user.pending.toString()" severity="warning" />
-                                </td>
-                                <td class="text-center">
-                                    <p-tag [value]="user.rejected.toString()" severity="danger" />
-                                </td>
-                                <td class="text-center">
-                                    <p-button
-                                        icon="pi pi-eye"
-                                        label="View"
-                                        size="small"
-                                        [outlined]="true"
-                                        (onClick)="viewUserSolutions(user)"
-                                    />
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr>
-                                <td colspan="10">
-                                    <div class="empty-state">
-                                        <i class="pi pi-inbox"></i>
-                                        <p>No user data found matching your filters.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+
+                    </ng-container>
                 </div>
+            </div>
+        </div>
 
-            </ng-container>
+        <!-- Solutions Dialog -->
+        <p-dialog
+            [(visible)]="showSolutionsDialog"
+            [modal]="true"
+            [style]="{ width: '90vw', maxWidth: '1100px', overflow: 'hidden', borderRadius: '16px' }"
+            [contentStyle]="{ padding: '0', overflow: 'hidden', borderRadius: '0 0 16px 16px' }"
+            [draggable]="false"
+            [resizable]="false"
+            styleClass="solutions-dialog"
+        >
+            <ng-template pTemplate="header">
+                <div>
+                    <div style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.35rem;">
+                        Solutions — {{ selectedUser?.name }}
+                    </div>
+                    <div style="font-size: 0.85rem; opacity: 0.75;">
+                        {{ selectedUser?.yash_id }} &nbsp;·&nbsp; {{ selectedUser?.total_solutions }} Solutions &nbsp;·&nbsp; {{ selectedUser?.login_count }} Logins
+                    </div>
+                </div>
+            </ng-template>
 
-            <!-- Solutions Dialog -->
-            <p-dialog
-                [(visible)]="showSolutionsDialog"
-                [modal]="true"
-                [style]="{ width: '90vw' }"
-                [draggable]="false"
-                [resizable]="false"
-                styleClass="solutions-dialog"
+            <p-table
+                [value]="selectedUser?.solutions || []"
+                [paginator]="true"
+                [rows]="5"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first}–{last} of {totalRecords}"
+                responsiveLayout="scroll"
             >
                 <ng-template pTemplate="header">
-                    <div>
-                        <h3 style="margin: 0 0 0.5rem 0;">
-                            Solutions by {{ selectedUser?.name }}
-                        </h3>
-                        <div style="font-size: 0.95rem; opacity: 0.9;">
-                            {{ selectedUser?.yash_id }} • {{ selectedUser?.total_solutions }} Solutions • {{ selectedUser?.login_count }} Logins
-                        </div>
-                    </div>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Module</th>
+                        <th>Domain</th>
+                        <th>Sector</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Approver</th>
+                    </tr>
                 </ng-template>
-
-                <p-table
-                    [value]="selectedUser?.solutions || []"
-                    [paginator]="true"
-                    [rows]="5"
-                    [showCurrentPageReport]="true"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} solutions"
-                    responsiveLayout="scroll"
-                >
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th>Customer Name</th>
-                            <th>Module</th>
-                            <th>Domain</th>
-                            <th>Sector</th>
-                            <th>Created Date</th>
-                            <th>Status</th>
-                            <th>Approver</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-solution>
-                        <tr>
-                            <td>{{ solution.customer_name }}</td>
-                            <td>{{ solution.module_name }}</td>
-                            <td>{{ solution.domain }}</td>
-                            <td>{{ solution.sector }}</td>
-                            <td>{{ formatDate(solution.created_at) }}</td>
-                            <td>
-                                <p-tag
-                                    [value]="solution.Approval_status || 'Pending'"
-                                    [severity]="getStatusSeverity(solution.Approval_status)"
-                                />
-                            </td>
-                            <td>{{ solution.Approver || 'N/A' }}</td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </p-dialog>
-
-        </div>
+                <ng-template pTemplate="body" let-solution>
+                    <tr>
+                        <td>{{ solution.customer_name }}</td>
+                        <td>{{ solution.module_name }}</td>
+                        <td>{{ solution.domain }}</td>
+                        <td>{{ solution.sector }}</td>
+                        <td>{{ formatDate(solution.created_at) }}</td>
+                        <td>
+                            <p-tag
+                                [value]="solution.Approval_status || 'Pending'"
+                                [severity]="getStatusSeverity(solution.Approval_status)"
+                            />
+                        </td>
+                        <td>{{ solution.Approver || 'N/A' }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-dialog>
     `
 })
 export class UserWiseReportComponent implements OnInit {
@@ -1024,26 +1250,22 @@ export class UserWiseReportComponent implements OnInit {
     filteredStats: UserStats[] = [];
     allSolutions: any[] = [];
     loginHistory: any[] = [];
-    
-    // Filters
+
     selectedMonth: string = '';
     selectedIRM: string = '';
     searchText: string = '';
-    
+
     monthOptions: MonthOption[] = [];
     irmOptions: string[] = [];
 
-    // Dialog
     showSolutionsDialog = false;
     selectedUser: UserStats | null = null;
 
-    // Chart data
     topContributorsChartData: any;
     loginActivityChartData: any;
     irmChartData: any;
     monthlySolutionsChartData: any;
 
-    // Chart options
     barChartOptions: any;
     loginChartOptions: any;
     pieChartOptions: any;
@@ -1060,7 +1282,6 @@ export class UserWiseReportComponent implements OnInit {
     }
 
     ngOnInit() {
-        console.log('UserWiseReportComponent initialized');
         this.checkAuthorization();
         this.loadReportData();
     }
@@ -1075,53 +1296,32 @@ export class UserWiseReportComponent implements OnInit {
 
     loadReportData() {
         this.loading = true;
-        console.log('Starting to load report data...');
-        
         forkJoin({
             users: this.adminService.getUsers(),
             repos: this.repoService.get_allrepos(),
             loginHistory: this.repoService.get_log_records()
         }).subscribe({
             next: (data: any) => {
-                console.log('Data loaded successfully');
-                
                 this.allSolutions = Array.isArray(data.repos) ? data.repos : [];
                 const usersData = Array.isArray(data.users) ? data.users : [];
                 this.loginHistory = Array.isArray(data.loginHistory) ? data.loginHistory : [];
-                
-                console.log(`Loaded: ${usersData.length} users, ${this.allSolutions.length} solutions, ${this.loginHistory.length} login records`);
 
-                // Filter to only include users with type: 'user'
-                const regularUsers = usersData.filter((user: any) => 
+                const regularUsers = usersData.filter((user: any) =>
                     user.type && user.type.toLowerCase() === 'user'
                 );
-                console.log(`Filtered to ${regularUsers.length} regular users`);
 
                 this.userStats = this.processUserStats(regularUsers, this.allSolutions);
-                console.log('Processed user stats:', this.userStats);
-
                 this.generateMonthOptions();
                 this.generateIRMOptions();
-
                 this.applyFilters();
-
                 this.loading = false;
-                
+
                 if (this.userStats.length === 0) {
-                    this.messageService.add({
-                        severity: 'info',
-                        summary: 'No Data',
-                        detail: 'No user data available for reporting'
-                    });
+                    this.messageService.add({ severity: 'info', summary: 'No Data', detail: 'No user data available' });
                 }
             },
-            error: (error) => {
-                console.error('Error loading report data:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load report data'
-                });
+            error: () => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load report data' });
                 this.loading = false;
             }
         });
@@ -1129,233 +1329,109 @@ export class UserWiseReportComponent implements OnInit {
 
     processUserStats(users: any[], solutions: any[]): UserStats[] {
         return users.map((user) => {
-            const userSolutions = solutions.filter(s => 
+            const userSolutions = solutions.filter(s =>
                 s.yash_id === user.yash_id || s.username === user.name
             );
-            
-            const approved = userSolutions.filter(s => 
-                s.Approval_status && s.Approval_status.toLowerCase() === 'approved'
-            ).length;
-            
-            const pending = userSolutions.filter(s => 
-                !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval'
-            ).length;
-            
-            const rejected = userSolutions.filter(s => 
-                s.Approval_status && s.Approval_status.toLowerCase() === 'rejected'
-            ).length;
-            
-            const total = userSolutions.length;
-            
-            // Calculate login count and last login from log records
+            const approved = userSolutions.filter(s => s.Approval_status?.toLowerCase() === 'approved').length;
+            const pending  = userSolutions.filter(s => !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval').length;
+            const rejected = userSolutions.filter(s => s.Approval_status?.toLowerCase() === 'rejected').length;
+
             const userLogins = this.loginHistory.filter(login => {
-                const loginYashId = String(login.yash_id || '');
-                const userYashId = String(user.yash_id || '');
-                const matchesByYashId = loginYashId === userYashId;
-                const matchesByUsername = login.username === user.name;
-                const matchesUser = matchesByYashId || matchesByUsername;
-                const isSuccessful = login.success === true || 
-                                   login.message === 'Login successful' ||
-                                   login.status === 'success';
-                
-                return matchesUser && isSuccessful;
+                const matchesId   = String(login.yash_id || '') === String(user.yash_id || '');
+                const matchesName = login.username === user.name;
+                const isSuccess   = login.success === true || login.message === 'Login successful' || login.status === 'success';
+                return (matchesId || matchesName) && isSuccess;
             });
-            
-            const loginCount = userLogins.length;
-            
+
             let lastLogin = 'Never';
             if (userLogins.length > 0) {
-                const sortedLogins = [...userLogins].sort((a, b) => {
-                    const dateA = new Date(a.timestamp || a.login_time || a.created_at || 0);
-                    const dateB = new Date(b.timestamp || b.login_time || b.created_at || 0);
-                    return dateB.getTime() - dateA.getTime();
-                });
-                lastLogin = sortedLogins[0].timestamp || 
-                          sortedLogins[0].login_time || 
-                          sortedLogins[0].created_at || 
-                          'Never';
+                const sorted = [...userLogins].sort((a, b) =>
+                    new Date(b.timestamp || b.login_time || b.created_at || 0).getTime() -
+                    new Date(a.timestamp || a.login_time || a.created_at || 0).getTime()
+                );
+                lastLogin = sorted[0].timestamp || sorted[0].login_time || sorted[0].created_at || 'Never';
             }
-            
+
             return {
-                yash_id: user.yash_id,
-                name: user.name,
-                email: user.email || '',
-                b_unit: user.b_unit || 'N/A',
-                irm: user.irm || 'N/A',
-                type: user.type || 'user',
-                total_solutions: total,
-                approved: approved,
-                pending: pending,
-                rejected: rejected,
-                login_count: loginCount,
-                last_login: lastLogin,
-                solutions: userSolutions
+                yash_id: user.yash_id, name: user.name, email: user.email || '',
+                b_unit: user.b_unit || 'N/A', irm: user.irm || 'N/A', type: user.type || 'user',
+                total_solutions: userSolutions.length, approved, pending, rejected,
+                login_count: userLogins.length, last_login: lastLogin, solutions: userSolutions
             };
-        }).filter(stat => stat.total_solutions > 0 || stat.login_count > 0);
+        }).filter(s => s.total_solutions > 0 || s.login_count > 0);
     }
 
     generateMonthOptions() {
         const months = new Set<string>();
-        this.allSolutions.forEach(solution => {
-            if (solution.created_at) {
-                const date = new Date(solution.created_at);
-                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                months.add(monthYear);
+        this.allSolutions.forEach(s => {
+            if (s.created_at) {
+                const d = new Date(s.created_at);
+                months.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
             }
         });
-
-        this.monthOptions = Array.from(months)
-            .sort()
-            .reverse()
-            .map(monthYear => {
-                const [year, month] = monthYear.split('-');
-                const monthName = new Date(parseInt(year), parseInt(month) - 1)
-                    .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                return { label: monthName, value: monthYear };
-            });
+        this.monthOptions = Array.from(months).sort().reverse().map(mv => {
+            const [y, m] = mv.split('-');
+            return { label: new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), value: mv };
+        });
     }
 
     generateIRMOptions() {
         const irms = new Set<string>();
-        this.userStats.forEach(stat => {
-            if (stat.irm && stat.irm !== 'N/A') {
-                irms.add(stat.irm);
-            }
-        });
+        this.userStats.forEach(s => { if (s.irm && s.irm !== 'N/A') irms.add(s.irm); });
         this.irmOptions = Array.from(irms).sort();
     }
 
     applyFilters() {
         let filtered = [...this.userStats];
-
-        // Filter by IRM
-        if (this.selectedIRM) {
-            filtered = filtered.filter(stat => stat.irm === this.selectedIRM);
-        }
-
-        // Filter by search text
-        if (this.searchText && this.searchText.trim()) {
-            const search = this.searchText.trim().toLowerCase();
-            filtered = filtered.filter(stat =>
-                (stat.name && stat.name.toLowerCase().includes(search)) ||
-                (stat.yash_id && stat.yash_id.toString().toLowerCase().includes(search)) ||
-                (stat.email && stat.email.toLowerCase().includes(search)) ||
-                (stat.irm && stat.irm.toLowerCase().includes(search))
+        if (this.selectedIRM) filtered = filtered.filter(s => s.irm === this.selectedIRM);
+        if (this.searchText?.trim()) {
+            const q = this.searchText.trim().toLowerCase();
+            filtered = filtered.filter(s =>
+                s.name?.toLowerCase().includes(q) || s.yash_id?.toString().toLowerCase().includes(q) ||
+                s.email?.toLowerCase().includes(q) || s.irm?.toLowerCase().includes(q)
             );
         }
-
-        // Filter by month
         if (this.selectedMonth) {
             filtered = filtered.map(stat => {
-                const filteredSolutions = stat.solutions.filter(solution => {
-                    if (!solution.created_at) return false;
-                    const date = new Date(solution.created_at);
-                    const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                    return monthYear === this.selectedMonth;
+                const sols = stat.solutions.filter(s => {
+                    if (!s.created_at) return false;
+                    const d = new Date(s.created_at);
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === this.selectedMonth;
+                });
+                const approved = sols.filter(s => s.Approval_status?.toLowerCase() === 'approved').length;
+                const pending  = sols.filter(s => !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval').length;
+                const rejected = sols.filter(s => s.Approval_status?.toLowerCase() === 'rejected').length;
+
+                const logins = this.loginHistory.filter(l => {
+                    const matchId   = String(l.yash_id || '') === String(stat.yash_id || '');
+                    const matchName = l.username === stat.name;
+                    const isSuccess = l.success === true || l.message === 'Login successful' || l.status === 'success';
+                    if (!(matchId || matchName) || !isSuccess) return false;
+                    const ts = l.timestamp || l.login_time || l.created_at;
+                    if (!ts) return false;
+                    const d = new Date(ts);
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === this.selectedMonth;
                 });
 
-                const approved = filteredSolutions.filter(s => 
-                    s.Approval_status && s.Approval_status.toLowerCase() === 'approved'
-                ).length;
-                
-                const pending = filteredSolutions.filter(s => 
-                    !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval'
-                ).length;
-                
-                const rejected = filteredSolutions.filter(s => 
-                    s.Approval_status && s.Approval_status.toLowerCase() === 'rejected'
-                ).length;
-                
-                const total = filteredSolutions.length;
-
-                // Filter login count by month
-                const filteredLoginCount = this.loginHistory.filter(login => {
-                    const loginYashId = String(login.yash_id || '');
-                    const userYashId = String(stat.yash_id || '');
-                    const matchesByYashId = loginYashId === userYashId;
-                    const matchesByUsername = login.username === stat.name;
-                    const matchesUser = matchesByYashId || matchesByUsername;
-                    const isSuccessful = login.success === true || 
-                                       login.message === 'Login successful' ||
-                                       login.status === 'success';
-                    
-                    if (!matchesUser || !isSuccessful) return false;
-                    
-                    // Check if login is in selected month
-                    const loginTimestamp = login.timestamp || login.login_time || login.created_at;
-                    if (!loginTimestamp) return false;
-                    
-                    const loginDate = new Date(loginTimestamp);
-                    const loginMonthYear = `${loginDate.getFullYear()}-${String(loginDate.getMonth() + 1).padStart(2, '0')}`;
-                    return loginMonthYear === this.selectedMonth;
-                }).length;
-
-                // Update last login based on filtered month
-                let filteredLastLogin = 'Never';
-                const monthLogins = this.loginHistory.filter(login => {
-                    const loginYashId = String(login.yash_id || '');
-                    const userYashId = String(stat.yash_id || '');
-                    const matchesByYashId = loginYashId === userYashId;
-                    const matchesByUsername = login.username === stat.name;
-                    const matchesUser = matchesByYashId || matchesByUsername;
-                    const isSuccessful = login.success === true || 
-                                       login.message === 'Login successful' ||
-                                       login.status === 'success';
-                    
-                    if (!matchesUser || !isSuccessful) return false;
-                    
-                    const loginTimestamp = login.timestamp || login.login_time || login.created_at;
-                    if (!loginTimestamp) return false;
-                    
-                    const loginDate = new Date(loginTimestamp);
-                    const loginMonthYear = `${loginDate.getFullYear()}-${String(loginDate.getMonth() + 1).padStart(2, '0')}`;
-                    return loginMonthYear === this.selectedMonth;
-                });
-
-                if (monthLogins.length > 0) {
-                    const sortedMonthLogins = [...monthLogins].sort((a, b) => {
-                        const dateA = new Date(a.timestamp || a.login_time || a.created_at || 0);
-                        const dateB = new Date(b.timestamp || b.login_time || b.created_at || 0);
-                        return dateB.getTime() - dateA.getTime();
-                    });
-                    filteredLastLogin = sortedMonthLogins[0].timestamp || 
-                                      sortedMonthLogins[0].login_time || 
-                                      sortedMonthLogins[0].created_at || 
-                                      'Never';
+                let lastLogin = 'Never';
+                if (logins.length > 0) {
+                    const sorted = [...logins].sort((a, b) =>
+                        new Date(b.timestamp || b.login_time || b.created_at || 0).getTime() -
+                        new Date(a.timestamp || a.login_time || a.created_at || 0).getTime()
+                    );
+                    lastLogin = sorted[0].timestamp || sorted[0].login_time || sorted[0].created_at || 'Never';
                 }
-
-                return {
-                    ...stat,
-                    total_solutions: total,
-                    approved: approved,
-                    pending: pending,
-                    rejected: rejected,
-                    login_count: filteredLoginCount,
-                    last_login: filteredLastLogin,
-                    solutions: filteredSolutions
-                };
-            }).filter(stat => stat.total_solutions > 0 || stat.login_count > 0);
+                return { ...stat, total_solutions: sols.length, approved, pending, rejected, login_count: logins.length, last_login: lastLogin, solutions: sols };
+            }).filter(s => s.total_solutions > 0 || s.login_count > 0);
         }
-
         this.filteredStats = filtered.sort((a, b) => b.total_solutions - a.total_solutions);
         this.updateCharts();
     }
 
-    getTotalSolutions(): number {
-        return this.filteredStats.reduce((sum, stat) => sum + stat.total_solutions, 0);
-    }
-
-    getTotalApproved(): number {
-        return this.filteredStats.reduce((sum, stat) => sum + stat.approved, 0);
-    }
-
-    getTotalPending(): number {
-        return this.filteredStats.reduce((sum, stat) => sum + stat.pending, 0);
-    }
-
-    getTotalRejected(): number {
-        return this.filteredStats.reduce((sum, stat) => sum + stat.rejected, 0);
-    }
+    getTotalSolutions() { return this.filteredStats.reduce((s, u) => s + u.total_solutions, 0); }
+    getTotalApproved()  { return this.filteredStats.reduce((s, u) => s + u.approved, 0); }
+    getTotalPending()   { return this.filteredStats.reduce((s, u) => s + u.pending, 0); }
+    getTotalRejected()  { return this.filteredStats.reduce((s, u) => s + u.rejected, 0); }
 
     updateCharts() {
         this.updateTopContributorsChart();
@@ -1365,338 +1441,125 @@ export class UserWiseReportComponent implements OnInit {
     }
 
     updateTopContributorsChart() {
-        const top10 = [...this.filteredStats].slice(0, 10);
-        
+        const top = [...this.filteredStats].slice(0, 10);
         this.topContributorsChartData = {
-            labels: top10.map(stat => stat.name),
+            labels: top.map(s => s.name),
             datasets: [
-                {
-                    label: 'Approved',
-                    data: top10.map(stat => stat.approved),
-                    backgroundColor: '#4caf50'
-                },
-                {
-                    label: 'Pending',
-                    data: top10.map(stat => stat.pending),
-                    backgroundColor: '#ff9800'
-                },
-                {
-                    label: 'Rejected',
-                    data: top10.map(stat => stat.rejected),
-                    backgroundColor: '#f44336'
-                }
+                { label: 'Approved', data: top.map(s => s.approved),  backgroundColor: '#3aab66' },
+                { label: 'Pending',  data: top.map(s => s.pending),   backgroundColor: '#f0b429' },
+                { label: 'Rejected', data: top.map(s => s.rejected),  backgroundColor: '#e87870' }
             ]
         };
     }
 
     updateLoginActivityChart() {
-        const top10 = [...this.filteredStats]
-            .sort((a, b) => b.login_count - a.login_count)
-            .slice(0, 10);
-        
+        const top = [...this.filteredStats].sort((a, b) => b.login_count - a.login_count).slice(0, 10);
         this.loginActivityChartData = {
-            labels: top10.map(stat => stat.name),
-            datasets: [{
-                label: 'Login Count',
-                data: top10.map(stat => stat.login_count),
-                backgroundColor: '#2196f3',
-                borderColor: '#1976d2',
-                borderWidth: 2
-            }]
+            labels: top.map(s => s.name),
+            datasets: [{ label: 'Logins', data: top.map(s => s.login_count), backgroundColor: '#2c6e9e', borderColor: '#1e4f75', borderWidth: 1 }]
         };
     }
 
     updateIRMChart() {
-        const irmGroups = new Map<string, number>();
-        
-        this.filteredStats.forEach(stat => {
-            const irm = stat.irm || 'N/A';
-            irmGroups.set(irm, (irmGroups.get(irm) || 0) + stat.total_solutions);
-        });
-
-        const sortedIRMs = Array.from(irmGroups.entries())
-            .sort((a, b) => b[1] - a[1]);
-
-        const colors = [
-            '#2d5f4f', '#3a7a63', '#4caf50', '#66bb6a',
-            '#81c784', '#a5d6a7', '#c8e6c9', '#e8f5e9'
-        ];
-
+        const groups = new Map<string, number>();
+        this.filteredStats.forEach(s => { const k = s.irm || 'N/A'; groups.set(k, (groups.get(k) || 0) + s.total_solutions); });
+        const sorted = Array.from(groups.entries()).sort((a, b) => b[1] - a[1]);
+        const palette = ['#1a3d2e','#2e7d52','#3aab66','#5aad7a','#86c99e','#a8d8b8','#c8e6c9','#e3f2eb'];
         this.irmChartData = {
-            labels: sortedIRMs.map(([irm]) => irm),
-            datasets: [{
-                data: sortedIRMs.map(([, count]) => count),
-                backgroundColor: colors,
-                hoverBackgroundColor: colors.map(c => c + 'dd')
-            }]
+            labels: sorted.map(([k]) => k),
+            datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: palette, hoverBackgroundColor: palette }]
         };
     }
 
     updateMonthlySolutionsChart() {
-        const monthlyData = new Map<string, number>();
-        
-        // Get all solutions from filtered users only
-        const userIds = new Set(this.filteredStats.map(stat => stat.yash_id));
-        const userNames = new Set(this.filteredStats.map(stat => stat.name));
-        
-        this.allSolutions.forEach(solution => {
-            // Only count solutions from users with type: 'user'
-            const isFromRegularUser = userIds.has(solution.yash_id) || userNames.has(solution.username);
-            
-            if (isFromRegularUser && solution.created_at) {
-                const date = new Date(solution.created_at);
-                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                monthlyData.set(monthYear, (monthlyData.get(monthYear) || 0) + 1);
+        const monthly = new Map<string, number>();
+        const ids = new Set(this.filteredStats.map(s => s.yash_id));
+        const names = new Set(this.filteredStats.map(s => s.name));
+        this.allSolutions.forEach(s => {
+            if ((ids.has(s.yash_id) || names.has(s.username)) && s.created_at) {
+                const d = new Date(s.created_at);
+                const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                monthly.set(k, (monthly.get(k) || 0) + 1);
             }
         });
-
-        const sortedMonths = Array.from(monthlyData.keys()).sort();
-        
+        const sorted = Array.from(monthly.keys()).sort();
         this.monthlySolutionsChartData = {
-            labels: sortedMonths.map(monthYear => {
-                const [year, month] = monthYear.split('-');
-                return new Date(parseInt(year), parseInt(month) - 1)
-                    .toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            }),
-            datasets: [{
-                label: 'Solutions Added',
-                data: sortedMonths.map(month => monthlyData.get(month) || 0),
-                backgroundColor: '#3a7a63',
-                borderColor: '#2d5f4f',
-                borderWidth: 2
-            }]
+            labels: sorted.map(mv => { const [y, m] = mv.split('-'); return new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }),
+            datasets: [{ label: 'Solutions', data: sorted.map(k => monthly.get(k) || 0), backgroundColor: '#2e7d52', borderColor: '#1a3d2e', borderWidth: 1 }]
         };
     }
 
     initializeChartOptions() {
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
+        const base = {
+            responsive: true, maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: { size: 11, weight: 600 },
-                        color: '#2d5f4f'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(45, 95, 79, 0.9)',
-                    padding: 12,
-                    titleFont: { size: 12, weight: 600 },
-                    bodyFont: { size: 11 }
-                }
+                legend: { display: true, position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11, weight: 600 }, color: '#1a3d2e' } },
+                tooltip: { backgroundColor: 'rgba(26,61,46,0.92)', padding: 10, titleFont: { size: 11, weight: 600 }, bodyFont: { size: 10 } }
             }
         };
-
-        this.barChartOptions = {
-            ...commonOptions,
-            scales: {
-                x: {
-                    stacked: true,
-                    grid: { display: false },
-                    ticks: { font: { size: 10 }, color: '#666' }
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true,
-                    ticks: { 
-                        precision: 0,
-                        font: { size: 10 },
-                        color: '#666'
-                    },
-                    grid: { color: '#f0f4f3' }
-                }
-            }
-        };
-
-        this.loginChartOptions = {
-            ...commonOptions,
-            plugins: {
-                ...commonOptions.plugins,
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 10 }, color: '#666' }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: { 
-                        precision: 0,
-                        font: { size: 10 },
-                        color: '#666'
-                    },
-                    grid: { color: '#f0f4f3' }
-                }
-            }
-        };
-
-        this.pieChartOptions = {
-            ...commonOptions,
-            plugins: {
-                ...commonOptions.plugins,
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: { size: 11, weight: 600 },
-                        color: '#2d5f4f'
-                    }
-                }
-            }
-        };
-
-        this.monthlyBarChartOptions = {
-            ...commonOptions,
-            plugins: {
-                ...commonOptions.plugins,
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 10 }, color: '#666' }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: { 
-                        precision: 0,
-                        font: { size: 10 },
-                        color: '#666'
-                    },
-                    grid: { color: '#f0f4f3' }
-                }
-            }
-        };
+        this.barChartOptions = { ...base, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 }, color: '#7a9a87' } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#7a9a87' }, grid: { color: '#eef4f0' } } } };
+        this.loginChartOptions = { ...base, plugins: { ...base.plugins, legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#7a9a87' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#7a9a87' }, grid: { color: '#eef4f0' } } } };
+        this.pieChartOptions  = { ...base, plugins: { ...base.plugins, legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font: { size: 10, weight: 600 }, color: '#1a3d2e' } } } };
+        this.monthlyBarChartOptions = { ...base, plugins: { ...base.plugins, legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#7a9a87' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#7a9a87' }, grid: { color: '#eef4f0' } } } };
     }
 
-    viewUserSolutions(user: UserStats) {
-        this.selectedUser = user;
-        this.showSolutionsDialog = true;
-    }
-
-    clearFilters() {
-        this.selectedMonth = '';
-        this.selectedIRM = '';
-        this.searchText = '';
-        this.applyFilters();
-    }
+    viewUserSolutions(user: UserStats) { this.selectedUser = user; this.showSolutionsDialog = true; }
+    clearFilters() { this.selectedMonth = ''; this.selectedIRM = ''; this.searchText = ''; this.applyFilters(); }
 
     getInitials(name: string): string {
         if (!name) return '?';
-        const parts = name.trim().split(' ');
-        if (parts.length >= 2) {
-            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-        }
-        return name.substring(0, 2).toUpperCase();
+        const p = name.trim().split(' ');
+        return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
     }
 
-    formatDate(dateString?: string): string {
-        if (!dateString || dateString === 'Never') return dateString || 'N/A';
+    formatDate(d?: string): string {
+        if (!d || d === 'Never') return d || 'N/A';
         try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Invalid Date';
-            
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            
-            return `${day}-${month}-${year} ${hours}:${minutes}`;
-        } catch (error) {
-            console.error('Error formatting date:', dateString, error);
-            return 'Invalid Date';
-        }
+            const dt = new Date(d);
+            if (isNaN(dt.getTime())) return 'Invalid';
+            return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+        } catch { return 'Invalid'; }
     }
 
-    formatDateOnly(dateString?: string): string {
-        if (!dateString || dateString === 'Never') return dateString || 'N/A';
+    formatDateOnly(d?: string): string {
+        if (!d || d === 'Never') return d || 'N/A';
         try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Invalid Date';
-            
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            
-            return `${day}-${month}-${year}`;
-        } catch (error) {
-            console.error('Error formatting date:', dateString, error);
-            return 'Invalid Date';
-        }
+            const dt = new Date(d);
+            if (isNaN(dt.getTime())) return 'Invalid';
+            return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
+        } catch { return 'Invalid'; }
     }
 
     getStatusSeverity(status?: string): 'success' | 'warning' | 'danger' {
-        const statusLower = status?.toLowerCase();
-        if (statusLower === 'approved') return 'success';
-        if (statusLower === 'rejected') return 'danger';
+        const s = status?.toLowerCase();
+        if (s === 'approved') return 'success';
+        if (s === 'rejected') return 'danger';
         return 'warning';
     }
 
     exportToExcel() {
         try {
-            const exportData = this.filteredStats.map(stat => ({
-                'User ID': stat.yash_id,
-                'User Name': stat.name,
-                'Email': stat.email,
-                'IRM': stat.irm,
-                'Login Count': stat.login_count,
-                'Last Login': this.formatDateOnly(stat.last_login),
-                'Total Solutions': stat.total_solutions,
-                'Approved': stat.approved,
-                'Pending': stat.pending,
-                'Rejected': stat.rejected
+            const summary = this.filteredStats.map(s => ({
+                'User ID': s.yash_id, 'Name': s.name, 'Email': s.email, 'IRM': s.irm,
+                'Logins': s.login_count, 'Last Login': this.formatDateOnly(s.last_login),
+                'Total': s.total_solutions, 'Approved': s.approved, 'Pending': s.pending, 'Rejected': s.rejected
             }));
-
-            const detailedData = this.filteredStats.flatMap(stat =>
-                stat.solutions.map(solution => ({
-                    'User ID': stat.yash_id,
-                    'User Name': stat.name,
-                    'IRM': stat.irm,
-                    'Customer Name': solution.customer_name,
-                    'Module': solution.module_name,
-                    'Domain': solution.domain,
-                    'Sector': solution.sector,
-                    'Standard/Custom': solution.standard_custom,
-                    'Created Date': this.formatDate(solution.created_at),
-                    'Status': solution.Approval_status || 'Pending',
-                    'Approver': solution.Approver || 'N/A',
-                    'Approval Date': solution.Approval_date || 'N/A'
-                }))
-            );
-
+            const details = this.filteredStats.flatMap(s => s.solutions.map(sol => ({
+                'User ID': s.yash_id, 'Name': s.name, 'IRM': s.irm,
+                'Customer': sol.customer_name, 'Module': sol.module_name,
+                'Domain': sol.domain, 'Sector': sol.sector,
+                'Created': this.formatDate(sol.created_at),
+                'Status': sol.Approval_status || 'Pending',
+                'Approver': sol.Approver || 'N/A', 'Approval Date': sol.Approval_date || 'N/A'
+            })));
             const wb = XLSX.utils.book_new();
-            const ws1 = XLSX.utils.json_to_sheet(exportData);
-            XLSX.utils.book_append_sheet(wb, ws1, 'User Summary');
-
-            const ws2 = XLSX.utils.json_to_sheet(detailedData);
-            XLSX.utils.book_append_sheet(wb, ws2, 'Detailed Solutions');
-
-            const timestamp = new Date().toISOString().split('T')[0];
-            const filename = `User_Activity_Report_${timestamp}.xlsx`;
-
-            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            saveAs(new Blob([wbout], { type: 'application/octet-stream' }), filename);
-
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Report exported successfully'
-            });
-        } catch (error) {
-            console.error('Error exporting to Excel:', error);
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to export report'
-            });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'User Summary');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(details), 'Detailed Solutions');
+            const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            saveAs(new Blob([out], { type: 'application/octet-stream' }), `User_Activity_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+            this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'Report downloaded successfully' });
+        } catch {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Export failed' });
         }
     }
 }

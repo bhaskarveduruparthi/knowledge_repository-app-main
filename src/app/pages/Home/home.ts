@@ -69,7 +69,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     ConfirmationService
   ],
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+    
 
     :host {
       --color-bg:       #EEF4E9;
@@ -101,7 +101,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
 
     /* ── Heading ── */
     .heading {
-      font-family: 'DM Serif Display', serif;
+      font-family:  sans-serif;
       font-size: clamp(2rem, 5vw, 3.25rem);
       color: var(--color-text);
       margin: 0 0 8px;
@@ -307,7 +307,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     .card-icon svg { color: var(--color-primary); }
     .card-title-group { flex: 1; min-width: 0; }
     .card-title {
-      font-family: 'DM Serif Display', serif;
+      
       font-size: 1.05rem;
       color: var(--color-text);
       margin: 0 0 3px;
@@ -533,7 +533,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
                 </svg>
               </div>
               <div class="card-title-group">
-                <div class="card-title" [title]="repo.module_name">{{ repo.module_name }}</div>
+                <div class="card-title" [title]="repo.module_name"><strong>{{ repo.module_name }}</strong></div>
                 <span class="card-domain-pill">Domain: {{ repo.domain }}</span>
                 
                 
