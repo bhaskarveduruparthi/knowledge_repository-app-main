@@ -344,150 +344,137 @@ interface ExportColumn {
             gap: 8px;
         }
 
-        /* ══ CREATE DIALOG – Structure-only redesign ════════════════════════ */
-.cd-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
+        /* ══ CREATE DIALOG – No-scroll compact redesign ════════════════════════ */
+        .cd-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
 
-.cd-progress-bar {
-    height: 4px;
-    background: #e0efe1;
-    margin: -1rem -1.5rem 1.5rem;
-    border-radius: 0;
-    overflow: hidden;
-}
-.cd-progress-bar-fill {
-    height: 100%;
-    width: 75%;
-    background: #1b5e20;
-    border-radius: 0 2px 2px 0;
-}
+        .cd-dialog-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.6rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #c8e6c9;
+        }
 
-.cd-dialog-header {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding-bottom: 1.1rem;
-    margin-bottom: 1.25rem;
-    border-bottom: 2px solid #c8e6c9;
-}
+        .cd-dialog-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: #c8e6c9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1b5e20;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
 
-.cd-dialog-header-icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: #c8e6c9;
-    display: flex; align-items: center; justify-content: center;
-    color: #1b5e20;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
+        .cd-dialog-header-text {
+            flex: 1;
+        }
 
-.cd-dialog-header-text {
-    flex: 1;
-}
-.cd-dialog-header-text h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1b5e20;
-    line-height: 1.2;
-}
-.cd-dialog-header-text p {
-    margin: 2px 0 0;
-    font-size: 0.78rem;
-    color: #558b5a;
-}
+        .cd-dialog-header-text h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1b5e20;
+            line-height: 1.2;
+        }
 
-/* ── Section group (groups related fields visually) ── */
-.cd-section {
-    margin-bottom: 1.5rem;
-}
+        .cd-dialog-header-text p {
+            margin: 1px 0 0;
+            font-size: 0.75rem;
+            color: #558b5a;
+        }
 
-.cd-section-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #2e7d32;
-    margin-bottom: 0.85rem;
-    padding-bottom: 0.45rem;
-    border-bottom: 1px solid #e8f5e9;
-}
-.cd-section-label i {
-    font-size: 0.75rem;
-    opacity: 0.7;
-}
+        /* ── Section group ── */
+        .cd-section {
+            margin-bottom: 0.75rem;
+        }
 
-/* ── Field styles ── */
-.cd-field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+        .cd-section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #2e7d32;
+            margin-bottom: 0.45rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid #e8f5e9;
+        }
 
-.cd-field-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #1b5e20;
-    opacity: 0.75;
-}
-.cd-field-label.req::after {
-    content: ' *';
-    color: #c0392b;
-    font-size: 0.75rem;
-}
+        .cd-section-label i {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
 
-.cd-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.9rem 1.25rem;
-}
-.cd-grid-2 .span-2 { grid-column: 1 / -1; }
+        /* ── Field styles ── */
+        .cd-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
 
-.cd-footer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 0.75rem;
-    padding-top: 1.1rem;
-    margin-top: 0.5rem;
-    border-top: 1px solid #e0efe1;
-}
+        .cd-field-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #1b5e20;
+            opacity: 0.75;
+        }
 
-.cd-step-pills {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 1.25rem;
-    justify-content: center;
-}
-.cd-pill {
-    height: 6px;
-    width: 28px;
-    border-radius: 3px;
-    background: #e0efe1;
-}
-.cd-pill.active {
-    background: #1b5e20;
-    width: 40px;
-}
-.cd-pill.done {
-    background: #c8e6c9;
-}
+        .cd-field-label.req::after {
+            content: ' *';
+            color: #c0392b;
+            font-size: 0.72rem;
+        }
 
-@media (max-width: 650px) {
-    .cd-grid-2 { grid-template-columns: 1fr; }
-    .cd-grid-2 .span-2 { grid-column: 1; }
-}
+        .cd-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 1rem;
+        }
+
+        .cd-grid-2 .span-2 {
+            grid-column: 1 / -1;
+        }
+
+        .cd-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.75rem;
+            padding-top: 0.65rem;
+            margin-top: 0.35rem;
+            border-top: 1px solid #e0efe1;
+        }
+
+        /* Compact textarea inside dialog */
+        .cd-wrap textarea {
+            resize: none;
+        }
+
+        /* Tighten p-message spacing inside dialog */
+        .cd-wrap p-message {
+            margin-top: 1px;
+        }
+
+        @media (max-width: 650px) {
+            .cd-grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .cd-grid-2 .span-2 {
+                grid-column: 1;
+            }
+        }
     `,
     imports: [
         CommonModule,
@@ -678,25 +665,21 @@ interface ExportColumn {
 
             <!-- ══ CARD VIEW ══════════════════════════════════════════════════ -->
             <ng-container *ngIf="viewMode === 'card'">
-                <!-- Loading state -->
                 <div *ngIf="loading" style="text-align:center; padding: 2rem; color:#666;">
                     <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
                     <p>Loading Data...</p>
                 </div>
 
-                <!-- Empty state -->
                 <div *ngIf="!loading && repositories().length === 0" style="text-align:center; padding: 3rem; color:#888;">
                     <i class="pi pi-inbox" style="font-size:3rem; display:block; margin-bottom:1rem;"></i>
                     No Repositories found.
                 </div>
 
-                <!-- Cards -->
                 <div class="card-grid" *ngIf="!loading && repositories().length > 0">
                     <div
                         class="repo-card has-checkbox"
                         *ngFor="let repo of repositories()">
 
-                        <!-- Select checkbox -->
                         <input
                             type="checkbox"
                             class="repo-card-select"
@@ -704,7 +687,6 @@ interface ExportColumn {
                             (change)="onCheckboxChange(repo, $event)"
                             [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
                         <br>
-                        <!-- Header: module name + status tag -->
                         <div class="repo-card-header">
                             <div>
                                 <div class="repo-card-title">{{ repo.module_name }}</div>
@@ -718,7 +700,6 @@ interface ExportColumn {
                             </p-tag>
                         </div>
 
-                        <!-- Domain / Sector badges -->
                         <div class="repo-card-badges">
                             <span class="badge badge-domain">Domain: {{ repo.domain }}</span>
                             <span class="badge badge-sector">Sector: {{ repo.sector }}</span>
@@ -726,7 +707,6 @@ interface ExportColumn {
 
                         <hr class="repo-card-divider" />
 
-                        <!-- Key fields -->
                         <div class="repo-card-field" *ngIf="repo.detailed_requirement">
                             <strong>Detailed Requirement:</strong> {{ repo.detailed_requirement || 'NA' }}
                         </div>
@@ -740,15 +720,12 @@ interface ExportColumn {
                             <strong>Object Type:</strong> {{ repo.standard_custom || 'NA' }}
                         </div>
 
-                        <!-- Approval chain -->
                         <div class="repo-card-field" *ngIf="repo.irm || repo.srm || repo.buh || repo.bgh">
-                            <strong>IRM:</strong> {{ repo.irm || 'NA' }} 
-                            
+                            <strong>IRM:</strong> {{ repo.irm || 'NA' }}
                         </div>
 
                         <hr class="repo-card-divider" />
 
-                        <!-- Footer: meta + actions -->
                         <div class="repo-card-footer">
                             <div class="repo-card-meta">
                                 <i class="pi pi-calendar" style="margin-right:4px"></i>Created on: {{ formatDate(repo.created_at) }}
@@ -757,7 +734,6 @@ interface ExportColumn {
                             </div>
 
                             <div class="repo-card-actions">
-                                <!-- File viewer -->
                                 <app-secure-file-viewer
                                     [repoId]="repo.id"
                                     [filename]="repo.attachment_filename || ''"
@@ -765,7 +741,6 @@ interface ExportColumn {
                                     apiBase="http://10.6.102.245:5002">
                                 </app-secure-file-viewer>
 
-                                <!-- Download / Request -->
                                 <ng-container *ngIf="isAdmin; else cardNormalUser">
                                     <p-button
                                         icon="pi pi-download"
@@ -803,7 +778,6 @@ interface ExportColumn {
                                     </ng-template>
                                 </ng-template>
 
-                                <!-- Paperclip (attach) -->
                                 <p-button
                                     *ngIf="attachvalid"
                                     pButton pRipple
@@ -815,7 +789,6 @@ interface ExportColumn {
                                     (click)="upload_ref(repo)">
                                 </p-button>
 
-                                <!-- Delete -->
                                 <p-button
                                     pButton pRipple
                                     icon="pi pi-trash"
@@ -828,7 +801,6 @@ interface ExportColumn {
                             </div>
                         </div>
 
-                        <!-- Validated by line -->
                         <div class="repo-card-meta" style="margin-top:2px;">
                             <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else cardValidated">
                                 <i class="pi pi-clock" style="margin-right:4px"></i>Solution with {{ repo.username }}
@@ -932,170 +904,164 @@ interface ExportColumn {
             </ng-template>
         </p-dialog>
 
-        
         <!-- ===================== CREATE REPOSITORY DIALOG ===================== -->
-<p-dialog
-    [(visible)]="createdialog"
-    [modal]="true"
-    [showHeader]="false"
-    [style]="{ width: '860px' }"
-    [contentStyle]="{ padding: '1.5rem' }"
-    [resizable]="false">
-    <ng-template pTemplate="content">
-        <div class="cd-wrap">
+        <p-dialog
+            [(visible)]="createdialog"
+            [modal]="true"
+            [showHeader]="false"
+            [style]="{ width: '860px' }"
+            [contentStyle]="{ padding: '1.25rem', overflow: 'visible' }"
+            [resizable]="false">
+            <ng-template pTemplate="content">
+                <div class="cd-wrap">
 
-            <!-- Progress bar -->
-            
-
-            <!-- Header -->
-            <div class="cd-dialog-header">
-                <div class="cd-dialog-header-icon">
-                    <i class="pi pi-file-edit"></i>
-                </div>
-                <div class="cd-dialog-header-text">
-                    <h3>Create Repository</h3>
-                    <p>Complete all fields below — an attachment will be required in the next step.</p>
-                </div>
-                <button
-                    pButton pRipple
-                    type="button"
-                    icon="pi pi-times"
-                    class="p-button-text p-button-rounded p-button-plain"
-                    (click)="createdialog = false">
-                </button>
-            </div>
-
-            <form [formGroup]="repoForm" (ngSubmit)="onSubmit()">
-
-                <!-- §1 Identity -->
-                <div class="cd-section">
-                    <div class="cd-section-label">
-                        <i class="pi pi-building"></i> Identity
+                    <!-- Header -->
+                    <div class="cd-dialog-header">
+                        <div class="cd-dialog-header-icon">
+                            <i class="pi pi-file-edit"></i>
+                        </div>
+                        <div class="cd-dialog-header-text">
+                            <h3>Create Repository</h3>
+                            <p>Complete all fields below — an attachment will be required in the next step.</p>
+                        </div>
+                        <button
+                            pButton pRipple
+                            type="button"
+                            icon="pi pi-times"
+                            class="p-button-text p-button-rounded p-button-plain"
+                            (click)="createdialog = false">
+                        </button>
                     </div>
-                    <div class="cd-grid-2">
-                        <div class="cd-field">
-                            <label class="cd-field-label req">Customer Name</label>
-                            <input id="customer_name" pInputText formControlName="customer_name" placeholder="e.g. Acme Corporation" />
-                            <p-message *ngIf="repoForm.controls['customer_name'].invalid && repoForm.controls['customer_name'].touched" severity="error" text="Customer Name is required"></p-message>
-                        </div>
-                        <div class="cd-field">
-                            <label class="cd-field-label req">Domain</label>
-                            <p-autoComplete
-                                inputId="domain"
-                                formControlName="domain"
-                                [suggestions]="filteredDomains"
-                                (completeMethod)="filterDomain($event)"
-                                
-                                dropdown="true"
-                                minLength="1"
-                                placeholder="Select Domain"
-                                (onSelect)="onDomainSelect($event)"
-                                styleClass="w-full">
-                            </p-autoComplete>
-                            <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- §2 Classification -->
-                <div class="cd-section">
-                    <div class="cd-section-label">
-                        <i class="pi pi-tag"></i> Classification
-                    </div>
-                    <div class="cd-grid-2">
-                        <div class="cd-field">
-                            <label class="cd-field-label req">Sector</label>
-                            <p-autoComplete
-                                inputId="sector"
-                                formControlName="sector"
-                                [suggestions]="filteredSectors"
-                                (completeMethod)="filterSector($event)"
-                                
-                                dropdown="true"
-                                minLength="1"
-                                placeholder="Select Sector"
-                                [disabled]="!selectedDomain"
-                                styleClass="w-full">
-                            </p-autoComplete>
-                            <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
-                        </div>
-                        <div class="cd-field">
-                            <label class="cd-field-label req">Module Name</label>
-                            <p-autoComplete
-                                inputId="modulename"
-                                formControlName="module_name"
-                                [suggestions]="filteredModules"
-                                (completeMethod)="filterModule($event)"
-                                appendTo="body"
-                                [dropdown]="true"
-                                [minLength]="1"
-                                placeholder="Select Module"
-                                styleClass="w-full">
-                            </p-autoComplete>
-                            <p-message *ngIf="repoForm.controls['module_name'].invalid && repoForm.controls['module_name'].touched" severity="error" text="Module Name is required"></p-message>
-                        </div>
-                        <div class="cd-field">
-                            <label class="cd-field-label req">Object Type</label>
-                            <p-select
-                                inputId="standard_custom"
-                                formControlName="standard_custom"
-                                [options]="standardCustomOptions"
-                                placeholder="Select Type"
-                                styleClass="w-full">
-                            </p-select>
-                            <p-message *ngIf="repoForm.controls['standard_custom'].invalid && repoForm.controls['standard_custom'].touched" severity="error" text="Object Type is required"></p-message>
-                        </div>
-                        <div class="cd-field">
-                            <label class="cd-field-label req">Customer Benefit</label>
-                            <input id="customer_benefit" pInputText formControlName="customer_benefit" placeholder="Key outcome for the customer" />
-                            <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
-                        </div>
-                    </div>
-                </div>
+                    <form [formGroup]="repoForm" (ngSubmit)="onSubmit()">
 
-                <!-- §3 Details -->
-                <div class="cd-section">
-                    <div class="cd-section-label">
-                        <i class="pi pi-align-left"></i> Details
-                    </div>
-                    <div class="cd-grid-2">
-                        <div class="cd-field span-2">
-                            <label class="cd-field-label req">Detailed Requirement</label>
-                            <textarea id="detailed_requirement" pInputTextarea rows="3" formControlName="detailed_requirement" placeholder="Describe the business requirement in detail…"></textarea>
-                            <p-message *ngIf="repoForm.controls['detailed_requirement'].invalid && repoForm.controls['detailed_requirement'].touched" severity="error" text="Detailed Requirement is required"></p-message>
+                        <!-- §1 Identity -->
+                        <div class="cd-section">
+                            <div class="cd-section-label">
+                                <i class="pi pi-building"></i> Identity
+                            </div>
+                            <div class="cd-grid-2">
+                                <div class="cd-field">
+                                    <label class="cd-field-label req">Customer Name</label>
+                                    <input id="customer_name" pInputText formControlName="customer_name" placeholder="e.g. Acme Corporation" />
+                                    <p-message *ngIf="repoForm.controls['customer_name'].invalid && repoForm.controls['customer_name'].touched" severity="error" text="Customer Name is required"></p-message>
+                                </div>
+                                <div class="cd-field">
+                                    <label class="cd-field-label req">Domain</label>
+                                    <p-autoComplete
+                                        inputId="domain"
+                                        formControlName="domain"
+                                        [suggestions]="filteredDomains"
+                                        (completeMethod)="filterDomain($event)"
+                                        dropdown="true"
+                                        minLength="1"
+                                        placeholder="Select Domain"
+                                        (onSelect)="onDomainSelect($event)"
+                                        styleClass="w-full">
+                                    </p-autoComplete>
+                                    <p-message *ngIf="repoForm.controls['domain'].invalid && repoForm.controls['domain'].touched" severity="error" text="Domain is required"></p-message>
+                                </div>
+                            </div>
                         </div>
-                        <div class="cd-field span-2">
-                            <label class="cd-field-label req">Technical Details</label>
-                            <textarea id="technical_details" pInputTextarea rows="3" formControlName="technical_details" placeholder="Z-object name, ABAP class, API endpoint…"></textarea>
-                            <p-message *ngIf="repoForm.controls['technical_details'].invalid && repoForm.controls['technical_details'].touched" severity="error" text="Technical Details is required"></p-message>
+
+                        <!-- §2 Classification -->
+                        <div class="cd-section">
+                            <div class="cd-section-label">
+                                <i class="pi pi-tag"></i> Classification
+                            </div>
+                            <div class="cd-grid-2">
+                                <div class="cd-field">
+                                    <label class="cd-field-label req">Sector</label>
+                                    <p-autoComplete
+                                        inputId="sector"
+                                        formControlName="sector"
+                                        [suggestions]="filteredSectors"
+                                        (completeMethod)="filterSector($event)"
+                                        dropdown="true"
+                                        minLength="1"
+                                        placeholder="Select Sector"
+                                        [disabled]="!selectedDomain"
+                                        styleClass="w-full">
+                                    </p-autoComplete>
+                                    <p-message *ngIf="repoForm.controls['sector'].invalid && repoForm.controls['sector'].touched" severity="error" text="Sector is required"></p-message>
+                                </div>
+                                <div class="cd-field">
+                                    <label class="cd-field-label req">Module Name</label>
+                                    <p-autoComplete
+                                        inputId="modulename"
+                                        formControlName="module_name"
+                                        [suggestions]="filteredModules"
+                                        (completeMethod)="filterModule($event)"
+                                        appendTo="body"
+                                        [dropdown]="true"
+                                        [minLength]="1"
+                                        placeholder="Select Module"
+                                        styleClass="w-full">
+                                    </p-autoComplete>
+                                    <p-message *ngIf="repoForm.controls['module_name'].invalid && repoForm.controls['module_name'].touched" severity="error" text="Module Name is required"></p-message>
+                                </div>
+                                <div class="cd-field">
+                                    <label class="cd-field-label req">Object Type</label>
+                                    <p-select
+                                        inputId="standard_custom"
+                                        formControlName="standard_custom"
+                                        [options]="standardCustomOptions"
+                                        placeholder="Select Type"
+                                        styleClass="w-full">
+                                    </p-select>
+                                    <p-message *ngIf="repoForm.controls['standard_custom'].invalid && repoForm.controls['standard_custom'].touched" severity="error" text="Object Type is required"></p-message>
+                                </div>
+                                <div class="cd-field">
+                                    <label class="cd-field-label req">Customer Benefit</label>
+                                    <input id="customer_benefit" pInputText formControlName="customer_benefit" placeholder="Key outcome for the customer" />
+                                    <p-message *ngIf="repoForm.controls['customer_benefit'].invalid && repoForm.controls['customer_benefit'].touched" severity="error" text="Customer Benefit is required"></p-message>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Footer -->
-                <div class="cd-footer">
-                    <button
-                        pButton pRipple
-                        type="button"
-                        icon="pi pi-times"
-                        class="p-button-outlined p-button-plain"
-                        label="Cancel"
-                        (click)="createdialog = false">
-                    </button>
-                    <button
-                        pButton pRipple
-                        type="button"
-                        icon="pi pi-paperclip"
-                        label="Next: Attach Document"
-                        [disabled]="repoForm.invalid"
-                        (click)="onSubmit()">
-                    </button>
-                </div>
+                        <!-- §3 Details -->
+                        <div class="cd-section">
+                            <div class="cd-section-label">
+                                <i class="pi pi-align-left"></i> Details
+                            </div>
+                            <div class="cd-grid-2">
+                                <div class="cd-field span-2">
+                                    <label class="cd-field-label req">Detailed Requirement</label>
+                                    <textarea id="detailed_requirement" pInputTextarea rows="2" formControlName="detailed_requirement" placeholder="Describe the business requirement in detail…"></textarea>
+                                    <p-message *ngIf="repoForm.controls['detailed_requirement'].invalid && repoForm.controls['detailed_requirement'].touched" severity="error" text="Detailed Requirement is required"></p-message>
+                                </div>
+                                <div class="cd-field span-2">
+                                    <label class="cd-field-label req">Technical Details</label>
+                                    <textarea id="technical_details" pInputTextarea rows="2" formControlName="technical_details" placeholder="Z-object name, ABAP class, API endpoint…"></textarea>
+                                    <p-message *ngIf="repoForm.controls['technical_details'].invalid && repoForm.controls['technical_details'].touched" severity="error" text="Technical Details is required"></p-message>
+                                </div>
+                            </div>
+                        </div>
 
-            </form>
-        </div>
-    </ng-template>
-</p-dialog>
+                        <!-- Footer -->
+                        <div class="cd-footer">
+                            <button
+                                pButton pRipple
+                                type="button"
+                                icon="pi pi-times"
+                                class="p-button-outlined p-button-plain"
+                                label="Cancel"
+                                (click)="createdialog = false">
+                            </button>
+                            <button
+                                pButton pRipple
+                                type="button"
+                                icon="pi pi-paperclip"
+                                label="Next: Attach Document"
+                                [disabled]="repoForm.invalid"
+                                (click)="onSubmit()">
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </ng-template>
+        </p-dialog>
 
         <!-- ===================== EDIT REPOSITORY DIALOG ===================== -->
         <p-dialog [(visible)]="editrepodialog" header="Create Repository" [modal]="true" [style]="{ width: '700px' }" [resizable]="false">
@@ -1278,8 +1244,8 @@ export class AddSolutions implements OnInit {
     @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
     standardCustomOptions: string[] = [
-    'Standard',
-    'Custom',
+        'Standard',
+        'Custom',
     ];
 
     moduleOptions = [
@@ -1354,11 +1320,10 @@ export class AddSolutions implements OnInit {
             this.first = (this.AddSolCurrentPage - 1) * 10;
         }
 
-        // Restore last used view preference
-        const savedView = localStorage.getItem('repoViewMode');
-if (savedView === 'card' || savedView === 'table') {
-    this.viewMode = savedView;
-}
+        const savedView = localStorage.getItem('addSolViewMode');
+        if (savedView === 'card' || savedView === 'table') {
+            this.viewMode = savedView;
+        }
 
         this.form_records();
         this.repoForm = new FormGroup({
@@ -1788,24 +1753,24 @@ if (savedView === 'card' || savedView === 'table') {
     }
 
     onUpload(event: any) {
-    const selected = event.target.files[0];
-    if (!selected) return;
+        const selected = event.target.files[0];
+        if (!selected) return;
 
-    const maxSizeMB = 16;
-    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+        const maxSizeMB = 16;
+        const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-    if (selected.size > maxSizeBytes) {
-        this.messageservice.add({
-            severity: 'error',
-            summary: 'File Too Large',
-            detail: `File size exceeds ${maxSizeMB}MB limit. Please choose a smaller file.`
-        });
-        this.file = null;
-        this.clearFileInput();
-        return;
-    }
+        if (selected.size > maxSizeBytes) {
+            this.messageservice.add({
+                severity: 'error',
+                summary: 'File Too Large',
+                detail: `File size exceeds ${maxSizeMB}MB limit. Please choose a smaller file.`
+            });
+            this.file = null;
+            this.clearFileInput();
+            return;
+        }
 
-    this.file = selected;
+        this.file = selected;
     }
 
     onPageChange(event: any) {
