@@ -1290,15 +1290,16 @@ export class UserWiseReportComponent implements OnInit {
 
     updateMonthlySolutionsChart() {
         const monthly = new Map<string, number>();
-        const ids = new Set(this.filteredStats.map(s => s.yash_id));
-        const names = new Set(this.filteredStats.map(s => s.name));
-        this.allSolutions.forEach(s => {
-            if ((ids.has(s.yash_id) || names.has(s.username)) && s.created_at) {
+    // Use solutions directly from filteredStats so all active filters are respected
+    this.filteredStats.forEach(stat => {
+        stat.solutions.forEach(s => {
+            if (s.created_at) {
                 const d = new Date(s.created_at);
                 const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
                 monthly.set(k, (monthly.get(k) || 0) + 1);
             }
         });
+    });
         const sorted = Array.from(monthly.keys()).sort();
         const orangeShades = sorted.map((_, i) => {
             const opacity = 0.5 + (i / Math.max(sorted.length - 1, 1)) * 0.5;

@@ -69,8 +69,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     ConfirmationService
   ],
   styles: [`
-    
-
     :host {
       --color-bg:       #EEF4E9;
       --color-surface:  #FFFFFF;
@@ -88,7 +86,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       font-family: 'DM Sans', sans-serif;
     }
 
-    /* ── Page shell ── */
     .page {
       min-height: 100vh;
       background-color: var(--color-bg);
@@ -99,9 +96,8 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       align-items: center;
     }
 
-    /* ── Heading ── */
     .heading {
-      font-family:  sans-serif;
+      font-family: sans-serif;
       font-size: clamp(2rem, 5vw, 3.25rem);
       color: var(--color-text);
       margin: 0 0 8px;
@@ -122,7 +118,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Search bar ── */
     .search-shell {
       width: 100%;
       max-width: 720px;
@@ -171,13 +166,46 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       flex: 1;
       border: none;
       padding: 10px 14px;
-      font-size: 15px;
+      font-size: 18px;
       color: var(--color-text);
       outline: none;
       background: transparent;
       font-family: 'DM Sans', sans-serif;
     }
     .search-input::placeholder { color: #a8bcb0; }
+
+    /* PrimeNG p-select inside search bar styling */
+    .value-select-wrapper {
+      flex: 1;
+      padding: 2px 8px;
+    }
+    .value-select-wrapper ::ng-deep .p-select {
+      width: 100%;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .value-select-wrapper ::ng-deep .p-select:not(.p-disabled):hover,
+    .value-select-wrapper ::ng-deep .p-select:not(.p-disabled).p-focus {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .value-select-wrapper ::ng-deep .p-select-label {
+      font-size: 15px;
+      color: var(--color-text);
+      font-family: 'DM Sans', sans-serif;
+      padding: 8px 6px;
+    }
+    .value-select-wrapper ::ng-deep .p-select-dropdown {
+      color: var(--color-primary);
+    }
+    .value-select-wrapper ::ng-deep .p-select-option.p-selected {
+      background: var(--color-tag-bg) !important;
+      color: var(--color-tag-text) !important;
+    }
+    .value-select-wrapper ::ng-deep .p-select-option:hover {
+      background: var(--color-accent) !important;
+    }
 
     .btn-search {
       display: flex;
@@ -216,7 +244,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     }
     .btn-clear:hover { color: var(--color-primary); }
 
-    /* ── Status line ── */
     .status {
       font-size: 13.5px;
       font-weight: 500;
@@ -227,7 +254,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     .status.empty    { color: #c0392b; }
     .status.all      { color: var(--color-muted); }
 
-    /* ── Loading ── */
     .spinner-wrap {
       display: flex;
       justify-content: center;
@@ -243,7 +269,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Card grid ── */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -253,7 +278,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     }
     .grid.single { grid-template-columns: minmax(320px, 480px); justify-content: center; }
 
-    /* ── Repo card ── */
     .repo-card {
       background: var(--color-surface);
       border: 1.5px solid var(--color-border);
@@ -277,9 +301,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Card color bar */
-    
-
     .card-body {
       padding: 22px 24px 20px;
       display: flex;
@@ -287,7 +308,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       flex: 1;
     }
 
-    /* Card header row */
     .card-header-row {
       display: flex;
       align-items: flex-start;
@@ -307,7 +327,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     .card-icon svg { color: var(--color-primary); }
     .card-title-group { flex: 1; min-width: 0; }
     .card-title {
-      
       font-size: 1.05rem;
       color: var(--color-text);
       margin: 0 0 3px;
@@ -328,7 +347,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       letter-spacing: 0.02em;
     }
 
-    /* Card meta rows */
     .card-meta {
       display: flex;
       flex-direction: column;
@@ -361,23 +379,15 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       font-size: 12px;
       font-weight: 600;
     }
-    .badge-standard {
-      background: #e0f2fe;
-      color: #0369a1;
-    }
-    .badge-custom {
-      background: #fef3c7;
-      color: #92400e;
-    }
+    .badge-standard { background: #e0f2fe; color: #0369a1; }
+    .badge-custom   { background: #fef3c7; color: #92400e; }
 
-    /* divider */
     .card-divider {
       height: 1px;
       background: var(--color-border);
       margin: 0 0 16px;
     }
 
-    /* Card footer */
     .card-footer {
       margin-top: auto;
       display: flex;
@@ -426,7 +436,6 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     .btn-details:active { transform: scale(0.97); }
     .btn-details svg { flex-shrink: 0; }
 
-    /* ── Details dialog (keep existing, minor polish) ── */
     .detail-table { width: 100%; border-collapse: collapse; }
     .detail-table tr { border-bottom: 1px solid #f0f4f0; }
     .detail-table tr:last-child { border-bottom: none; }
@@ -443,17 +452,17 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     .detail-table .dt-value { color: var(--color-text); }
   `],
   template: `
-    
     <p-toast></p-toast>
     <div class="page">
 
-      <!-- Heading -->
       <h1 class="heading">Search Solutions</h1>
       <p class="subheading">Explore, and Discover Approved solutions</p>
 
       <!-- Search bar -->
       <div class="search-shell">
         <div class="search-bar">
+
+          <!-- Filter type selector (native select) -->
           <select [(ngModel)]="selectedFilter" class="filter-select"
             (change)="onFilterChange()" aria-label="Filter By">
             <option *ngFor="let opt of filterOptions" [value]="opt">{{ opt }}</option>
@@ -461,7 +470,9 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
 
           <div class="vr"></div>
 
+          <!-- Plain text input for "Any" -->
           <input
+            *ngIf="selectedFilter === 'Any'"
             type="text"
             [(ngModel)]="searchText"
             placeholder="Search knowledge repository…"
@@ -470,7 +481,59 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             class="search-input"
           />
 
-          <button *ngIf="searchText.trim()" class="btn-clear" (click)="clearSearch()">
+          <!-- PrimeNG p-select for Domain -->
+          <div class="value-select-wrapper" *ngIf="selectedFilter === 'Domain'">
+            <p-select
+              [options]="domainOptions"
+              [(ngModel)]="selectedDropdownValue"
+              placeholder="Select a Domain…"
+              [filter]="true"
+              appendTo="body"
+              filterPlaceholder="Search domains…"
+              [showClear]="true"
+              (onChange)="onDropdownValueChange($event)"
+              (onClear)="onDropdownClear()"
+              styleClass="w-full"
+            ></p-select>
+          </div>
+
+          <!-- PrimeNG p-select for Sector -->
+          <div class="value-select-wrapper" *ngIf="selectedFilter === 'Sector'">
+            <p-select
+              [options]="sectorOptions"
+              [(ngModel)]="selectedDropdownValue"
+              placeholder="Select a Sector…"
+              [filter]="true"
+              appendTo="body"
+              filterPlaceholder="Search sectors…"
+              [showClear]="true"
+              (onChange)="onDropdownValueChange($event)"
+              (onClear)="onDropdownClear()"
+              styleClass="w-full"
+            ></p-select>
+          </div>
+
+          <!-- PrimeNG p-select for Module -->
+          <div class="value-select-wrapper" *ngIf="selectedFilter === 'Module'">
+            <p-select
+              [options]="moduleOptions"
+              [(ngModel)]="selectedDropdownValue"
+              placeholder="Select a Module…"
+              appendTo="body"
+              [filter]="true"
+              filterPlaceholder="Search modules…"
+              [showClear]="true"
+              (onChange)="onDropdownValueChange($event)"
+              (onClear)="onDropdownClear()"
+              styleClass="w-full"
+            ></p-select>
+          </div>
+
+          <!-- Clear button -->
+          <button
+            *ngIf="(selectedFilter === 'Any' && searchText.trim()) || (selectedFilter !== 'Any' && selectedDropdownValue)"
+            class="btn-clear"
+            (click)="clearSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="2" x2="2" y2="12"/><line x1="2" y1="2" x2="12" y2="12"/>
@@ -478,7 +541,12 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             Clear
           </button>
 
-          <button class="btn-search" (click)="onSearch()" [disabled]="isLoading">
+          <!-- Search button (only relevant for "Any" text search) -->
+          <button
+            *ngIf="selectedFilter === 'Any'"
+            class="btn-search"
+            (click)="onSearch()"
+            [disabled]="isLoading">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="6.5" cy="6.5" r="5.5"/>
@@ -486,6 +554,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             </svg>
             Search
           </button>
+
         </div>
       </div>
 
@@ -516,12 +585,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
         <div class="repo-card" *ngFor="let repo of displayedRepos; let i = index"
           [style.animation-delay]="(i * 0.05) + 's'">
 
-          <!-- Accent bar -->
-          <div class="card-bar"></div>
-
           <div class="card-body">
-
-            <!-- Header -->
             <div class="card-header-row">
               <div class="card-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
@@ -535,12 +599,9 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
               <div class="card-title-group">
                 <div class="card-title" [title]="repo.module_name"><strong>{{ repo.module_name }}</strong></div>
                 <span class="card-domain-pill">Domain: {{ repo.domain }}</span>
-                
-                
               </div>
             </div>
 
-            <!-- Meta -->
             <div class="card-meta">
               <div class="meta-row">
                 <span class="meta-label">Sector</span>
@@ -549,15 +610,14 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
               <div class="meta-row">
                 <span class="meta-label">Object Type</span>
                 <span class="badge"
-                  [ngClass]="repo.standard_custom === 'Standard' ? 'badge-standard' : 'badge-custom'">
-                  {{ repo.standard_custom }}
-                </span>
+  [ngClass]="normalizeStandardCustom(repo.standard_custom) === 'Standard' ? 'badge-standard' : 'badge-custom'">
+  {{ normalizeStandardCustom(repo.standard_custom) }}
+</span>
               </div>
             </div>
 
             <div class="card-divider"></div>
 
-            <!-- Footer -->
             <div class="card-footer">
               <div class="card-author">
                 <div class="author-avatar">{{ (repo.username || '?')[0].toUpperCase() }}</div>
@@ -572,12 +632,10 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
                 </svg>
               </button>
             </div>
-
           </div>
         </div>
 
-      </div><!-- /grid -->
-
+      </div>
 
       <!-- Details Dialog -->
       <p-dialog
@@ -592,34 +650,13 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
           <div *ngIf="selectedRepo" style="padding: 1rem;">
             <table class="detail-table">
               <tbody>
-                <tr>
-                  <td class="dt-label">Domain</td>
-                  <td class="dt-value">{{ selectedRepo.domain }}</td>
-                </tr>
-                <tr>
-                  <td class="dt-label">Sector</td>
-                  <td class="dt-value">{{ selectedRepo.sector }}</td>
-                </tr>
-                <tr>
-                  <td class="dt-label">Module Name</td>
-                  <td class="dt-value">{{ selectedRepo.module_name }}</td>
-                </tr>
-                <tr>
-                  <td class="dt-label">Detailed Requirement</td>
-                  <td class="dt-value">{{ selectedRepo.detailed_requirement }}</td>
-                </tr>
-                <tr>
-                  <td class="dt-label">Standard / Custom</td>
-                  <td class="dt-value">{{ selectedRepo.standard_custom }}</td>
-                </tr>
-                <tr>
-                  <td class="dt-label">Technical Details</td>
-                  <td class="dt-value">{{ selectedRepo.technical_details }}</td>
-                </tr>
-                <tr>
-                  <td class="dt-label">Customer Benefit</td>
-                  <td class="dt-value">{{ selectedRepo.customer_benefit }}</td>
-                </tr>
+                <tr><td class="dt-label">Domain</td><td class="dt-value">{{ selectedRepo.domain }}</td></tr>
+                <tr><td class="dt-label">Sector</td><td class="dt-value">{{ selectedRepo.sector }}</td></tr>
+                <tr><td class="dt-label">Module Name</td><td class="dt-value">{{ selectedRepo.module_name }}</td></tr>
+                <tr><td class="dt-label">Detailed Requirement</td><td class="dt-value">{{ selectedRepo.detailed_requirement }}</td></tr>
+                <tr><td class="dt-label">Standard / Custom</td><td class="dt-value">{{ normalizeStandardCustom(selectedRepo.standard_custom) }}</td></tr>
+                <tr><td class="dt-label">Technical Details</td><td class="dt-value">{{ selectedRepo.technical_details }}</td></tr>
+                <tr><td class="dt-label">Customer Benefit</td><td class="dt-value">{{ selectedRepo.customer_benefit }}</td></tr>
               </tbody>
             </table>
           </div>
@@ -636,7 +673,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
 
             <button
               pButton type="button"
-              [label]="isAttachmentLoading ? 'Loading…' : 'Open Solution Attachment'"
+              [label]="isAttachmentLoading ? 'Loading…' : 'Download Attachment'"
               [disabled]="isAttachmentLoading"
               (click)="openAttachment(selectedRepo)"
               *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved === true"
@@ -645,7 +682,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             <button
               pButton type="button"
               label="Request Download Access"
-              severity="secondary"
+              severity="info"
               (click)="requestDownload(selectedRepo)"
               *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved !== true"
             ></button>
@@ -658,9 +695,17 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
 })
 export class Home implements OnInit, OnDestroy {
 
-  filterOptions: string[] = ['Any', 'Domain', 'Module', 'Sector'];
+  filterOptions: string[] = ['Any', 'Domain', 'Sector', 'Module'];
   selectedFilter: string = 'Any';
   searchText: string = '';
+
+  // PrimeNG dropdown options — populated after repos load
+  domainOptions:  string[] = [];
+  sectorOptions:  string[] = [];
+  moduleOptions:  string[] = [];
+
+  // Bound value for the p-select dropdowns
+  selectedDropdownValue: string | null = null;
 
   isAttachmentLoading: boolean = false;
 
@@ -693,9 +738,9 @@ export class Home implements OnInit, OnDestroy {
       if (trimmed) {
         this.executeSearch(trimmed);
       } else {
-        this.displayedRepos  = this.allRepos;
-        this.isSearchActive  = false;
-        this.lastSearchText  = '';
+        this.displayedRepos = this.allRepos;
+        this.isSearchActive = false;
+        this.lastSearchText = '';
       }
     });
 
@@ -714,6 +759,7 @@ export class Home implements OnInit, OnDestroy {
         this.allRepos       = repos;
         this.displayedRepos = repos;
         this.isLoading      = false;
+        this.buildFilterOptions();
       },
       error: (err) => {
         this.isLoading = false;
@@ -725,6 +771,18 @@ export class Home implements OnInit, OnDestroy {
       }
     });
   }
+
+  /** Extract unique sorted values for each filterable field */
+  private buildFilterOptions() {
+    const unique = (field: string): string[] =>
+      [...new Set(this.allRepos.map(r => r[field]).filter(Boolean))].sort();
+
+    this.domainOptions = unique('domain');
+    this.sectorOptions = unique('sector');
+    this.moduleOptions = unique('module_name');
+  }
+
+  // ── Search handlers ──────────────────────────────────────────────────────
 
   onSearch() {
     const trimmed = this.searchText.trim();
@@ -741,9 +799,32 @@ export class Home implements OnInit, OnDestroy {
   }
 
   onFilterChange() {
-    if (this.searchText.trim()) {
-      this.executeSearch(this.searchText.trim());
+    // Reset values when the filter type changes
+    this.searchText            = '';
+    this.selectedDropdownValue = null;
+    this.displayedRepos        = this.allRepos;
+    this.isSearchActive        = false;
+    this.lastSearchText        = '';
+  }
+
+  /** Called when the user picks a value from Domain / Sector / Module p-select */
+  onDropdownValueChange(event: any) {
+    const value = event.value;
+    if (value) {
+      this.executeSearch(value);
+    } else {
+      this.displayedRepos = this.allRepos;
+      this.isSearchActive = false;
+      this.lastSearchText = '';
     }
+  }
+
+  /** Called when the user clears the p-select */
+  onDropdownClear() {
+    this.selectedDropdownValue = null;
+    this.displayedRepos        = this.allRepos;
+    this.isSearchActive        = false;
+    this.lastSearchText        = '';
   }
 
   private executeSearch(query: string) {
@@ -768,12 +849,23 @@ export class Home implements OnInit, OnDestroy {
   }
 
   clearSearch() {
-    this.searchText     = '';
-    this.selectedFilter = 'Any';
-    this.displayedRepos = this.allRepos;
-    this.isSearchActive = false;
-    this.lastSearchText = '';
+    this.searchText            = '';
+    this.selectedFilter        = 'Any';
+    this.selectedDropdownValue = null;
+    this.displayedRepos        = this.allRepos;
+    this.isSearchActive        = false;
+    this.lastSearchText        = '';
   }
+
+  normalizeStandardCustom(value: string): string {
+  if (!value) return '';
+  const lower = value.trim().toLowerCase();
+  if (lower === 'standard') return 'Standard';
+  if (lower === 'custom') return 'Custom';
+  return value; // fallback: return as-is
+  }
+
+  // ── Dialog ───────────────────────────────────────────────────────────────
 
   showDetails(repo: any) {
     this.selectedRepo  = repo;
@@ -784,6 +876,8 @@ export class Home implements OnInit, OnDestroy {
     this.selectedRepo  = null;
     this.dialogVisible = false;
   }
+
+  // ── Attachment ───────────────────────────────────────────────────────────
 
   openAttachment(repo: any) {
     const base    = 'http://10.6.102.245:5002';
