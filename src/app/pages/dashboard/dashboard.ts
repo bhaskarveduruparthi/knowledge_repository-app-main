@@ -11,6 +11,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ManageReposService } from '../service/managerepos.service';
 import { AuthenticationService } from '../service/authentication.service';
 import { ManageAdminsService } from '../service/manageadmins.service';
+import { forkJoin } from 'rxjs';
 
 export interface LegendItem {
   label: string;
@@ -37,6 +38,107 @@ export interface LegendItem {
     ConfirmationService
   ],
   styles: `
+    /* ─── Skeleton shimmer keyframe ─── */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    .skeleton {
+      border-radius: 10px;
+      background: linear-gradient(90deg, #e8f0eb 25%, #d4e6da 50%, #e8f0eb 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.5s infinite linear;
+    }
+
+    /* ─── Skeleton layout blocks ─── */
+    .sk-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.4rem;
+      margin-bottom: 1.8rem;
+    }
+    .sk-stat-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1.5rem 1.6rem 1.4rem;
+      border: 1px solid #e8f0eb;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .sk-stat-top { display: flex; justify-content: space-between; }
+    .sk-label  { height: 11px; width: 55%;  }
+    .sk-icon   { height: 36px; width: 36px; border-radius: 10px; }
+    .sk-count  { height: 38px; width: 45%; margin-top: 0.3rem; }
+    .sk-footer { height: 10px; width: 60%; }
+
+    .sk-charts-outer {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 1.8rem 2rem;
+      border: 1px solid rgba(34,139,78,0.10);
+      box-shadow: 0 2px 14px rgba(13,61,36,0.06);
+      margin-bottom: 1.8rem;
+    }
+    .sk-section-title { height: 16px; width: 200px; margin-bottom: 1.4rem; }
+    .sk-charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.6rem;
+      margin-bottom: 1.6rem;
+    }
+    .sk-charts-row:last-child { margin-bottom: 0; }
+    .sk-chart-panel {
+      background: #f9fdf9;
+      border-radius: 14px;
+      border: 1px solid rgba(34,139,78,0.09);
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .sk-chart-title  { height: 11px; width: 55%; }
+    .sk-chart-canvas { height: 160px; width: 100%; border-radius: 8px; }
+    .sk-legend-divider { height: 1px; background: rgba(34,139,78,0.10); margin: 0.3rem 0; }
+    .sk-legend-row {
+      display: flex; align-items: center; gap: 0.55rem;
+    }
+    .sk-legend-swatch { height: 11px; width: 11px; border-radius: 3px; flex-shrink: 0; }
+    .sk-legend-label  { height: 10px; flex: 1; border-radius: 6px; }
+    .sk-legend-count  { height: 18px; width: 32px; border-radius: 10px; }
+
+    .sk-manager-section {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 1.8rem 2rem;
+      border: 1px solid rgba(34,139,78,0.10);
+      box-shadow: 0 2px 14px rgba(13,61,36,0.06);
+      margin-top: 1.8rem;
+    }
+    .sk-filters-row {
+      display: flex; gap: 1rem; margin-bottom: 1.4rem;
+      padding: 1rem 1.2rem; background: #f4f8f5;
+      border-radius: 12px; border: 1px solid rgba(34,139,78,0.09);
+    }
+    .sk-filter-input { height: 36px; width: 170px; border-radius: 10px; }
+    .sk-table-header {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr 1fr;
+      gap: 0; border-bottom: 2px solid rgba(34,139,78,0.12);
+      padding: 0.85rem 1rem; background: #f4f8f5;
+      border-radius: 8px 8px 0 0;
+    }
+    .sk-th { height: 11px; border-radius: 6px; }
+    .sk-table-row {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr 1fr;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(34,139,78,0.07);
+      gap: 1rem;
+    }
+    .sk-td { height: 18px; border-radius: 6px; }
+
     :host {
       display: block;
       padding: 2.5rem 2.8rem;
@@ -65,7 +167,6 @@ export interface LegendItem {
       overflow: hidden;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
-    /* Colored left border stripe instead of top bar — no "back card" artifacts */
     .stat-card.total    { border-left: 4px solid #43bfe6; }
     .stat-card.approved { border-left: 4px solid #228b4e; }
     .stat-card.pending  { border-left: 4px solid #f59e0b; }
@@ -93,7 +194,6 @@ export interface LegendItem {
     }
     .stat-footer { font-size: 0.75rem; color: #a0b8a8; margin-top: 0.5rem; }
 
-    /* ── Section title ── */
     .section-title {
       font-family: 'DM Serif Display', serif;
       font-size: 1.15rem; color: #0d3d24;
@@ -107,7 +207,6 @@ export interface LegendItem {
       border-radius: 3px;
     }
 
-    /* ── Charts outer ── */
     .charts-outer {
       background: #ffffff;
       border-radius: 20px;
@@ -124,7 +223,6 @@ export interface LegendItem {
     }
     .charts-row:last-child { margin-bottom: 0; }
 
-    /* ── Chart panel ── */
     .chart-panel {
       background: #f9fdf9;
       border-radius: 14px;
@@ -149,7 +247,6 @@ export interface LegendItem {
       background: #228b4e; flex-shrink: 0;
     }
 
-    /* Force canvas to fill width */
     :host ::ng-deep .chart-panel p-chart,
     :host ::ng-deep .chart-panel p-chart > div,
     :host ::ng-deep .chart-panel canvas {
@@ -157,7 +254,6 @@ export interface LegendItem {
       display: block;
     }
 
-    /* ── Custom legend ── */
     .chart-legend {
       margin-top: 1rem;
       display: flex;
@@ -206,14 +302,12 @@ export interface LegendItem {
       white-space: nowrap;
     }
 
-    /* ── Divider between chart and legend ── */
     .legend-divider {
       height: 1px;
       background: rgba(34,139,78,0.10);
       margin: 0.8rem 0 0.5rem;
     }
 
-    /* ── Manager table section ── */
     .manager-section {
       background: #ffffff;
       border-radius: 20px;
@@ -272,200 +366,258 @@ export interface LegendItem {
     }
 
     @media (max-width: 1100px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .charts-row { grid-template-columns: 1fr; }
+      .stats-grid, .sk-stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-row, .sk-charts-row { grid-template-columns: 1fr; }
     }
     @media (max-width: 700px) {
-      .stats-grid { grid-template-columns: 1fr; }
+      .stats-grid, .sk-stats-grid { grid-template-columns: 1fr; }
       :host { padding: 1.4rem 1rem; }
-      .charts-outer { padding: 1.2rem 1rem; }
+      .charts-outer, .sk-charts-outer { padding: 1.2rem 1rem; }
     }
   `,
   template: `
-    <!-- ── Stat Cards ── -->
-    <div class="stats-grid">
-      <div class="stat-card total">
-        <div class="stat-top">
-          <div class="stat-label">Total Solutions</div>
-          <div class="stat-icon"><i class="pi pi-book"></i></div>
-        </div>
-        <div class="stat-count">{{ allReposCount }}</div>
-        <div class="stat-footer">All submissions</div>
-      </div>
-      <div class="stat-card approved">
-        <div class="stat-top">
-          <div class="stat-label">Approved</div>
-          <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
-        </div>
-        <div class="stat-count">{{ approvedReposCount }}</div>
-        <div class="stat-footer">Published &amp; live</div>
-      </div>
-      <div class="stat-card pending">
-        <div class="stat-top">
-          <div class="stat-label">Pending Approval</div>
-          <div class="stat-icon"><i class="pi pi-clock"></i></div>
-        </div>
-        <div class="stat-count">{{ sentforapprovalcount }}</div>
-        <div class="stat-footer">Awaiting review</div>
-      </div>
-      <div class="stat-card rejected">
-        <div class="stat-top">
-          <div class="stat-label">Rejected</div>
-          <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
-        </div>
-        <div class="stat-count">{{ unapprovedReposCount }}</div>
-        <div class="stat-footer">Needs revision</div>
-      </div>
-    </div>
+    <!-- ═══════════════════════════════════════
+         SKELETON LOADER  (shown while loading)
+    ════════════════════════════════════════════ -->
+    <ng-container *ngIf="isLoading">
 
-    <!-- ── Charts Block ── -->
-    <div class="charts-outer">
-      <div class="section-title">Analytics Overview</div>
+      <!-- Skeleton stat cards -->
+      <div class="sk-stats-grid">
+        <div class="sk-stat-card" *ngFor="let _ of [0,1,2,3]">
+          <div class="sk-stat-top">
+            <div class="skeleton sk-label"></div>
+            <div class="skeleton sk-icon"></div>
+          </div>
+          <div class="skeleton sk-count"></div>
+          <div class="skeleton sk-footer"></div>
+        </div>
+      </div>
 
-      <div class="charts-row">
+      <!-- Skeleton charts block -->
+      <div class="sk-charts-outer">
+        <div class="skeleton sk-section-title"></div>
 
-        <!-- Solutions by Module -->
-        <div class="chart-panel">
-          <div class="chart-panel-title"><span class="dot"></span> Solutions by Module</div>
-          <p-chart type="bar" [data]="moduleData" [options]="barChartOptions" *ngIf="moduleData"></p-chart>
-          <ng-container *ngIf="moduleLegend.length">
-            <div class="legend-divider"></div>
-            <div class="chart-legend">
-              <div class="legend-item" *ngFor="let item of moduleLegend">
-                <span class="legend-swatch" [style.background]="item.color"></span>
-                <span class="legend-label" [title]="item.label">{{ item.label }}</span>
-                <span class="legend-count">{{ item.count }}</span>
-              </div>
+        <div class="sk-charts-row" *ngFor="let _ of [0,1]">
+          <div class="sk-chart-panel" *ngFor="let __ of [0,1]">
+            <div class="skeleton sk-chart-title"></div>
+            <div class="skeleton sk-chart-canvas"></div>
+            <div class="sk-legend-divider"></div>
+            <div class="sk-legend-row" *ngFor="let ___ of [0,1,2,3]">
+              <div class="skeleton sk-legend-swatch"></div>
+              <div class="skeleton sk-legend-label"></div>
+              <div class="skeleton sk-legend-count"></div>
             </div>
-          </ng-container>
+          </div>
         </div>
-
-        <!-- Solutions by Domain -->
-        <div class="chart-panel">
-          <div class="chart-panel-title"><span class="dot" style="background:#f59e0b"></span> Solutions by Domain</div>
-          <p-chart type="bar" [data]="domainData" [options]="barChartOptions" *ngIf="domainData"></p-chart>
-          <ng-container *ngIf="domainLegend.length">
-            <div class="legend-divider"></div>
-            <div class="chart-legend">
-              <div class="legend-item" *ngFor="let item of domainLegend">
-                <span class="legend-swatch" [style.background]="item.color"></span>
-                <span class="legend-label" [title]="item.label">{{ item.label }}</span>
-                <span class="legend-count">{{ item.count }}</span>
-              </div>
-            </div>
-          </ng-container>
-        </div>
-
       </div>
 
-      <div class="charts-row">
-
-        <!-- Top Contributors — Overall -->
-        <div class="chart-panel">
-          <div class="chart-panel-title"><span class="dot" style="background:#43bfe6"></span> Top Contributors — Overall</div>
-          <p-chart type="bar" [data]="s_chartData" [options]="barChartOptions" *ngIf="s_chartData"></p-chart>
-          <ng-container *ngIf="overallLegend.length">
-            <div class="legend-divider"></div>
-            <div class="chart-legend">
-              <div class="legend-item" *ngFor="let item of overallLegend">
-                <span class="legend-swatch" [style.background]="item.color"></span>
-                <span class="legend-label" [title]="item.label">{{ item.label }}</span>
-                <span class="legend-count">{{ item.count }}</span>
-              </div>
-            </div>
-          </ng-container>
+      <!-- Skeleton manager table (only for Superadmin) -->
+      <div class="sk-manager-section" *ngIf="userType === 'Superadmin'">
+        <div class="skeleton sk-section-title" style="width:260px; margin-bottom:1.4rem;"></div>
+        <div class="sk-filters-row">
+          <div class="skeleton sk-filter-input"></div>
+          <div class="skeleton sk-filter-input"></div>
         </div>
-
-        <!-- Top Contributors — Community -->
-        <div class="chart-panel">
-          <div class="chart-panel-title"><span class="dot" style="background:#a855f7"></span> Top Contributors — Community</div>
-          <p-chart type="bar" [data]="chartData" [options]="barChartOptions" *ngIf="chartData"></p-chart>
-          <ng-container *ngIf="communityLegend.length">
-            <div class="legend-divider"></div>
-            <div class="chart-legend">
-              <div class="legend-item" *ngFor="let item of communityLegend">
-                <span class="legend-swatch" [style.background]="item.color"></span>
-                <span class="legend-label" [title]="item.label">{{ item.label }}</span>
-                <span class="legend-count">{{ item.count }}</span>
-              </div>
-            </div>
-          </ng-container>
+        <div class="sk-table-header">
+          <div class="skeleton sk-th" *ngFor="let _ of [0,1,2,3,4,5]"></div>
         </div>
-
-      </div>
-    </div>
-
-    <!-- ── Manager Stats (Superadmin only) ── -->
-    <div class="manager-section" *ngIf="userType === 'Superadmin'">
-      <div class="section-title">Manager Repository Statistics</div>
-
-      <div class="filters-row">
-        <span class="filter-label">Filter by</span>
-        <p-autoComplete
-          [(ngModel)]="selectedYear"
-          [suggestions]="filteredYears"
-          (completeMethod)="filterYears($event)"
-          (onDropdownClick)="onYearDropdownClick()"
-          placeholder="All Years"
-          field="label"
-          [dropdown]="true"
-          [showClear]="true"
-          (onSelect)="onYearSelect($event)"
-          (onClear)="onYearClear()"
-          [forceSelection]="true"
-          [style]="{'width': '170px'}"
-        ></p-autoComplete>
-        <p-autoComplete
-          [(ngModel)]="selectedMonth"
-          [suggestions]="filteredMonths"
-          (completeMethod)="filterMonths($event)"
-          (onDropdownClick)="onMonthDropdownClick()"
-          placeholder="All Months"
-          field="label"
-          [dropdown]="true"
-          [showClear]="true"
-          (onSelect)="onMonthSelect($event)"
-          (onClear)="onMonthClear()"
-          [forceSelection]="true"
-          [style]="{'width': '170px'}"
-        ></p-autoComplete>
+        <div class="sk-table-row" *ngFor="let _ of [0,1,2,3,4]">
+          <div class="skeleton sk-td" *ngFor="let __ of [0,1,2,3,4,5]"></div>
+        </div>
       </div>
 
-      <p-table
-        [value]="managerStatsTableData"
-        [tableStyle]="{'min-width': '50rem'}"
-        styleClass="p-datatable-striped clean-table"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Manager</th>
-            <th>Period</th>
-            <th>Approved</th>
-            <th>Pending</th>
-            <th>Rejected</th>
-            <th>Total</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-stat>
-          <tr>
-            <td><strong>{{ stat.manager_name }}</strong></td>
-            <td>{{ stat.period }}</td>
-            <td><span class="badge badge-approved">{{ stat.approved }}</span></td>
-            <td><span class="badge badge-pending">{{ stat.pending }}</span></td>
-            <td><span class="badge badge-rejected">{{ stat.rejected }}</span></td>
-            <td><strong style="color:#228b4e;">{{ stat.total }}</strong></td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="6">No data available for the selected filters.</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
+    </ng-container>
+
+    <!-- ═══════════════════════════════════════
+         ACTUAL DASHBOARD  (shown after loading)
+    ════════════════════════════════════════════ -->
+    <ng-container *ngIf="!isLoading">
+
+      <!-- ── Stat Cards ── -->
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-top">
+            <div class="stat-label">Total Solutions</div>
+            <div class="stat-icon"><i class="pi pi-book"></i></div>
+          </div>
+          <div class="stat-count">{{ allReposCount }}</div>
+          <div class="stat-footer">All submissions</div>
+        </div>
+        <div class="stat-card approved">
+          <div class="stat-top">
+            <div class="stat-label">Approved</div>
+            <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
+          </div>
+          <div class="stat-count">{{ approvedReposCount }}</div>
+          <div class="stat-footer">Published &amp; live</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-top">
+            <div class="stat-label">Pending Approval</div>
+            <div class="stat-icon"><i class="pi pi-clock"></i></div>
+          </div>
+          <div class="stat-count">{{ sentforapprovalcount }}</div>
+          <div class="stat-footer">Awaiting review</div>
+        </div>
+        <div class="stat-card rejected">
+          <div class="stat-top">
+            <div class="stat-label">Rejected</div>
+            <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
+          </div>
+          <div class="stat-count">{{ unapprovedReposCount }}</div>
+          <div class="stat-footer">Needs revision</div>
+        </div>
+      </div>
+
+      <!-- ── Charts Block ── -->
+      <div class="charts-outer">
+        <div class="section-title">Analytics Overview</div>
+
+        <div class="charts-row">
+          <div class="chart-panel">
+            <div class="chart-panel-title"><span class="dot"></span> Solutions by Module</div>
+            <p-chart type="bar" [data]="moduleData" [options]="barChartOptions" *ngIf="moduleData"></p-chart>
+            <ng-container *ngIf="moduleLegend.length">
+              <div class="legend-divider"></div>
+              <div class="chart-legend">
+                <div class="legend-item" *ngFor="let item of moduleLegend">
+                  <span class="legend-swatch" [style.background]="item.color"></span>
+                  <span class="legend-label" [title]="item.label">{{ item.label }}</span>
+                  <span class="legend-count">{{ item.count }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="chart-panel">
+            <div class="chart-panel-title"><span class="dot" style="background:#f59e0b"></span> Solutions by Domain</div>
+            <p-chart type="bar" [data]="domainData" [options]="barChartOptions" *ngIf="domainData"></p-chart>
+            <ng-container *ngIf="domainLegend.length">
+              <div class="legend-divider"></div>
+              <div class="chart-legend">
+                <div class="legend-item" *ngFor="let item of domainLegend">
+                  <span class="legend-swatch" [style.background]="item.color"></span>
+                  <span class="legend-label" [title]="item.label">{{ item.label }}</span>
+                  <span class="legend-count">{{ item.count }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-panel">
+            <div class="chart-panel-title"><span class="dot" style="background:#43bfe6"></span> Top Contributors — Overall</div>
+            <p-chart type="bar" [data]="s_chartData" [options]="barChartOptions" *ngIf="s_chartData"></p-chart>
+            <ng-container *ngIf="overallLegend.length">
+              <div class="legend-divider"></div>
+              <div class="chart-legend">
+                <div class="legend-item" *ngFor="let item of overallLegend">
+                  <span class="legend-swatch" [style.background]="item.color"></span>
+                  <span class="legend-label" [title]="item.label">{{ item.label }}</span>
+                  <span class="legend-count">{{ item.count }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="chart-panel">
+            <div class="chart-panel-title"><span class="dot" style="background:#a855f7"></span> Top Contributors — Community</div>
+            <p-chart type="bar" [data]="chartData" [options]="barChartOptions" *ngIf="chartData"></p-chart>
+            <ng-container *ngIf="communityLegend.length">
+              <div class="legend-divider"></div>
+              <div class="chart-legend">
+                <div class="legend-item" *ngFor="let item of communityLegend">
+                  <span class="legend-swatch" [style.background]="item.color"></span>
+                  <span class="legend-label" [title]="item.label">{{ item.label }}</span>
+                  <span class="legend-count">{{ item.count }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Manager Stats (Superadmin only) ── -->
+      <div class="manager-section" *ngIf="userType === 'Superadmin'">
+        <div class="section-title">Manager Repository Statistics</div>
+
+        <div class="filters-row">
+          <span class="filter-label">Filter by</span>
+          <p-autoComplete
+            [(ngModel)]="selectedYear"
+            [suggestions]="filteredYears"
+            (completeMethod)="filterYears($event)"
+            (onDropdownClick)="onYearDropdownClick()"
+            placeholder="All Years"
+            field="label"
+            [dropdown]="true"
+            [showClear]="true"
+            (onSelect)="onYearSelect($event)"
+            (onClear)="onYearClear()"
+            [forceSelection]="true"
+            [style]="{'width': '170px'}"
+          ></p-autoComplete>
+          <p-autoComplete
+            [(ngModel)]="selectedMonth"
+            [suggestions]="filteredMonths"
+            (completeMethod)="filterMonths($event)"
+            (onDropdownClick)="onMonthDropdownClick()"
+            placeholder="All Months"
+            field="label"
+            [dropdown]="true"
+            [showClear]="true"
+            (onSelect)="onMonthSelect($event)"
+            (onClear)="onMonthClear()"
+            [forceSelection]="true"
+            [style]="{'width': '170px'}"
+          ></p-autoComplete>
+        </div>
+
+        <p-table
+          [value]="managerStatsTableData"
+          [tableStyle]="{'min-width': '50rem'}"
+          styleClass="p-datatable-striped clean-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Manager</th>
+              <th>Period</th>
+              <th>Approved</th>
+              <th>Pending</th>
+              <th>Rejected</th>
+              <th>Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-stat>
+            <tr>
+              <td><strong>{{ stat.manager_name }}</strong></td>
+              <td>{{ stat.period }}</td>
+              <td><span class="badge badge-approved">{{ stat.approved }}</span></td>
+              <td><span class="badge badge-pending">{{ stat.pending }}</span></td>
+              <td><span class="badge badge-rejected">{{ stat.rejected }}</span></td>
+              <td><strong style="color:#228b4e;">{{ stat.total }}</strong></td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6">No data available for the selected filters.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+    </ng-container>
   `
 })
 export class Dashboard implements OnInit {
+  // ── Loading flag ──────────────────────────────────────────────
+  isLoading = true;
+
+  // Tracks how many of the 4 core fetches have completed
+  private loadedCount = 0;
+  private readonly TOTAL_LOADS = 4; // counts, module, domain, topVotes+topUsers (forkJoin counts as 1)
+
   allReposCount = 0;
   approvedReposCount = 0;
   unapprovedReposCount = 0;
@@ -481,7 +633,6 @@ export class Dashboard implements OnInit {
   chartData: any;
   s_chartData: any;
 
-  // Legend arrays populated when data arrives
   moduleLegend:    LegendItem[] = [];
   domainLegend:    LegendItem[] = [];
   overallLegend:   LegendItem[] = [];
@@ -538,7 +689,6 @@ export class Dashboard implements OnInit {
           bodyFont:  { family: 'DM Sans', size: 11 },
           cornerRadius: 8,
           padding: 10,
-          // Show label name in tooltip since x-axis is hidden
           callbacks: {
             title: (items: any[]) => items[0]?.label ?? ''
           }
@@ -551,9 +701,7 @@ export class Dashboard implements OnInit {
           border: { display: false },
           ticks:  { color: '#7a9484', font: { family: 'DM Sans', size: 11 }, precision: 0 }
         },
-        x: {
-          display: false   // x-axis completely hidden
-        }
+        x: { display: false }
       }
     };
 
@@ -562,7 +710,14 @@ export class Dashboard implements OnInit {
     this.managerChartOptions = this.barChartOptions;
   }
 
-  // Sort labels + counts together by count descending, re-assign colors by rank
+  // ── Called each time one async fetch completes ────────────────
+  private markLoaded(): void {
+    this.loadedCount++;
+    if (this.loadedCount >= this.TOTAL_LOADS) {
+      this.isLoading = false;
+    }
+  }
+
   private sortDescending(
     labels: string[],
     counts: number[],
@@ -573,12 +728,10 @@ export class Dashboard implements OnInit {
     return {
       labels: paired.map(p => p.label),
       counts: paired.map(p => p.count),
-      // Re-map colors by sorted rank so the top item always gets the first color
       colors: paired.map((_, i) => colors[i % colors.length])
     };
   }
 
-  // Build a LegendItem[] from any Chart.js data object (already sorted)
   private buildLegend(chartObj: any): LegendItem[] {
     if (!chartObj?.labels?.length) return [];
     const dataset = chartObj.datasets?.[0];
@@ -586,7 +739,6 @@ export class Dashboard implements OnInit {
       ? dataset.backgroundColor
       : (chartObj.labels as string[]).map(() => dataset?.backgroundColor ?? '#228b4e');
 
-    // Pair up and sort descending by count
     const paired = (chartObj.labels as string[]).map((label: string, i: number) => ({
       label,
       count: (dataset?.data?.[i] ?? 0) as number,
@@ -672,7 +824,6 @@ export class Dashboard implements OnInit {
         const srcDataset = data.datasets?.[0] ?? {};
         const rawLabels: string[] = data.labels ?? [];
         const rawCounts: number[] = srcDataset.data ?? [];
-        // Use same multi-color palette as module/domain charts
         const paletteColors = ['#a855f7','#228b4e','#43bfe6','#f59e0b','#34c97a','#64748b','#0ea5e9'];
         const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
         const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
@@ -688,7 +839,8 @@ export class Dashboard implements OnInit {
         };
         this.communityLegend = this.buildLegend(this.chartData);
       },
-      error: (err) => console.error('Error loading top votes chart', err)
+      error: (err) => console.error('Error loading top votes chart', err),
+      complete: () => this.markLoaded()   // ← mark complete
     });
   }
 
@@ -698,7 +850,6 @@ export class Dashboard implements OnInit {
         const srcDataset = data.datasets?.[0] ?? {};
         const rawLabels: string[] = data.labels ?? [];
         const rawCounts: number[] = srcDataset.data ?? [];
-        // Use same multi-color palette as module/domain charts
         const paletteColors = ['#43bfe6','#228b4e','#a855f7','#f59e0b','#34c97a','#64748b','#0ea5e9'];
         const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
         const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
@@ -714,7 +865,8 @@ export class Dashboard implements OnInit {
         };
         this.overallLegend = this.buildLegend(this.s_chartData);
       },
-      error: (err) => console.error('Error loading top users chart', err)
+      error: (err) => console.error('Error loading top users chart', err),
+      complete: () => this.markLoaded()   // ← mark complete
     });
   }
 
@@ -738,7 +890,8 @@ export class Dashboard implements OnInit {
         this.unapprovedReposCount = data.unapproved_repos_count;
         this.sentforapprovalcount = data.sentforapproval_count;
       },
-      error: (err) => console.error('Error loading counts', err)
+      error: (err) => console.error('Error loading counts', err),
+      complete: () => this.markLoaded()   // ← mark complete
     });
   }
 
@@ -747,41 +900,49 @@ export class Dashboard implements OnInit {
     const moduleColors = ['#228b4e','#34c97a','#43bfe6','#f59e0b','#a855f7','#64748b','#0ea5e9'];
     const domainColors = ['#f59e0b','#228b4e','#a855f7','#43bfe6','#34c97a','#64748b','#0ea5e9'];
 
-    this.managereposervice.getdatabymodule().subscribe(data => {
-      const truncatedData: { [key: string]: number } = {};
-      Object.entries(data).forEach(([key, value]) => {
-        const s = truncateName(key);
-        truncatedData[s] = (truncatedData[s] || 0) + (value as number);
-      });
-      const sorted = this.sortDescending(
-        Object.keys(truncatedData),
-        Object.values(truncatedData) as number[],
-        moduleColors
-      );
-      this.moduleData = {
-        labels: sorted.labels,
-        datasets: [{ label: 'Modules', data: sorted.counts,
-          backgroundColor: sorted.colors, borderRadius: 6, borderSkipped: false }]
-      };
-      this.moduleLegend = sorted.labels.map((label, i) => ({
-        label, count: sorted.counts[i], color: sorted.colors[i]
-      }));
-    });
+    // Use forkJoin so module + domain together count as one load tick
+    forkJoin({
+      module: this.managereposervice.getdatabymodule(),
+      domain: this.managereposervice.getdatabydomain()
+    }).subscribe({
+      next: ({ module: moduleRaw, domain: domainRaw }: any) => {
+        // Module chart
+        const truncatedData: { [key: string]: number } = {};
+        Object.entries(moduleRaw).forEach(([key, value]) => {
+          const s = truncateName(key);
+          truncatedData[s] = (truncatedData[s] || 0) + (value as number);
+        });
+        const moduleSorted = this.sortDescending(
+          Object.keys(truncatedData),
+          Object.values(truncatedData) as number[],
+          moduleColors
+        );
+        this.moduleData = {
+          labels: moduleSorted.labels,
+          datasets: [{ label: 'Modules', data: moduleSorted.counts,
+            backgroundColor: moduleSorted.colors, borderRadius: 6, borderSkipped: false }]
+        };
+        this.moduleLegend = moduleSorted.labels.map((label, i) => ({
+          label, count: moduleSorted.counts[i], color: moduleSorted.colors[i]
+        }));
 
-    this.managereposervice.getdatabydomain().subscribe(data => {
-      const sorted = this.sortDescending(
-        Object.keys(data),
-        Object.values(data) as number[],
-        domainColors
-      );
-      this.domainData = {
-        labels: sorted.labels,
-        datasets: [{ label: 'Domains', data: sorted.counts,
-          backgroundColor: sorted.colors, borderRadius: 6, borderSkipped: false }]
-      };
-      this.domainLegend = sorted.labels.map((label, i) => ({
-        label, count: sorted.counts[i], color: sorted.colors[i]
-      }));
+        // Domain chart
+        const domainSorted = this.sortDescending(
+          Object.keys(domainRaw),
+          Object.values(domainRaw) as number[],
+          domainColors
+        );
+        this.domainData = {
+          labels: domainSorted.labels,
+          datasets: [{ label: 'Domains', data: domainSorted.counts,
+            backgroundColor: domainSorted.colors, borderRadius: 6, borderSkipped: false }]
+        };
+        this.domainLegend = domainSorted.labels.map((label, i) => ({
+          label, count: domainSorted.counts[i], color: domainSorted.colors[i]
+        }));
+      },
+      error: (err) => console.error('Error loading chart data', err),
+      complete: () => this.markLoaded()   // ← counts as 1 combined load
     });
   }
 }
