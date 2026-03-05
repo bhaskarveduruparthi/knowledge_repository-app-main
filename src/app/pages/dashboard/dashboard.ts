@@ -82,7 +82,7 @@ export interface LegendItem {
     }
     .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
     .stat-label {
-      font-size: 0.78rem; font-weight: 600; color: #7a9484;
+      font-size: 1rem; font-weight: 700; color: #7a9484;
       text-transform: uppercase; letter-spacing: 0.07em;
     }
     .stat-icon {
@@ -195,7 +195,7 @@ export interface LegendItem {
       flex-shrink: 0;
     }
     .legend-label {
-      font-size: 0.8rem;
+      font-size: 1rem;
       color: #1a3828;
       flex: 1;
       white-space: nowrap;
@@ -203,7 +203,7 @@ export interface LegendItem {
       text-overflow: ellipsis;
     }
     .legend-count {
-      font-size: 0.76rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #228b4e;
       background: rgba(34,139,78,0.10);
@@ -296,7 +296,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-book"></i></div>
         </div>
         <div class="stat-count">{{ allReposCount }}</div>
-        <div class="stat-footer">All submissions</div>
+        <div class="stat-footer">All Submissions</div>
       </div>
       <div class="stat-card approved">
         <div class="stat-top">
@@ -304,7 +304,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
         </div>
         <div class="stat-count">{{ approvedReposCount }}</div>
-        <div class="stat-footer">Published &amp; live</div>
+        <div class="stat-footer">Published &amp; Live</div>
       </div>
       <div class="stat-card pending">
         <div class="stat-top">
@@ -312,7 +312,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-clock"></i></div>
         </div>
         <div class="stat-count">{{ sentforapprovalcount }}</div>
-        <div class="stat-footer">Awaiting review</div>
+        <div class="stat-footer">Awaiting Review</div>
       </div>
       <div class="stat-card rejected">
         <div class="stat-top">
@@ -320,7 +320,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
         </div>
         <div class="stat-count">{{ unapprovedReposCount }}</div>
-        <div class="stat-footer">Needs revision</div>
+        <div class="stat-footer">Needs Revision</div>
       </div>
     </div>
 
