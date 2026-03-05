@@ -420,14 +420,14 @@ interface ExportColumn {
                     <div class="view-toggle">
                         <button
                             [class.active]="viewMode === 'table'"
-                            (click)="viewMode = 'table'"
+                            (click)="viewMode = 'table'; setViewMode()"
                             pTooltip="Table view"
                             tooltipPosition="top">
                             <i class="pi pi-table"></i>
                         </button>
                         <button
                             [class.active]="viewMode === 'card'"
-                            (click)="viewMode = 'card'"
+                            (click)="viewMode = 'card'; setViewMode()"
                             pTooltip="Card view"
                             tooltipPosition="top">
                             <i class="pi pi-th-large"></i>
@@ -508,7 +508,7 @@ interface ExportColumn {
                                             </ng-container>
                                             <ng-template #requestBlock>
                                                 <p-button
-                                                    label="Request"
+                                                    label="Request for Download"
                                                     icon="pi pi-send"
                                                     severity="help"
                                                     (click)="openDownloadRequestDialog(repo)"
@@ -610,16 +610,16 @@ interface ExportColumn {
                         <hr class="repo-card-divider" />
 
                         <!-- Key fields -->
-                        <div class="repo-card-field" *ngIf="repo.detailed_requirement">
+                        <div class="repo-card-field" >
                             <strong>Detail Requirement:</strong> {{ repo.detailed_requirement || 'NA' }}
                         </div>
-                        <div class="repo-card-field" *ngIf="repo.technical_details">
+                        <div class="repo-card-field" >
                             <strong>Technical Details:</strong> {{ repo.technical_details || 'NA' }}
                         </div>
-                        <div class="repo-card-field" *ngIf="repo.customer_benefit">
+                        <div class="repo-card-field" >
                             <strong>Customer Benefit:</strong> {{ repo.customer_benefit || 'NA' }}
                         </div>
-                        <div class="repo-card-field" *ngIf="repo.standard_custom">
+                        <div class="repo-card-field" >
                             <strong>Object Type:</strong> {{ repo.standard_custom }}
                         </div>
 
@@ -645,7 +645,7 @@ interface ExportColumn {
                                     [repoId]="repo.id"
                                     [filename]="repo.attachment_filename || ''"
                                     [disabled]="repo.attach_code_or_document === 'UPLOADED'"
-                                    apiBase="http://127.0.0.1:5001">
+                                    apiBase="http://10.6.102.245:5002">
                                 </app-secure-file-viewer>
 
                                 <!-- Download / Request -->
@@ -1138,9 +1138,9 @@ if (savedView === 'card' || savedView === 'table') {
     }
 
     // ── View mode toggle with localStorage persistence ───────────────────────
-    setViewMode(mode: 'table' | 'card') {
-        this.viewMode = mode;
-        localStorage.setItem('repoViewMode', mode);
+    setViewMode() {
+        
+        localStorage.setItem('repoViewMode', this.viewMode);
     }
 
     // ── Existing onSearch — untouched ────────────────────────────────────────
@@ -1568,7 +1568,7 @@ if (savedView === 'card' || savedView === 'table') {
         const parsed = JSON.parse(raw);
         const jwt = parsed.access_token;
 
-        const url = `http://127.0.0.1:5001/repos/refdownload/${id}?access_token=${jwt}`;
+        const url = `http://10.6.102.245:5002/repos/refdownload/${id}?access_token=${jwt}`;
         window.open(url, '_blank');
     }
 
