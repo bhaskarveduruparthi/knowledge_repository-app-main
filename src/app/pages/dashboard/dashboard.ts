@@ -57,47 +57,41 @@ export interface LegendItem {
     }
     .stat-card {
       background: #ffffff;
-      border-radius: 18px;
+      border-radius: 14px;
       padding: 1.5rem 1.6rem 1.4rem;
-      border: 1px solid rgba(34, 139, 78, 0.12);
-      box-shadow: 0 2px 12px rgba(13, 61, 36, 0.06), 0 1px 3px rgba(13,61,36,0.04);
+      border: 1px solid #e8f0eb;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      border-radius: 18px 18px 0 0;
-    }
-    .stat-card.total::before    { background: linear-gradient(90deg, #43bfe6, #0ea5c9); }
-    .stat-card.approved::before { background: linear-gradient(90deg, #228b4e, #34c97a); }
-    .stat-card.pending::before  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-    .stat-card.rejected::before { background: linear-gradient(90deg, #8496a8, #b0c0cc); }
+    /* Colored left border stripe instead of top bar — no "back card" artifacts */
+    .stat-card.total    { border-left: 4px solid #43bfe6; }
+    .stat-card.approved { border-left: 4px solid #228b4e; }
+    .stat-card.pending  { border-left: 4px solid #f59e0b; }
+    .stat-card.rejected { border-left: 4px solid #94a3b8; }
     .stat-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 28px rgba(13, 61, 36, 0.11), 0 2px 6px rgba(13,61,36,0.06);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.09);
     }
     .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
     .stat-label {
-      font-size: 1rem; font-weight: 700; color: #7a9484;
+      font-size: 0.78rem; font-weight: 600; color: #7a9484;
       text-transform: uppercase; letter-spacing: 0.07em;
     }
     .stat-icon {
-      width: 38px; height: 38px; border-radius: 11px;
-      display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
     }
-    .stat-card.total    .stat-icon { background: rgba(67,191,230,0.13);  color: #1aabd3; }
-    .stat-card.approved .stat-icon { background: rgba(34,139,78,0.13);   color: #228b4e; }
-    .stat-card.pending  .stat-icon { background: rgba(245,158,11,0.13);  color: #d97706; }
-    .stat-card.rejected .stat-icon { background: rgba(132,150,168,0.15); color: #62738c; }
+    .stat-card.total    .stat-icon { background: rgba(67,191,230,0.12);  color: #1aabd3; }
+    .stat-card.approved .stat-icon { background: rgba(34,139,78,0.12);   color: #228b4e; }
+    .stat-card.pending  .stat-icon { background: rgba(245,158,11,0.12);  color: #d97706; }
+    .stat-card.rejected .stat-icon { background: rgba(148,163,184,0.15); color: #64748b; }
     .stat-count {
-      font-size: 2.6rem; font-weight: 700; color: #0d3d24;
-      line-height: 1; margin-top: 1.1rem; letter-spacing: -0.03em;
+      font-size: 2.4rem; font-weight: 700; color: #0d3d24;
+      line-height: 1; margin-top: 1rem; letter-spacing: -0.03em;
     }
-    .stat-footer { font-size: 0.76rem; color: #a0b8a8; margin-top: 0.6rem; }
+    .stat-footer { font-size: 0.75rem; color: #a0b8a8; margin-top: 0.5rem; }
 
     /* ── Section title ── */
     .section-title {
@@ -195,7 +189,7 @@ export interface LegendItem {
       flex-shrink: 0;
     }
     .legend-label {
-      font-size: 1rem;
+      font-size: 0.8rem;
       color: #1a3828;
       flex: 1;
       white-space: nowrap;
@@ -203,7 +197,7 @@ export interface LegendItem {
       text-overflow: ellipsis;
     }
     .legend-count {
-      font-size: 1rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: #228b4e;
       background: rgba(34,139,78,0.10);
@@ -296,7 +290,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-book"></i></div>
         </div>
         <div class="stat-count">{{ allReposCount }}</div>
-        <div class="stat-footer">All Submissions</div>
+        <div class="stat-footer">All submissions</div>
       </div>
       <div class="stat-card approved">
         <div class="stat-top">
@@ -304,7 +298,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
         </div>
         <div class="stat-count">{{ approvedReposCount }}</div>
-        <div class="stat-footer">Published &amp; Live</div>
+        <div class="stat-footer">Published &amp; live</div>
       </div>
       <div class="stat-card pending">
         <div class="stat-top">
@@ -312,7 +306,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-clock"></i></div>
         </div>
         <div class="stat-count">{{ sentforapprovalcount }}</div>
-        <div class="stat-footer">Awaiting Review</div>
+        <div class="stat-footer">Awaiting review</div>
       </div>
       <div class="stat-card rejected">
         <div class="stat-top">
@@ -320,7 +314,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
         </div>
         <div class="stat-count">{{ unapprovedReposCount }}</div>
-        <div class="stat-footer">Needs Revision</div>
+        <div class="stat-footer">Needs revision</div>
       </div>
     </div>
 
@@ -678,13 +672,19 @@ export class Dashboard implements OnInit {
         const srcDataset = data.datasets?.[0] ?? {};
         const rawLabels: string[] = data.labels ?? [];
         const rawCounts: number[] = srcDataset.data ?? [];
-        const rawColors: string[] = Array.isArray(srcDataset.backgroundColor)
-          ? srcDataset.backgroundColor
-          : rawLabels.map(() => srcDataset.backgroundColor ?? '#a855f7');
+        // Use same multi-color palette as module/domain charts
+        const paletteColors = ['#a855f7','#228b4e','#43bfe6','#f59e0b','#34c97a','#64748b','#0ea5e9'];
+        const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
         const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
         this.chartData = {
           labels: sorted.labels,
-          datasets: [{ ...srcDataset, data: sorted.counts, backgroundColor: sorted.colors }]
+          datasets: [{
+            ...srcDataset,
+            data: sorted.counts,
+            backgroundColor: sorted.colors,
+            borderRadius: 6,
+            borderSkipped: false
+          }]
         };
         this.communityLegend = this.buildLegend(this.chartData);
       },
@@ -698,13 +698,19 @@ export class Dashboard implements OnInit {
         const srcDataset = data.datasets?.[0] ?? {};
         const rawLabels: string[] = data.labels ?? [];
         const rawCounts: number[] = srcDataset.data ?? [];
-        const rawColors: string[] = Array.isArray(srcDataset.backgroundColor)
-          ? srcDataset.backgroundColor
-          : rawLabels.map(() => srcDataset.backgroundColor ?? '#43bfe6');
+        // Use same multi-color palette as module/domain charts
+        const paletteColors = ['#43bfe6','#228b4e','#a855f7','#f59e0b','#34c97a','#64748b','#0ea5e9'];
+        const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
         const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
         this.s_chartData = {
           labels: sorted.labels,
-          datasets: [{ ...srcDataset, data: sorted.counts, backgroundColor: sorted.colors }]
+          datasets: [{
+            ...srcDataset,
+            data: sorted.counts,
+            backgroundColor: sorted.colors,
+            borderRadius: 6,
+            borderSkipped: false
+          }]
         };
         this.overallLegend = this.buildLegend(this.s_chartData);
       },

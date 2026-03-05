@@ -1280,8 +1280,16 @@ export class UserWiseReportComponent implements OnInit {
         const groups = new Map<string, number>();
         this.filteredStats.forEach(s => { const k = s.irm || 'N/A'; groups.set(k, (groups.get(k) || 0) + s.total_solutions); });
         const sorted = Array.from(groups.entries()).sort((a, b) => b[1] - a[1]);
-        const palette = ['#6d28d9','#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe','#4c1d95','#5b21b6'];
-        const hoverPalette = ['#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe','#ede9fe','#5b21b6','#6d28d9'];
+        const palette = [
+    '#1c4535', '#1565a8', '#6d28d9', '#c2410c', '#0f766e',
+    '#b45309', '#be185d', '#0369a1', '#4d7c0f', '#7e22ce',
+    '#0e7490', '#9a3412', '#1d4ed8', '#15803d', '#a21caf'
+];
+const hoverPalette = [
+    '#2e7d52', '#1d4ed8', '#7c3aed', '#ea580c', '#0d9488',
+    '#d97706', '#db2777', '#0284c7', '#65a30d', '#9333ea',
+    '#0891b2', '#c2410c', '#2563eb', '#16a34a', '#c026d3'
+];
         this.irmChartData = {
             labels: sorted.map(([k]) => k),
             datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: palette, hoverBackgroundColor: hoverPalette, borderWidth: 2, borderColor: '#ffffff' }]

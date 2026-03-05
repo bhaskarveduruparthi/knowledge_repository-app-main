@@ -646,8 +646,14 @@ interface ExportColumn {
                     </button>
                 </div>
 
+                <!-- Loading -->
+                <div *ngIf="loading" class="state-card">
+                    <i class="pi pi-spin pi-spinner state-icon"></i>
+                    <p>Loading approvals…</p>
+                </div>
+
                 <!-- Empty state -->
-                <div *ngIf="repositories().length === 0 && !searchQuery()" class="state-card">
+                <div *ngIf="repositories().length === 0 && !searchQuery() && !loading" class="state-card">
                     <i class="pi pi-inbox state-icon"></i>
                     <p>No repositories pending approval.</p>
                     <p class="sub">Check back later or refresh the page.</p>
@@ -1019,10 +1025,21 @@ export class ManageApprovals implements OnInit {
     }
 
     loadDemoData() {
-        this.managereposervice.get_approval_repos().subscribe((data: any) => {
-            this.repositories.set(data);
-            this.currentPage.set(0); // Reset page when data reloads
-            this.loading = false;
+        this.loading = true;
+        this.managereposervice.get_approval_repos().subscribe({
+            next: (data: any) => {
+                this.repositories.set(data);
+                this.currentPage.set(0); // Reset page when data reloads
+                this.loading = false;
+            },
+            error: () => {
+                this.loading = false;
+                this.messageservice.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load approval repositories'
+                });
+            }
         });
         this.cols = [
             { field: 'id', header: 'S.No.' },
