@@ -82,7 +82,7 @@ export interface LegendItem {
     }
     .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
     .stat-label {
-      font-size: 1rem; font-weight: 700; color: #7a9484;
+      font-size: 0.78rem; font-weight: 600; color: #7a9484;
       text-transform: uppercase; letter-spacing: 0.07em;
     }
     .stat-icon {
@@ -102,7 +102,7 @@ export interface LegendItem {
     /* ── Section title ── */
     .section-title {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.25rem; color: #0d3d24;
+      font-size: 1.15rem; color: #0d3d24;
       margin-bottom: 1.4rem; letter-spacing: -0.01em;
       display: flex; align-items: center; gap: 0.6rem;
     }
@@ -195,7 +195,7 @@ export interface LegendItem {
       flex-shrink: 0;
     }
     .legend-label {
-      font-size: 1rem;
+      font-size: 0.8rem;
       color: #1a3828;
       flex: 1;
       white-space: nowrap;
@@ -203,7 +203,7 @@ export interface LegendItem {
       text-overflow: ellipsis;
     }
     .legend-count {
-      font-size: 1rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: #228b4e;
       background: rgba(34,139,78,0.10);
@@ -296,7 +296,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-book"></i></div>
         </div>
         <div class="stat-count">{{ allReposCount }}</div>
-        <div class="stat-footer">All Submissions</div>
+        <div class="stat-footer">All submissions</div>
       </div>
       <div class="stat-card approved">
         <div class="stat-top">
@@ -304,7 +304,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
         </div>
         <div class="stat-count">{{ approvedReposCount }}</div>
-        <div class="stat-footer">Published &amp; Live</div>
+        <div class="stat-footer">Published &amp; live</div>
       </div>
       <div class="stat-card pending">
         <div class="stat-top">
@@ -312,7 +312,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-clock"></i></div>
         </div>
         <div class="stat-count">{{ sentforapprovalcount }}</div>
-        <div class="stat-footer">Awaiting Review</div>
+        <div class="stat-footer">Awaiting review</div>
       </div>
       <div class="stat-card rejected">
         <div class="stat-top">
@@ -320,7 +320,7 @@ export interface LegendItem {
           <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
         </div>
         <div class="stat-count">{{ unapprovedReposCount }}</div>
-        <div class="stat-footer">Needs Revision</div>
+        <div class="stat-footer">Needs revision</div>
       </div>
     </div>
 
@@ -568,18 +568,38 @@ export class Dashboard implements OnInit {
     this.managerChartOptions = this.barChartOptions;
   }
 
-  // Build a LegendItem[] from any Chart.js data object
+  // Sort labels + counts together by count descending, re-assign colors by rank
+  private sortDescending(
+    labels: string[],
+    counts: number[],
+    colors: string[]
+  ): { labels: string[]; counts: number[]; colors: string[] } {
+    const paired = labels.map((label, i) => ({ label, count: counts[i] }));
+    paired.sort((a, b) => b.count - a.count);
+    return {
+      labels: paired.map(p => p.label),
+      counts: paired.map(p => p.count),
+      // Re-map colors by sorted rank so the top item always gets the first color
+      colors: paired.map((_, i) => colors[i % colors.length])
+    };
+  }
+
+  // Build a LegendItem[] from any Chart.js data object (already sorted)
   private buildLegend(chartObj: any): LegendItem[] {
     if (!chartObj?.labels?.length) return [];
     const dataset = chartObj.datasets?.[0];
-    const colors: string[] = Array.isArray(dataset?.backgroundColor)
+    const rawColors: string[] = Array.isArray(dataset?.backgroundColor)
       ? dataset.backgroundColor
-      : chartObj.labels.map(() => dataset?.backgroundColor ?? '#228b4e');
-    return (chartObj.labels as string[]).map((label, i) => ({
+      : (chartObj.labels as string[]).map(() => dataset?.backgroundColor ?? '#228b4e');
+
+    // Pair up and sort descending by count
+    const paired = (chartObj.labels as string[]).map((label: string, i: number) => ({
       label,
-      count: dataset?.data?.[i] ?? 0,
-      color: colors[i % colors.length]
+      count: (dataset?.data?.[i] ?? 0) as number,
+      color: rawColors[i % rawColors.length]
     }));
+    paired.sort((a, b) => b.count - a.count);
+    return paired;
   }
 
   ngOnInit() {
@@ -655,7 +675,17 @@ export class Dashboard implements OnInit {
   fetchtopvotes() {
     this.managereposervice.getTopUsersVotes().subscribe({
       next: (data: any) => {
-        this.chartData       = { labels: data.labels, datasets: data.datasets };
+        const srcDataset = data.datasets?.[0] ?? {};
+        const rawLabels: string[] = data.labels ?? [];
+        const rawCounts: number[] = srcDataset.data ?? [];
+        const rawColors: string[] = Array.isArray(srcDataset.backgroundColor)
+          ? srcDataset.backgroundColor
+          : rawLabels.map(() => srcDataset.backgroundColor ?? '#a855f7');
+        const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
+        this.chartData = {
+          labels: sorted.labels,
+          datasets: [{ ...srcDataset, data: sorted.counts, backgroundColor: sorted.colors }]
+        };
         this.communityLegend = this.buildLegend(this.chartData);
       },
       error: (err) => console.error('Error loading top votes chart', err)
@@ -665,7 +695,17 @@ export class Dashboard implements OnInit {
   fetchtopusers() {
     this.managereposervice.getTopUsersSolutions().subscribe({
       next: (data: any) => {
-        this.s_chartData   = { labels: data.labels, datasets: data.datasets };
+        const srcDataset = data.datasets?.[0] ?? {};
+        const rawLabels: string[] = data.labels ?? [];
+        const rawCounts: number[] = srcDataset.data ?? [];
+        const rawColors: string[] = Array.isArray(srcDataset.backgroundColor)
+          ? srcDataset.backgroundColor
+          : rawLabels.map(() => srcDataset.backgroundColor ?? '#43bfe6');
+        const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
+        this.s_chartData = {
+          labels: sorted.labels,
+          datasets: [{ ...srcDataset, data: sorted.counts, backgroundColor: sorted.colors }]
+        };
         this.overallLegend = this.buildLegend(this.s_chartData);
       },
       error: (err) => console.error('Error loading top users chart', err)
@@ -707,28 +747,34 @@ export class Dashboard implements OnInit {
         const s = truncateName(key);
         truncatedData[s] = (truncatedData[s] || 0) + (value as number);
       });
-      const labels = Object.keys(truncatedData);
-      const counts = Object.values(truncatedData) as number[];
+      const sorted = this.sortDescending(
+        Object.keys(truncatedData),
+        Object.values(truncatedData) as number[],
+        moduleColors
+      );
       this.moduleData = {
-        labels,
-        datasets: [{ label: 'Modules', data: counts,
-          backgroundColor: moduleColors, borderRadius: 6, borderSkipped: false }]
+        labels: sorted.labels,
+        datasets: [{ label: 'Modules', data: sorted.counts,
+          backgroundColor: sorted.colors, borderRadius: 6, borderSkipped: false }]
       };
-      this.moduleLegend = labels.map((label, i) => ({
-        label, count: counts[i], color: moduleColors[i % moduleColors.length]
+      this.moduleLegend = sorted.labels.map((label, i) => ({
+        label, count: sorted.counts[i], color: sorted.colors[i]
       }));
     });
 
     this.managereposervice.getdatabydomain().subscribe(data => {
-      const labels = Object.keys(data);
-      const counts = Object.values(data) as number[];
+      const sorted = this.sortDescending(
+        Object.keys(data),
+        Object.values(data) as number[],
+        domainColors
+      );
       this.domainData = {
-        labels,
-        datasets: [{ label: 'Domains', data: counts,
-          backgroundColor: domainColors, borderRadius: 6, borderSkipped: false }]
+        labels: sorted.labels,
+        datasets: [{ label: 'Domains', data: sorted.counts,
+          backgroundColor: sorted.colors, borderRadius: 6, borderSkipped: false }]
       };
-      this.domainLegend = labels.map((label, i) => ({
-        label, count: counts[i], color: domainColors[i % domainColors.length]
+      this.domainLegend = sorted.labels.map((label, i) => ({
+        label, count: sorted.counts[i], color: sorted.colors[i]
       }));
     });
   }
