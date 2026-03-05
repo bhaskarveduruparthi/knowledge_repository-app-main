@@ -82,9 +82,9 @@ interface ExportColumn {
         }
 
         .toolbar-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Arial', serif;
             font-size: 1.45rem;
-            font-weight: 400;
+            font-weight: 700;
             color: #1b5e20;
             letter-spacing: -0.01em;
             white-space: nowrap;
@@ -123,11 +123,11 @@ interface ExportColumn {
             border: 1.5px solid #c8e6c9;
             background: #f9fafb;
             width: 290px;
-            font-size: 0.875rem;
+            font-size: 1rem;
             color: #2e3a2f;
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Arial', sans-serif;
         }
 
         .search-pill input::placeholder { color: #aab5ab; }
@@ -612,11 +612,11 @@ interface ExportColumn {
 
                 <div class="toolbar-right">
                     <div class="search-pill">
-                        <i class="pi pi-search"></i>
+                        
                         <input
                             type="text"
                             [value]="searchQuery()"
-                            placeholder="Search name, module, domain, sector…"
+                            placeholder="Search…"
                             (input)="onSearchChange($event)"
                         />
                         <button
@@ -809,7 +809,7 @@ interface ExportColumn {
         <!-- ── Approve Dialog ── -->
         <p-dialog [(visible)]="approvedialog" header="Approve Solution" [modal]="true" [style]="{ width: '440px' }">
             <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
-                <i class="pi pi-check-circle" style="font-size:2rem; color:#43a047; flex-shrink:0; margin-top:0.1rem"></i>
+                
                 <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
                     Confirm approval of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
                     <br><span style="font-size:0.82rem; color:#81c784">This action will mark the solution as approved.</span>
@@ -829,7 +829,7 @@ interface ExportColumn {
             [style]="{ width: '560px' }">
             <div style="display:flex; flex-direction:column; gap:1.1rem; padding:0.25rem 0">
                 <div style="display:flex; align-items:flex-start; gap:0.85rem">
-                    <i class="pi pi-share-alt" style="font-size:1.8rem; color:#1565c0; flex-shrink:0"></i>
+                    
                     <span style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
                         Delegate <b>{{ repository?.module_name }}</b> for <b>{{ repository?.customer_name }}</b> to another user.
                     </span>
@@ -877,7 +877,7 @@ interface ExportColumn {
         <!-- ── Reject Dialog ── -->
         <p-dialog [(visible)]="rejectdialog" header="Reject Solution" [modal]="true" [style]="{ width: '440px' }">
             <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
-                <i class="pi pi-times-circle" style="font-size:2rem; color:#e53935; flex-shrink:0; margin-top:0.1rem"></i>
+                
                 <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
                     Confirm rejection of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
                     <br><span style="font-size:0.82rem; color:#ef9a9a">This action will mark the solution as rejected.</span>

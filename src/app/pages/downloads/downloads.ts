@@ -59,9 +59,9 @@ import { CardModule } from "primeng/card";
     }
 
     .toolbar-title {
-      font-family: 'DM Serif Display', serif;
+      font-family: 'Arial', serif;
       font-size: 1.45rem;
-      font-weight: 400;
+      font-weight: 700;
       color: #1b5e20;
       letter-spacing: -0.01em;
       white-space: nowrap;
@@ -98,11 +98,11 @@ import { CardModule } from "primeng/card";
       border: 1.5px solid #c8e6c9;
       background: #f9fafb;
       width: 290px;
-      font-size: 0.875rem;
+      font-size: 1rem;
       color: #2e3a2f;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Arial', sans-serif;
     }
 
     .search-pill input::placeholder { color: #aab5ab; }
@@ -522,11 +522,11 @@ import { CardModule } from "primeng/card";
         </div>
         <div class="toolbar-right">
           <div class="search-pill">
-            <i class="pi pi-search"></i>
+            
             <input
               type="text"
               [value]="searchQuery()"
-              placeholder="Search customer, module, name, email…"
+              placeholder="Search..."
               (input)="onSearchChange($event)"
             />
             <button
@@ -656,12 +656,12 @@ import { CardModule } from "primeng/card";
     <p-dialog [(visible)]="approveDialogVisible" header="Approve Download Request"
               [modal]="true" [style]="{ width: '440px' }">
       <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0" *ngIf="selectedRequest">
-        <i class="pi pi-check-circle" style="font-size:2rem; color:#43a047; flex-shrink:0; margin-top:0.1rem"></i>
+        
         <span style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
           Approve download request for
           <b>{{ selectedRequest.repo_customer_name }} — {{ selectedRequest.repo_module_name }}</b>
           requested by <b>{{ selectedRequest.requested_by_name }}</b>?
-          <br><span style="font-size:0.82rem; color:#81c784">The requester will be granted access to download.</span>
+          <br><span style="font-size:0.82rem; color:#81c784">The requestor will be granted access to download.</span>
         </span>
       </div>
       <ng-template pTemplate="footer">
@@ -676,12 +676,12 @@ import { CardModule } from "primeng/card";
     <p-dialog [(visible)]="rejectDialogVisible" header="Reject Download Request"
               [modal]="true" [style]="{ width: '440px' }">
       <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0" *ngIf="selectedRequest">
-        <i class="pi pi-times-circle" style="font-size:2rem; color:#e53935; flex-shrink:0; margin-top:0.1rem"></i>
+       
         <span style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
           Reject download request for
           <b>{{ selectedRequest.repo_customer_name }} — {{ selectedRequest.repo_module_name }}</b>
           requested by <b>{{ selectedRequest.requested_by_name }}</b>?
-          <br><span style="font-size:0.82rem; color:#ef9a9a">The requester will be denied access.</span>
+          <br><span style="font-size:0.82rem; color:#ef9a9a">The requestor will be denied access.</span>
         </span>
       </div>
       <ng-template pTemplate="footer">
