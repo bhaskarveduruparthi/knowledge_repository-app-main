@@ -18,8 +18,8 @@
             .layout-sidebar {
                 transform: translateX(-100%);
                 left: 0;
-                top: 0;
-                height: 100vh;
+                top: 4rem;
+                height: calc(100vh - 4rem);
                 border-top-left-radius: 0;
                 border-bottom-left-radius: 0;
                 border-right: 1px solid var(--surface-border);
