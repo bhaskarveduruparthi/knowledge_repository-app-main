@@ -330,12 +330,12 @@ import { ManageAdminsService } from '../service/manageadmins.service';
   `,
   template: `
     <!-- ── Page Header ── -->
-    <div class="page-header">
+    <!--<div class="page-header">
       <div>
         <div class="page-title">Welcome Back, {{ username }} — Here's your Overview</div>
       </div>
       <div class="header-date">{{ today }}</div>
-    </div>
+    </div>-->
 
     <!-- ── Stat Cards ── -->
     <div class="stats-grid">

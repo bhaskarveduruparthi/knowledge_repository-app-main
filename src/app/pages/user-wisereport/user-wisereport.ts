@@ -759,7 +759,6 @@ interface MonthOption {
                         <div class="hero-icon"><i class="pi pi-users"></i></div>
                         <div class="hero-title-wrap">
                             <h1>User Activity &amp; Solutions Report</h1>
-                            <p>Track contributions, login patterns and solution performance</p>
                         </div>
                     </div>
                     <div class="hero-actions">
@@ -879,15 +878,15 @@ interface MonthOption {
                             <p-chart type="bar" [data]="topContributorsChartData" [options]="barChartOptions" />
                         </div>
 
-                        <div class="chart-card accent-blue">
+                        <div class="chart-card accent-orange">
                             <div class="chart-card-header">
                                 <div class="chart-card-title">
-                                    <div class="chart-icon blue"><i class="pi pi-sign-in"></i></div>
-                                    Login Activity
+                                    <div class="chart-icon orange"><i class="pi pi-calendar"></i></div>
+                                    Monthly Trend
                                 </div>
-                                <span class="chart-badge badge-blue">By Logins</span>
+                                <span class="chart-badge badge-orange">Trend</span>
                             </div>
-                            <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
+                            <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
                         </div>
 
                         <div class="chart-card accent-purple" *ngIf="!selectedIRM">
@@ -901,15 +900,16 @@ interface MonthOption {
                             <p-chart type="doughnut" [data]="irmChartData" [options]="pieChartOptions" />
                         </div>
 
-                        <div class="chart-card accent-orange">
+                        
+                        <div class="chart-card accent-blue">
                             <div class="chart-card-header">
                                 <div class="chart-card-title">
-                                    <div class="chart-icon orange"><i class="pi pi-calendar"></i></div>
-                                    Monthly Trend
+                                    <div class="chart-icon blue"><i class="pi pi-sign-in"></i></div>
+                                    Login Activity
                                 </div>
-                                <span class="chart-badge badge-orange">Trend</span>
+                                <span class="chart-badge badge-blue">By Logins</span>
                             </div>
-                            <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
+                            <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
                         </div>
                     </div>
 

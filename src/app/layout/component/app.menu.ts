@@ -52,7 +52,7 @@ export class AppMenu implements OnInit {
                 
                 {label: 'Pending for Approval', icon: 'pi pi-fw pi-file-o', routerLink: ['/app/pages/pending'] },
                 { label: 'Rejected Solutions', icon: 'pi pi-fw pi-file-excel', routerLink: ['/app/pages/rejected'] },
-                { label: 'Statuses by Resource', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/userwise'] }
+                { label: 'UserWise Activity', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/userwise'] }
                 
 
             ]

@@ -118,7 +118,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .brand-desc {
-      font-size: 1rem;
+      font-size: 1.125rem;
       color: rgba(255,255,255,0.75);
       line-height: 1.78;
       max-width: 370px;
@@ -501,22 +501,20 @@ import { CommonModule } from '@angular/common';
         </div>
 
         <div class="headline">
-          Solutions,<br/>
-          <em>shared &amp; found</em><br/>
-          instantly.
+          Unique/Complex Solutions,<br/>
+          <em>Discover &amp; Reuse.</em><br/>
         </div>
 
         <p class="brand-desc">
-          A centralised hub where your team uploads, discovers, and validates
-          solutions across every project — turning collective expertise into a
-          searchable asset.
+          A centralised hub where the team uploads, discovers, and reuses
+          solutions across every project.       
         </p>
 
         
 
         <div class="pills">
           <span class="pill"><span class="pill-dot"></span>Upload Solutions</span>
-          <span class="pill"><span class="pill-dot"></span>Smart Search</span>
+          <span class="pill"><span class="pill-dot"></span>Search</span>
           <span class="pill"><span class="pill-dot"></span>Peer Review</span>
           <span class="pill"><span class="pill-dot"></span>Role-based Access</span>
         </div>
@@ -533,7 +531,7 @@ import { CommonModule } from '@angular/common';
 
           <!-- Yash ID -->
           <div class="field">
-            <label class="field-label" for="yash-id">Yash ID</label>
+            <label class="field-label" for="yash-id">Employee ID</label>
             <div class="field-wrap">
               <input
                 class="custom-input"
