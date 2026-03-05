@@ -466,6 +466,7 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         box-shadow: var(--shadow-float);
                         padding: 4rem 4.5rem;
                         animation: rise 0.35s ease-out;
+                        overflow: hidden;
                     }
 
                     .word-viewer {
@@ -550,6 +551,17 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         font-size: 0.88em;
                         color: var(--green-600);
                     }
+
+                    .word-viewer img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 1.25em auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(20,60,35,0.10);
+    border: 1px solid var(--border);
+}
 
                     /* ── EXCEL ────────────────────────────────────────── */
                     .excel-scroll {
