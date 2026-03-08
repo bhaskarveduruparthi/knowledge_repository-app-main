@@ -119,6 +119,10 @@ export class ManageReposService {
     return this.http.get(`${this.url}repos/getdownloadlogs?page=${page}`);
   }
 
+  getallviewlogs(page: number) {
+    return this.http.get(`${this.url}repos/getviewlogs?page=${page}`);
+  }
+
   getallapprovedrepos(page: number) {
     return this.http.get(`${this.url}repos/getallapprovedrepos?page=${page}`);
   }
@@ -190,6 +194,10 @@ export class ManageReposService {
 
   get_downloadlog_records() {
     return this.http.get(`${this.url}/repos/getdownloadlogrecords`);
+  }
+
+  get_viewlog_records() {
+    return this.http.get(`${this.url}/repos/getviewlogrecords`);
   }
 
   getapproved_repo_records() {

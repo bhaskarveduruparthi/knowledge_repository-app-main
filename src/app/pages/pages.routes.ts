@@ -14,6 +14,7 @@ import { ManageManagers } from './manage_managers/manage_managers';
 import { ManageDownloads } from './downloads/downloads';
 import { AddSolutions } from './addsolutions/addsolutions';
 import { UserWiseReportComponent } from './user-wisereport/user-wisereport';
+import { ViewHistory } from './viewhistory/viewhistory';
 
 
 export default [
@@ -32,5 +33,6 @@ export default [
      {path:'login-history', component: LoginHistory, title: 'Login History'},
      {path: 'manage-managers', component: ManageManagers, title: 'Manage Managers'},
      {path: 'download-history', component: DownloadHistory, title: 'Download History'},
+     {path: 'view-history', component: ViewHistory, title: 'View History'},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

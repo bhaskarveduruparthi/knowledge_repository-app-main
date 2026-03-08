@@ -699,7 +699,7 @@ export class ManageDownloads implements OnInit {
   searchQuery = signal<string>('');
 
   // ── Pagination ──
-  pageSize: number = 6;
+  pageSize: number = 10;
   currentPage = signal<number>(0);
 
   filteredRequests = computed(() => {

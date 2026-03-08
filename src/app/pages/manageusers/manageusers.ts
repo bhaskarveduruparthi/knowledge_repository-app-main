@@ -424,7 +424,7 @@ export class ManageUsers implements OnInit {
 
     filteredUsersList: User[] = [];
     first: number = 0;
-    rows: number = 6;
+    rows: number = 10;
     searchTerm: string = '';
 
     integerRegex = /^\d+$/;

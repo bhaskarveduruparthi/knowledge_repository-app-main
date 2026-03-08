@@ -16,7 +16,7 @@ export const appRoutes: Routes = [
         path: 'app',
         component: AppLayout,
         children: [
-            { path: '', component: Dashboard },
+            { path: '', component: Dashboard, title: 'Knowledge Repository - Dashboard' },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ], 
         canActivate: [AuthGuard]

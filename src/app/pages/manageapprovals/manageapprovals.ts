@@ -392,7 +392,7 @@ interface ExportColumn { title: string; dataKey: string; }
             <p-paginator
                 [totalRecords]="totalitems" [first]="first"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
-                [showCurrentPageReport]="true" [rows]="6"
+                [showCurrentPageReport]="true" [rows]="10"
                 (onPageChange)="onPageChange($event)">
             </p-paginator>
         </div>

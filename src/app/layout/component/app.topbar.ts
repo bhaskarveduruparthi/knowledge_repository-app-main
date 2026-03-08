@@ -101,20 +101,20 @@ import { Toast } from 'primeng/toast';
       background: var(--brand-accent-soft);
     }
 
-    .logo-icon-wrap {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(74,222,128,0.2);
-      border: 1px solid rgba(74,222,128,0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* ── Yash Logo image ── */
+    .yash-logo-img {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
       flex-shrink: 0;
     }
-    .logo-icon-wrap i {
-      color: var(--brand-accent);
-      font-size: 0.95rem;
+
+    /* ── Divider between logo and text ── */
+    .logo-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
     }
 
     .logo-text {
@@ -302,6 +302,10 @@ import { Toast } from 'primeng/toast';
       .user-name { display: none; }
       .logo-text { font-size: 0.9rem; }
     }
+    @media (max-width: 768px) {
+      .logo-divider { display: none; }
+      .logo-text { font-size: 0.85rem; }
+    }
     @media (max-width: 576px) {
       .logo-text { display: none; }
     }
@@ -319,7 +323,15 @@ import { Toast } from 'primeng/toast';
         </button>
 
         <a class="layout-topbar-logo" routerLink="/app">
-          
+          <!-- Yash Technologies logo -->
+          <img
+            src="/yash-logo.png"
+            alt="Yash Technologies"
+            class="yash-logo-img"
+          />
+
+          <div class="logo-divider"></div>
+
           <span class="logo-text">Knowledge <span>Repository</span></span>
         </a>
       </div>

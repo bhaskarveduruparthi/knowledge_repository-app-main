@@ -935,7 +935,7 @@ export class ManageApprovals implements OnInit {
     delegateUsers: User[] = [];
 
     // ── Pagination ──
-    pageSize: number = 6;
+    pageSize: number = 10;
     currentPage = signal<number>(0);
 
     searchQuery = signal<string>('');

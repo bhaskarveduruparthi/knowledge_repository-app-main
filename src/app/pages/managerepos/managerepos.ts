@@ -729,7 +729,7 @@ interface ExportColumn {
                 [first]="first"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
                 [showCurrentPageReport]="true"
-                [rows]="6"
+                [rows]="10"
                 (onPageChange)="onPageChange($event)">
             </p-paginator>
         </div>
@@ -992,7 +992,7 @@ export class ManageRepos implements OnInit {
     file: any;
 
     /** Controls which view is active: 'table' | 'card' */
-    viewMode: 'table' | 'card' = 'card';
+    viewMode: 'table' | 'card' = 'table';
 
     // ── Table search properties ──────────────────────────────────────────────
     tableSearchTerm: string = '';
