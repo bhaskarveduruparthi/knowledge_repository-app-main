@@ -206,10 +206,10 @@ interface ExportColumn { title: string; dataKey: string; }
 
                     <!-- View toggle -->
                     <div class="view-toggle">
-                        <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" title="Table view">
+                        <button [class.active]="viewMode === 'table'" (click)="setViewMode('table')" title="Table view">
                             <i class="pi pi-list"></i>
                         </button>
-                        <button [class.active]="viewMode === 'card'" (click)="viewMode = 'card'" title="Card view">
+                        <button [class.active]="viewMode === 'card'" (click)="setViewMode('card')" title="Card view">
                             <i class="pi pi-th-large"></i>
                         </button>
                     </div>
@@ -400,6 +400,8 @@ interface ExportColumn { title: string; dataKey: string; }
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
 export class ManageRejectedReport implements OnInit {
+    private static readonly VIEW_MODE_KEY = 'rejectedReportViewMode';
+
     adminDialog: boolean = false;
     repositories = signal<Repository[]>([]);
     repository!: Repository;
@@ -424,8 +426,13 @@ export class ManageRejectedReport implements OnInit {
     file: any;
     business_justification: any;
 
-    /** 'table' | 'card' */
+    /** Persisted 'table' | 'card' — reads from localStorage on init */
     viewMode: 'table' | 'card' = 'card';
+
+    setViewMode(mode: 'table' | 'card'): void {
+        this.viewMode = mode;
+        localStorage.setItem(ManageRejectedReport.VIEW_MODE_KEY, mode);
+    }
 
     // ── Search ──────────────────────────────────────────────────────────────
     searchQuery = signal<string>('');
@@ -460,6 +467,12 @@ export class ManageRejectedReport implements OnInit {
     get isAdmin(): boolean { return this.downloadvalid === true; }
 
     ngOnInit() {
+        // Restore persisted view mode
+        const savedMode = localStorage.getItem(ManageRejectedReport.VIEW_MODE_KEY);
+        if (savedMode === 'table' || savedMode === 'card') {
+            this.viewMode = savedMode;
+        }
+
         const storedPage = localStorage.getItem('RejectedCurrentPage');
         if (storedPage) {
             this.RejectedCurrentPage = parseInt(storedPage);
