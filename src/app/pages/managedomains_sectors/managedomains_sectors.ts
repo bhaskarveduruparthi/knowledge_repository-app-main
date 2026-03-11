@@ -1,3 +1,4 @@
+import { style } from '@angular/animations';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
@@ -141,7 +142,7 @@ import { Domain, ManageReposService, Sector } from '../service/managerepos.servi
         }
         .sector-tag button {
             background: none; border: none; cursor: pointer;
-            color: #c62828; font-size: .65rem; padding: 0; line-height: 1;
+            color: #c62828; font-size: 1.5rem; padding: 0; line-height: 1;
         }
 
         /* Stats bar */
@@ -175,7 +176,7 @@ import { Domain, ManageReposService, Sector } from '../service/managerepos.servi
         <ng-template #end>
           <div class="search-wrap">
             <i class="pi pi-search"></i>
-            <input type="text" placeholder="Search domains / sectors…"
+            <input type="text" placeholder="Search..."
               [(ngModel)]="searchText" (ngModelChange)="applyFilter()" />
           </div>
         </ng-template>
@@ -220,11 +221,11 @@ import { Domain, ManageReposService, Sector } from '../service/managerepos.servi
               <tr class="domain-row">
 
                 <!-- Domain name -->
-                <td>
+                <td style="min-width:100px">
                   <div class="domain-name">
-                    <i class="pi pi-globe" style="color:#1e3a6e;font-size:.85rem"></i>
+                    <i class="pi pi-globe" style=";font-size:.85rem"></i>
                     {{ domain.name }}
-                    <span class="domain-badge">Domain</span>
+                    
                   </div>
                 </td>
 
@@ -233,11 +234,11 @@ import { Domain, ManageReposService, Sector } from '../service/managerepos.servi
                   <div class="sector-chips">
                     <span class="chip" *ngFor="let s of domain.sectors">
                       {{ s.name }}
-                      <button class="chip-del"
+                      <!--<button class="chip-del"
                         pTooltip="Remove sector" tooltipPosition="top"
                         (click)="confirmDeleteSector(s, domain)">
                         <i class="pi pi-times"></i>
-                      </button>
+                      </button>-->
                     </span>
 
                     <!--<div class="add-sector-inline">

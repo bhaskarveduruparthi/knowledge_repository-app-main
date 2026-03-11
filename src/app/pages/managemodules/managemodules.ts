@@ -268,7 +268,7 @@ export interface Module {
                     <i class="pi pi-search"></i>
                     <input
                         type="text"
-                        placeholder="Search by module name or key…"
+                        placeholder="Search..."
                         [(ngModel)]="searchTerm"
                         (input)="onSearch()" />
                     <i

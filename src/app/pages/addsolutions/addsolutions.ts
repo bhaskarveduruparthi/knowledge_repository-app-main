@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, signal } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, signal } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
@@ -25,9 +25,10 @@ import { AuthenticationService } from '../service/authentication.service';
 import { PanelModule } from 'primeng/panel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
-import { ManageReposService, Repository } from '../service/managerepos.service';
+import { ManageReposService, Repository,Domain } from '../service/managerepos.service';
 import { PaginatorModule } from 'primeng/paginator';
 import { TooltipModule } from 'primeng/tooltip';
+import { forkJoin } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -60,7 +61,6 @@ interface ExportColumn {
             border-radius: 8px;
             padding: 4px;
         }
-
         .view-toggle button {
             border: none;
             background: transparent;
@@ -73,7 +73,6 @@ interface ExportColumn {
             align-items: center;
             justify-content: center;
         }
-
         .view-toggle button.active {
             background: #fff;
             color: #11224E;
@@ -87,7 +86,6 @@ interface ExportColumn {
             gap: 1.25rem;
             margin-bottom: 1rem;
         }
-
         .repo-card {
             background: #fff;
             border-radius: 12px;
@@ -100,410 +98,120 @@ interface ExportColumn {
             transition: box-shadow 0.2s, transform 0.2s;
             position: relative;
         }
-
         .repo-card:hover {
             box-shadow: 0 6px 24px rgba(17, 34, 78, 0.16);
             transform: translateY(-2px);
         }
-
         .repo-card-header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
             gap: 0.5rem;
         }
-
-        .repo-card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #11224E;
-            line-height: 1.3;
-        }
-
-        .repo-card-subtitle {
-            font-size: 0.82rem;
-            color: #6b7a99;
-            margin-top: 2px;
-        }
-
+        .repo-card-title { font-size: 1rem; font-weight: 700; color: #11224E; line-height: 1.3; }
+        .repo-card-subtitle { font-size: 0.82rem; color: #6b7a99; margin-top: 2px; }
         .repo-card-select {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            accent-color: #11224E;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
+            position: absolute; top: 1rem; left: 1rem;
+            accent-color: #11224E; width: 16px; height: 16px; cursor: pointer;
         }
-
-        .repo-card.has-checkbox {
-            padding-left: 2.25rem;
-        }
-
-        .repo-card-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-        }
-
-        .badge-domain {
-            background: #e8f0fb;
-            color: #2457b3;
-        }
-
-        .badge-sector {
-            background: #f0f7ee;
-            color: #2e7d32;
-        }
-
-        .repo-card-field {
-            font-size: 0.83rem;
-            color: #444;
-            line-height: 1.5;
-        }
-
-        .repo-card-field strong {
-            color: #11224E;
-            font-weight: 600;
-        }
-
-        .repo-card-divider {
-            border: none;
-            border-top: 1px solid #eef2f7;
-            margin: 0.25rem 0;
-        }
-
+        .repo-card.has-checkbox { padding-left: 2.25rem; }
+        .repo-card-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .badge { font-size: 0.75rem; padding: 2px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.01em; }
+        .badge-domain { background: #e8f0fb; color: #2457b3; }
+        .badge-sector { background: #f0f7ee; color: #2e7d32; }
+        .repo-card-field { font-size: 0.83rem; color: #444; line-height: 1.5; }
+        .repo-card-field strong { color: #11224E; font-weight: 600; }
+        .repo-card-divider { border: none; border-top: 1px solid #eef2f7; margin: 0.25rem 0; }
         .repo-card-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.25rem;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;
         }
+        .repo-card-meta { font-size: 0.77rem; color: #8a96b0; }
+        .repo-card-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 
-        .repo-card-meta {
-            font-size: 0.77rem;
-            color: #8a96b0;
-        }
-
-        .repo-card-actions {
-            display: flex;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        /* ── Existing styles (kept) ──────────────────────────────────────────── */
+        /* ── Table ───────────────────────────────────────────────────────────── */
         .custom-file-input {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-            padding: 8px 12px;
-            width: 100%;
-            color: #333;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            border: 1px solid #ced4da; border-radius: 6px; background-color: #f8f9fa;
+            padding: 8px 12px; width: 100%; color: #333; font-size: 1rem; transition: border-color 0.2s;
         }
-
-        .custom-file-input:hover {
-            border-color: #007ad9;
-            background-color: #e9ecef;
-        }
-
-        .custom-file-label {
-            display: inline-block;
-            margin-bottom: 4px;
-            font-size: 0.95em;
-            color: #5a5a5a;
-            font-weight: 500;
-        }
-
-        .custom-table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-        }
-
-        .glass-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 75rem;
-            font-size: 0.95rem;
-        }
-
+        .custom-file-input:hover { border-color: #007ad9; background-color: #e9ecef; }
+        .custom-file-label { display: inline-block; margin-bottom: 4px; font-size: 0.95em; color: #5a5a5a; font-weight: 500; }
+        .custom-table-container { width: 100%; overflow-x: auto; margin-bottom: 1rem; border-radius: 8px; }
+        .glass-table { width: 100%; border-collapse: collapse; min-width: 75rem; font-size: 0.95rem; }
         .glass-table thead th {
-            text-align: left;
-            padding: 1rem;
-            font-weight: bold;
-            color: #11224E;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-            white-space: nowrap;
-            background-color: #cce4f7;
+            text-align: left; padding: 1rem; font-weight: bold; color: #11224E;
+            border-bottom: 2px solid rgba(255,255,255,0.4); white-space: nowrap; background-color: #cce4f7;
         }
+        .glass-table tbody td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); vertical-align: middle; color: #222; }
+        .glass-table tbody tr { transition: background-color 0.2s; }
+        .glass-table tbody tr:hover { background-color: rgba(255,255,255,0.3); }
+        .glass-table input[type="checkbox"] { accent-color: #11224E; width: 16px; height: 16px; cursor: pointer; }
 
-        .glass-table tbody td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            vertical-align: middle;
-            color: #222;
-        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
+        .form-field { display: flex; flex-direction: column; width: 100%; }
+        @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } .card-grid { grid-template-columns: 1fr; } }
 
-        .glass-table tbody tr {
-            transition: background-color 0.2s;
-        }
-
-        .glass-table tbody tr:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .glass-table input[type="checkbox"] {
-            accent-color: #11224E;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        .responsive-form .custom-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 700px) {
-            .responsive-form .custom-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            width: 100%;
-        }
-
-        .form-field {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        input[pInputText],
-        textarea[pInputTextarea] {
-            width: 100%;
-        }
-
-        @media (max-width: 700px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .card-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        label.required:after {
-            content: "*";
-            color: red;
-            margin-left: 5px;
-        }
-
-        .error {
-            border: 1px solid red;
-        }
-
-        .p-toolbar {
-            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        }
-
-        .card {
-            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
-        }
+        label.required:after { content: "*"; color: red; margin-left: 5px; }
+        .error { border: 1px solid red; }
+        .p-toolbar { box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5); }
+        .card { box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5); }
 
         .attachment-notice {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: 10px 14px;
-            margin-bottom: 12px;
-            font-size: 0.88rem;
-            color: #856404;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px;
+            padding: 10px 14px; margin-bottom: 12px; font-size: 0.88rem; color: #856404;
+            display: flex; align-items: center; gap: 8px;
         }
 
-        /* ══ CREATE DIALOG – No-scroll compact redesign ════════════════════════ */
-        .cd-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-        }
-
+        /* ══ CREATE DIALOG ════════════════════════════════════════════════════ */
+        .cd-wrap { display: flex; flex-direction: column; gap: 0; }
         .cd-dialog-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding-bottom: 0.6rem;
-            margin-bottom: 0.75rem;
-            border-bottom: 2px solid #c8e6c9;
+            display: flex; align-items: center; gap: 0.75rem;
+            padding-bottom: 0.6rem; margin-bottom: 0.75rem; border-bottom: 2px solid #c8e6c9;
         }
-
         .cd-dialog-header-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 9px;
-            background: #c8e6c9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1b5e20;
-            font-size: 1rem;
-            flex-shrink: 0;
+            width: 36px; height: 36px; border-radius: 9px; background: #c8e6c9;
+            display: flex; align-items: center; justify-content: center;
+            color: #1b5e20; font-size: 1rem; flex-shrink: 0;
         }
-
-        .cd-dialog-header-text {
-            flex: 1;
-        }
-
-        .cd-dialog-header-text h3 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1b5e20;
-            line-height: 1.2;
-        }
-
-        .cd-dialog-header-text p {
-            margin: 1px 0 0;
-            font-size: 0.75rem;
-            color: #558b5a;
-        }
-
-        /* ── Section group ── */
-        .cd-section {
-            margin-bottom: 0.75rem;
-        }
-
+        .cd-dialog-header-text { flex: 1; }
+        .cd-dialog-header-text h3 { margin: 0; font-size: 1rem; font-weight: 700; color: #1b5e20; line-height: 1.2; }
+        .cd-dialog-header-text p { margin: 1px 0 0; font-size: 0.75rem; color: #558b5a; }
+        .cd-section { margin-bottom: 0.75rem; }
         .cd-section-label {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.65rem;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #2e7d32;
-            margin-bottom: 0.45rem;
-            padding-bottom: 0.35rem;
-            border-bottom: 1px solid #e8f5e9;
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+            color: #2e7d32; margin-bottom: 0.45rem; padding-bottom: 0.35rem; border-bottom: 1px solid #e8f5e9;
         }
-
-        .cd-section-label i {
-            font-size: 0.7rem;
-            opacity: 0.7;
-        }
-
-        /* ── Field styles ── */
-        .cd-field {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .cd-field-label {
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #1b5e20;
-            opacity: 0.75;
-        }
-
-        .cd-field-label.req::after {
-            content: ' *';
-            color: #c0392b;
-            font-size: 0.72rem;
-        }
-
-        .cd-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem 1rem;
-        }
-
-        .cd-grid-2 .span-2 {
-            grid-column: 1 / -1;
-        }
-
+        .cd-section-label i { font-size: 0.7rem; opacity: 0.7; }
+        .cd-field { display: flex; flex-direction: column; gap: 3px; }
+        .cd-field-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1b5e20; opacity: 0.75; }
+        .cd-field-label.req::after { content: ' *'; color: #c0392b; font-size: 0.72rem; }
+        .cd-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; }
+        .cd-grid-2 .span-2 { grid-column: 1 / -1; }
         .cd-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 0.75rem;
-            padding-top: 0.65rem;
-            margin-top: 0.35rem;
-            border-top: 1px solid #e0efe1;
+            display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;
+            padding-top: 0.65rem; margin-top: 0.35rem; border-top: 1px solid #e0efe1;
         }
-
-        /* Compact textarea inside dialog */
-        .cd-wrap textarea {
-            resize: none;
-        }
-
-        /* Tighten p-message spacing inside dialog */
-        .cd-wrap p-message {
-            margin-top: 1px;
-        }
-
+        .cd-wrap textarea { resize: none; }
+        .cd-wrap p-message { margin-top: 1px; }
         @media (max-width: 650px) {
-            .cd-grid-2 {
-                grid-template-columns: 1fr;
-            }
-            .cd-grid-2 .span-2 {
-                grid-column: 1;
-            }
+            .cd-grid-2 { grid-template-columns: 1fr; }
+            .cd-grid-2 .span-2 { grid-column: 1; }
+        }
+
+        /* Loading pill shown while dropdowns fetch */
+        .dropdown-loading-hint {
+            font-size: 0.72rem; color: #6b7a99; font-style: italic;
+            display: flex; align-items: center; gap: 4px; margin-top: 2px;
         }
     `,
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        RouterModule,
-        ToolbarModule,
-        RatingModule,
-        FluidModule,
-        PanelModule,
-        AutoCompleteModule,
-        PaginatorModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        SecureFileViewerComponent,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        PasswordModule,
-        MessageModule,
-        TooltipModule
+        CommonModule, FormsModule, ReactiveFormsModule,
+        ButtonModule, RippleModule, ToastModule, RouterModule, ToolbarModule,
+        RatingModule, FluidModule, PanelModule, AutoCompleteModule, PaginatorModule,
+        InputTextModule, TextareaModule, SelectModule, RadioButtonModule, InputNumberModule,
+        SecureFileViewerComponent, DialogModule, TagModule, InputIconModule, IconFieldModule,
+        ConfirmDialogModule, PasswordModule, MessageModule, TooltipModule
     ],
     template: `
         <p-toast />
@@ -519,30 +227,20 @@ interface ExportColumn {
                 </ng-template>
             </p-toolbar>
 
-            <!-- Header row: title + view toggle -->
+            <!-- Header row -->
             <div class="flex items-center justify-between mb-3" style="flex-wrap: wrap; gap: 0.75rem;">
                 <h5 class="m-0">Add Solutions</h5>
-
-                <!-- View toggle -->
                 <div class="view-toggle">
-                    <button
-                        [class.active]="viewMode === 'table'"
-                        (click)="viewMode = 'table'; saveViewMode()"
-                        pTooltip="Table view"
-                        tooltipPosition="top">
+                    <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'; saveViewMode()" pTooltip="Table view" tooltipPosition="top">
                         <i class="pi pi-table"></i>
                     </button>
-                    <button
-                        [class.active]="viewMode === 'card'"
-                        (click)="viewMode = 'card'; saveViewMode()"
-                        pTooltip="Card view"
-                        tooltipPosition="top">
+                    <button [class.active]="viewMode === 'card'" (click)="viewMode = 'card'; saveViewMode()" pTooltip="Card view" tooltipPosition="top">
                         <i class="pi pi-th-large"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- ══ TABLE VIEW ═════════════════════════════════════════════════ -->
+            <!-- TABLE VIEW -->
             <ng-container *ngIf="viewMode === 'table'">
                 <div class="custom-table-container">
                     <table class="glass-table">
@@ -550,23 +248,13 @@ interface ExportColumn {
                             <tr>
                                 <th>Select</th>
                                 <th *ngIf="customervalid">Customer Name</th>
-                                <th>Domain</th>
-                                <th>Sector</th>
-                                <th>Module Name</th>
-                                <th>Detailed Requirement</th>
-                                <th>Object Type</th>
-                                <th>Technical details</th>
-                                <th>Customer Benefit</th>
-                                <th>Code/Process Document</th>
-                                <th>Created On</th>
-                                <th>Created User</th>
-                                <th>Immediate Response Manager(IRM)</th>
-                                <th>Secondary Response Manager(SRM)</th>
-                                <th>Business Unit Head(BUH)</th>
-                                <th>Business Group Head(BGH)</th>
-                                <th>Status</th>
-                                <th>By User</th>
-                                <th>Actions</th>
+                                <th>Domain</th><th>Sector</th><th>Module Name</th>
+                                <th>Detailed Requirement</th><th>Object Type</th>
+                                <th>Technical details</th><th>Customer Benefit</th>
+                                <th>Code/Process Document</th><th>Created On</th>
+                                <th>Created User</th><th>IRM</th><th>SRM</th>
+                                <th>BUH</th><th>BGH</th><th>Status</th>
+                                <th>By User</th><th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -577,276 +265,143 @@ interface ExportColumn {
                                         (change)="onCheckboxChange(repo, $event)"
                                         [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
                                 </td>
-                                <td *ngIf="customervalid" style="white-space: nowrap;">{{ repo.customer_name }}</td>
-                                <td style="white-space: nowrap;">{{ repo.domain }}</td>
-                                <td style="white-space: nowrap;">{{ repo.sector }}</td>
-                                <td style="white-space: nowrap;">{{ repo.module_name }}</td>
+                                <td *ngIf="customervalid" style="white-space:nowrap">{{ repo.customer_name }}</td>
+                                <td style="white-space:nowrap">{{ repo.domain }}</td>
+                                <td style="white-space:nowrap">{{ repo.sector }}</td>
+                                <td style="white-space:nowrap">{{ repo.module_name }}</td>
                                 <td>{{ repo.detailed_requirement }}</td>
                                 <td>{{ repo.standard_custom }}</td>
                                 <td>{{ repo.technical_details }}</td>
                                 <td>{{ repo.customer_benefit }}</td>
                                 <td>
-                                    <div class="flex" style="min-width: 100px; gap: 0.5rem;">
-                                        <app-secure-file-viewer
-                                            [repoId]="repo.id"
-                                            [filename]="repo.attachment_filename || ''"
-                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'"
-                                            apiBase="http://10.6.102.245:5002">
-                                        </app-secure-file-viewer>
+                                    <div class="flex" style="min-width:100px; gap:0.5rem">
+                                        <app-secure-file-viewer [repoId]="repo.id" [filename]="repo.attachment_filename || ''" [disabled]="repo.attach_code_or_document === 'UPLOADED'" apiBase="http://10.6.102.245:5002"></app-secure-file-viewer>
                                         <ng-container *ngIf="isAdmin; else normalUserBlock">
-                                            <p-button
-                                                label="Download"
-                                                icon="pi pi-download"
-                                                severity="primary"
-                                                (click)="download_ref(repo, repo.id)"
-                                                [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                            </p-button>
+                                            <p-button label="Download" icon="pi pi-download" severity="primary" (click)="download_ref(repo, repo.id)" [disabled]="repo.attach_code_or_document === 'UPLOADED'"></p-button>
                                         </ng-container>
                                         <ng-template #normalUserBlock>
                                             <ng-container *ngIf="repo.download_approved; else requestBlock">
-                                                <p-button
-                                                    label="Download"
-                                                    icon="pi pi-download"
-                                                    severity="primary"
-                                                    (click)="download_ref(repo, repo.id)"
-                                                    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                                </p-button>
+                                                <p-button label="Download" icon="pi pi-download" severity="primary" (click)="download_ref(repo, repo.id)" [disabled]="repo.attach_code_or_document === 'UPLOADED'"></p-button>
                                             </ng-container>
                                             <ng-template #requestBlock>
-                                                <p-button
-                                                    label="Request"
-                                                    icon="pi pi-send"
-                                                    severity="help"
-                                                    (click)="openDownloadRequestDialog(repo)"
-                                                    [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                                </p-button>
+                                                <p-button label="Request" icon="pi pi-send" severity="help" (click)="openDownloadRequestDialog(repo)" [disabled]="repo.attach_code_or_document === 'UPLOADED'"></p-button>
                                             </ng-template>
                                         </ng-template>
                                     </div>
                                 </td>
-                                <td style="white-space: nowrap;">{{ formatDate(repo.created_at) }}</td>
-                                <td style="white-space: nowrap; text-align: center">{{ repo.username }}</td>
-                                <td style="white-space: nowrap; text-align: center">{{ repo.irm }}</td>
-                                <td style="white-space: nowrap; text-align: center">{{ repo.srm }}</td>
-                                <td style="white-space: nowrap; text-align: center">{{ repo.buh }}</td>
-                                <td style="white-space: nowrap; text-align: center">{{ repo.bgh }}</td>
-                                <td style="white-space: nowrap; text-align: center">
-                                    <p-tag
-                                        [value]="repo.Approval_status"
-                                        [severity]="getApprovalSeverity(repo.Approval_status)"
-                                        [rounded]="true">
-                                    </p-tag>
+                                <td style="white-space:nowrap">{{ formatDate(repo.created_at) }}</td>
+                                <td style="white-space:nowrap; text-align:center">{{ repo.username }}</td>
+                                <td style="white-space:nowrap; text-align:center">{{ repo.irm }}</td>
+                                <td style="white-space:nowrap; text-align:center">{{ repo.srm }}</td>
+                                <td style="white-space:nowrap; text-align:center">{{ repo.buh }}</td>
+                                <td style="white-space:nowrap; text-align:center">{{ repo.bgh }}</td>
+                                <td style="white-space:nowrap; text-align:center">
+                                    <p-tag [value]="repo.Approval_status" [severity]="getApprovalSeverity(repo.Approval_status)" [rounded]="true"></p-tag>
                                 </td>
-                                <td style="white-space: nowrap; text-align: center">
-                                    <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">
-                                        Solution with {{ repo.username }}
-                                    </ng-container>
-                                    <ng-template #validated>
-                                        Validated by {{ repo.Approver }}
-                                    </ng-template>
+                                <td style="white-space:nowrap; text-align:center">
+                                    <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else validated">Solution with {{ repo.username }}</ng-container>
+                                    <ng-template #validated>Validated by {{ repo.Approver }}</ng-template>
                                 </td>
                                 <td>
-                                    <div class="flex" style="min-width: 100px; gap: 0.5rem;">
+                                    <div class="flex" style="min-width:100px; gap:0.5rem">
                                         <button pButton pRipple icon="pi pi-paperclip" class="p-button-rounded p-button-info" *ngIf="attachvalid" (click)="upload_ref(repo)"></button>
                                         <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="delete_Repo(repo)"></button>
                                     </div>
                                 </td>
                             </tr>
                             <tr *ngIf="repositories().length === 0 && !loading">
-                                <td colspan="17" style="text-align:center; padding: 2rem;">No Repositories found.</td>
+                                <td colspan="17" style="text-align:center; padding:2rem">No Repositories found.</td>
                             </tr>
                             <tr *ngIf="loading">
-                                <td colspan="17" style="text-align:center; padding: 2rem;">Loading Data...</td>
+                                <td colspan="17" style="text-align:center; padding:2rem">Loading Data...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </ng-container>
 
-            <!-- ══ CARD VIEW ══════════════════════════════════════════════════ -->
+            <!-- CARD VIEW -->
             <ng-container *ngIf="viewMode === 'card'">
-                <div *ngIf="loading" style="text-align:center; padding: 2rem; color:#666;">
-                    <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
-                    <p>Loading Data...</p>
+                <div *ngIf="loading" style="text-align:center; padding:2rem; color:#666">
+                    <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i><p>Loading Data...</p>
                 </div>
-
-                <div *ngIf="!loading && repositories().length === 0" style="text-align:center; padding: 3rem; color:#888;">
-                    <i class="pi pi-inbox" style="font-size:3rem; display:block; margin-bottom:1rem;"></i>
-                    No Repositories found.
+                <div *ngIf="!loading && repositories().length === 0" style="text-align:center; padding:3rem; color:#888">
+                    <i class="pi pi-inbox" style="font-size:3rem; display:block; margin-bottom:1rem"></i>No Repositories found.
                 </div>
-
                 <div class="card-grid" *ngIf="!loading && repositories().length > 0">
-                    <div
-                        class="repo-card has-checkbox"
-                        *ngFor="let repo of repositories()">
-
-                        <input
-                            type="checkbox"
-                            class="repo-card-select"
-                            [checked]="isRepoSelected(repo)"
-                            (change)="onCheckboxChange(repo, $event)"
-                            [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" />
-                        <br>
+                    <div class="repo-card has-checkbox" *ngFor="let repo of repositories()">
+                        <input type="checkbox" class="repo-card-select" [checked]="isRepoSelected(repo)" (change)="onCheckboxChange(repo, $event)" [disabled]="!isAdmin && repo.Approval_status !== 'Approved'" /><br>
                         <div class="repo-card-header">
                             <div>
                                 <div class="repo-card-title">{{ repo.module_name }}</div>
                                 <div class="repo-card-subtitle" *ngIf="customervalid">{{ repo.customer_name }}</div>
                             </div>
-                            <p-tag
-                                [value]="repo.Approval_status"
-                                [severity]="getApprovalSeverity(repo.Approval_status)"
-                                [rounded]="true"
-                                style="flex-shrink:0">
-                            </p-tag>
+                            <p-tag [value]="repo.Approval_status" [severity]="getApprovalSeverity(repo.Approval_status)" [rounded]="true" style="flex-shrink:0"></p-tag>
                         </div>
-
                         <div class="repo-card-badges">
                             <span class="badge badge-domain">Domain: {{ repo.domain }}</span>
                             <span class="badge badge-sector">Sector: {{ repo.sector }}</span>
                         </div>
-
                         <hr class="repo-card-divider" />
-
-                        <div class="repo-card-field" *ngIf="repo.detailed_requirement">
-                            <strong>Detailed Requirement:</strong> {{ repo.detailed_requirement || 'NA' }}
-                        </div>
-                        <div class="repo-card-field" *ngIf="repo.technical_details">
-                            <strong>Technical Details:</strong> {{ repo.technical_details || 'NA' }}
-                        </div>
-                        <div class="repo-card-field" *ngIf="repo.customer_benefit">
-                            <strong>Customer Benefit:</strong> {{ repo.customer_benefit || 'NA' }}
-                        </div>
-                        <div class="repo-card-field" *ngIf="repo.standard_custom">
-                            <strong>Object Type:</strong> {{ repo.standard_custom || 'NA' }}
-                        </div>
-
-                        <div class="repo-card-field" *ngIf="repo.irm || repo.srm || repo.buh || repo.bgh">
-                            <strong>IRM:</strong> {{ repo.irm || 'NA' }}
-                        </div>
-
+                        <div class="repo-card-field" *ngIf="repo.detailed_requirement"><strong>Detailed Requirement:</strong> {{ repo.detailed_requirement }}</div>
+                        <div class="repo-card-field" *ngIf="repo.technical_details"><strong>Technical Details:</strong> {{ repo.technical_details }}</div>
+                        <div class="repo-card-field" *ngIf="repo.customer_benefit"><strong>Customer Benefit:</strong> {{ repo.customer_benefit }}</div>
+                        <div class="repo-card-field" *ngIf="repo.standard_custom"><strong>Object Type:</strong> {{ repo.standard_custom }}</div>
+                        <div class="repo-card-field" *ngIf="repo.irm"><strong>IRM:</strong> {{ repo.irm }}</div>
                         <hr class="repo-card-divider" />
-
                         <div class="repo-card-footer">
                             <div class="repo-card-meta">
-                                <i class="pi pi-calendar" style="margin-right:4px"></i>Created on: {{ formatDate(repo.created_at) }}
-                                &nbsp;&nbsp;
-                                <i class="pi pi-user" style="margin-right:4px"></i>{{ repo.username }}
+                                <i class="pi pi-calendar" style="margin-right:4px"></i>{{ formatDate(repo.created_at) }}
+                                &nbsp;&nbsp;<i class="pi pi-user" style="margin-right:4px"></i>{{ repo.username }}
                             </div>
-
                             <div class="repo-card-actions">
-                                <app-secure-file-viewer
-                                    [repoId]="repo.id"
-                                    [filename]="repo.attachment_filename || ''"
-                                    [disabled]="repo.attach_code_or_document === 'UPLOADED'"
-                                    apiBase="http://10.6.102.245:5002">
-                                </app-secure-file-viewer>
-
+                                <app-secure-file-viewer [repoId]="repo.id" [filename]="repo.attachment_filename || ''" [disabled]="repo.attach_code_or_document === 'UPLOADED'" apiBase="http://10.6.102.245:5002"></app-secure-file-viewer>
                                 <ng-container *ngIf="isAdmin; else cardNormalUser">
-                                    <p-button
-                                        icon="pi pi-download"
-                                        severity="primary"
-                                        [rounded]="true"
-                                        pTooltip="Download"
-                                        tooltipPosition="top"
-                                        (click)="download_ref(repo, repo.id)"
-                                        [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                    </p-button>
+                                    <p-button icon="pi pi-download" severity="primary" [rounded]="true" pTooltip="Download" tooltipPosition="top" (click)="download_ref(repo, repo.id)" [disabled]="repo.attach_code_or_document === 'UPLOADED'"></p-button>
                                 </ng-container>
-
                                 <ng-template #cardNormalUser>
                                     <ng-container *ngIf="repo.download_approved; else cardRequest">
-                                        <p-button
-                                            icon="pi pi-download"
-                                            severity="primary"
-                                            [rounded]="true"
-                                            pTooltip="Download"
-                                            tooltipPosition="top"
-                                            (click)="download_ref(repo, repo.id)"
-                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                        </p-button>
+                                        <p-button icon="pi pi-download" severity="primary" [rounded]="true" pTooltip="Download" tooltipPosition="top" (click)="download_ref(repo, repo.id)" [disabled]="repo.attach_code_or_document === 'UPLOADED'"></p-button>
                                     </ng-container>
                                     <ng-template #cardRequest>
-                                        <p-button
-                                            icon="pi pi-send"
-                                            severity="help"
-                                            [rounded]="true"
-                                            pTooltip="Request Access"
-                                            tooltipPosition="top"
-                                            (click)="openDownloadRequestDialog(repo)"
-                                            [disabled]="repo.attach_code_or_document === 'UPLOADED'">
-                                        </p-button>
+                                        <p-button icon="pi pi-send" severity="help" [rounded]="true" pTooltip="Request Access" tooltipPosition="top" (click)="openDownloadRequestDialog(repo)" [disabled]="repo.attach_code_or_document === 'UPLOADED'"></p-button>
                                     </ng-template>
                                 </ng-template>
-
-                                <p-button
-                                    *ngIf="attachvalid"
-                                    pButton pRipple
-                                    icon="pi pi-paperclip"
-                                    severity="info"
-                                    rounded="true"
-                                    pTooltip="Attach Document"
-                                    tooltipPosition="top"
-                                    (click)="upload_ref(repo)">
-                                </p-button>
-
-                                <p-button
-                                    pButton pRipple
-                                    icon="pi pi-trash"
-                                    severity="danger"
-                                    rounded="true"
-                                    pTooltip="Delete"
-                                    tooltipPosition="top"
-                                    (click)="delete_Repo(repo)">
-                                </p-button>
+                                <p-button *ngIf="attachvalid" icon="pi pi-paperclip" severity="info" [rounded]="true" pTooltip="Attach Document" tooltipPosition="top" (click)="upload_ref(repo)"></p-button>
+                                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" pTooltip="Delete" tooltipPosition="top" (click)="delete_Repo(repo)"></p-button>
                             </div>
                         </div>
-
-                        <div class="repo-card-meta" style="margin-top:2px;">
+                        <div class="repo-card-meta" style="margin-top:2px">
                             <ng-container *ngIf="repo.Approval_status === 'Sent for Approval'; else cardValidated">
                                 <i class="pi pi-clock" style="margin-right:4px"></i>Solution with {{ repo.username }}
                             </ng-container>
                             <ng-template #cardValidated>
-                                <i class="pi pi-check-circle" style="margin-right:4px;color:#2e7d32"></i>Validated by {{ repo.Approver }}
+                                <i class="pi pi-check-circle" style="margin-right:4px; color:#2e7d32"></i>Validated by {{ repo.Approver }}
                             </ng-template>
                         </div>
                     </div>
                 </div>
             </ng-container>
 
-            <!-- Paginator (shared) -->
-            <p-paginator
-                [totalRecords]="totalitems"
-                [first]="first"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos"
-                [showCurrentPageReport]="true"
-                [rows]="6"
-                (onPageChange)="onPageChange($event)">
-            </p-paginator>
+            <p-paginator [totalRecords]="totalitems" [first]="first" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Repos" [showCurrentPageReport]="true" [rows]="6" (onPageChange)="onPageChange($event)"></p-paginator>
         </div>
 
-        <!-- ===================== BULK UPLOAD DIALOG ===================== -->
+        <!-- BULK UPLOAD DIALOG -->
         <p-dialog [(visible)]="uploaddialog" header="Upload Solutions" [modal]="true" [style]="{ width: '450px' }">
-            <div class="flex align-items-c justify-content-c">
-                <div>
-                    <label class="custom-file-label">Choose Excel and Attachments</label>
-                    <input type="file" class="custom-file-input" multiple (change)="onFilesSelected($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
-                </div>
-            </div>
+            <div><label class="custom-file-label">Choose Excel and Attachments</label>
+            <input type="file" class="custom-file-input" multiple (change)="onFilesSelected($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" /></div>
             <ng-template pTemplate="footer">
                 <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploaddialog = false"></button>
                 <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Upload" (click)="uploadFiles()" [disabled]="!selectedFiles.length"></button>
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== SEND FOR APPROVAL DIALOG ===================== -->
+        <!-- SEND FOR APPROVAL -->
         <p-dialog [(visible)]="sendforapprovaldialog" header="Send the Repository for Approval" [modal]="true" [style]="{ width: '450px' }">
             <div class="flex align-items-c justify-content-c">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span *ngIf="repository">
-                    Are you sure you want to Send the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository for Approval?
-                </span>
-            </div>
-            <br>
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size:2rem"></i>
+                <span *ngIf="repository">Are you sure you want to Send the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository for Approval?</span>
+            </div><br>
             <ng-template pTemplate="content">
                 <form [formGroup]="approvalForm">
                     <label class="required" for="business_justification">Business Justification</label>
@@ -862,20 +417,15 @@ interface ExportColumn {
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== APPROVE DIALOG ===================== -->
+        <!-- APPROVE DIALOG -->
         <p-dialog [(visible)]="approvedialog" header="Approve the Repository" [modal]="true" [style]="{ width: '450px' }">
             <div class="flex align-items-c justify-content-c">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span *ngIf="repository">
-                    Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
-                </span>
-            </div>
-            <br>
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size:2rem"></i>
+                <span *ngIf="repository">Are you sure you want to approve the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?</span>
+            </div><br>
             <ng-template pTemplate="content">
                 <label for="business_justification">Business Justification</label>
-                <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
-                    {{ repository.business_justification }}
-                </div>
+                <div id="business_justification" style="min-height:72px; padding:0.5rem; border:1px solid #ccc; border-radius:4px; background:#f9f9f9">{{ repository.business_justification }}</div>
             </ng-template>
             <ng-template pTemplate="footer">
                 <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="sendforapprovaldialog = false"></button>
@@ -883,20 +433,15 @@ interface ExportColumn {
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== REJECT DIALOG ===================== -->
+        <!-- REJECT DIALOG -->
         <p-dialog [(visible)]="rejectdialog" header="Reject the Repository" [modal]="true" [style]="{ width: '450px' }">
             <div class="flex align-items-c justify-content-c">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span *ngIf="repository">
-                    Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
-                </span>
-            </div>
-            <br>
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size:2rem"></i>
+                <span *ngIf="repository">Are you sure you want to reject the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?</span>
+            </div><br>
             <ng-template pTemplate="content">
                 <label for="business_justification">Business Justification</label>
-                <div id="business_justification" style="min-height: 72px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
-                    {{ repository.business_justification }}
-                </div>
+                <div id="business_justification" style="min-height:72px; padding:0.5rem; border:1px solid #ccc; border-radius:4px; background:#f9f9f9">{{ repository.business_justification }}</div>
             </ng-template>
             <ng-template pTemplate="footer">
                 <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="rejectdialog = false"></button>
@@ -904,42 +449,23 @@ interface ExportColumn {
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== CREATE REPOSITORY DIALOG ===================== -->
-        <p-dialog
-            [(visible)]="createdialog"
-            [modal]="true"
-            [showHeader]="false"
-            [style]="{ width: '860px' }"
-            [contentStyle]="{ padding: '1.25rem', overflow: 'visible' }"
-            [resizable]="false">
+        <!-- CREATE REPOSITORY DIALOG -->
+        <p-dialog [(visible)]="createdialog" [modal]="true" [showHeader]="false" [style]="{ width: '860px' }" [contentStyle]="{ padding: '1.25rem', overflow: 'visible' }" [resizable]="true" [draggable]="true">
             <ng-template pTemplate="content">
                 <div class="cd-wrap">
-
-                    <!-- Header -->
                     <div class="cd-dialog-header">
-                        <div class="cd-dialog-header-icon">
-                            <i class="pi pi-file-edit"></i>
-                        </div>
+                        <div class="cd-dialog-header-icon"><i class="pi pi-file-edit"></i></div>
                         <div class="cd-dialog-header-text">
                             <h3>Create Repository</h3>
                             <p>Complete all fields below — an attachment will be required in the next step.</p>
                         </div>
-                        <button
-                            pButton pRipple
-                            type="button"
-                            icon="pi pi-times"
-                            class="p-button-text p-button-rounded p-button-plain"
-                            (click)="createdialog = false">
-                        </button>
+                        <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text p-button-rounded p-button-plain" (click)="createdialog = false"></button>
                     </div>
 
                     <form [formGroup]="repoForm" (ngSubmit)="onSubmit()">
-
                         <!-- §1 Identity -->
                         <div class="cd-section">
-                            <div class="cd-section-label">
-                                <i class="pi pi-building"></i> Identity
-                            </div>
+                            <div class="cd-section-label"><i class="pi pi-building"></i> Identity</div>
                             <div class="cd-grid-2">
                                 <div class="cd-field">
                                     <label class="cd-field-label req">Customer Name</label>
@@ -948,13 +474,17 @@ interface ExportColumn {
                                 </div>
                                 <div class="cd-field">
                                     <label class="cd-field-label req">Domain</label>
-                                    <p-autoComplete
+                                    <!-- Loading hint -->
+                                    <div *ngIf="dropdownsLoading" class="dropdown-loading-hint">
+                                        <i class="pi pi-spin pi-spinner"></i> Loading domains…
+                                    </div>
+                                    <p-autoComplete *ngIf="!dropdownsLoading"
                                         inputId="domain"
                                         formControlName="domain"
                                         [suggestions]="filteredDomains"
                                         (completeMethod)="filterDomain($event)"
-                                        dropdown="true"
-                                        minLength="1"
+                                        [dropdown]="true"
+                                        minLength="0"
                                         placeholder="Select Domain"
                                         (onSelect)="onDomainSelect($event)"
                                         styleClass="w-full">
@@ -966,19 +496,20 @@ interface ExportColumn {
 
                         <!-- §2 Classification -->
                         <div class="cd-section">
-                            <div class="cd-section-label">
-                                <i class="pi pi-tag"></i> Classification
-                            </div>
+                            <div class="cd-section-label"><i class="pi pi-tag"></i> Classification</div>
                             <div class="cd-grid-2">
                                 <div class="cd-field">
                                     <label class="cd-field-label req">Sector</label>
-                                    <p-autoComplete
+                                    <div *ngIf="dropdownsLoading" class="dropdown-loading-hint">
+                                        <i class="pi pi-spin pi-spinner"></i> Loading sectors…
+                                    </div>
+                                    <p-autoComplete *ngIf="!dropdownsLoading"
                                         inputId="sector"
                                         formControlName="sector"
                                         [suggestions]="filteredSectors"
                                         (completeMethod)="filterSector($event)"
-                                        dropdown="true"
-                                        minLength="1"
+                                        [dropdown]="true"
+                                        minLength="0"
                                         placeholder="Select Sector"
                                         [disabled]="!selectedDomain"
                                         styleClass="w-full">
@@ -987,14 +518,17 @@ interface ExportColumn {
                                 </div>
                                 <div class="cd-field">
                                     <label class="cd-field-label req">Module Name</label>
-                                    <p-autoComplete
+                                    <div *ngIf="dropdownsLoading" class="dropdown-loading-hint">
+                                        <i class="pi pi-spin pi-spinner"></i> Loading modules…
+                                    </div>
+                                    <p-autoComplete *ngIf="!dropdownsLoading"
                                         inputId="modulename"
                                         formControlName="module_name"
                                         [suggestions]="filteredModules"
                                         (completeMethod)="filterModule($event)"
                                         appendTo="body"
                                         [dropdown]="true"
-                                        [minLength]="1"
+                                        [minLength]="0"
                                         placeholder="Select Module"
                                         styleClass="w-full">
                                     </p-autoComplete>
@@ -1002,13 +536,7 @@ interface ExportColumn {
                                 </div>
                                 <div class="cd-field">
                                     <label class="cd-field-label req">Object Type</label>
-                                    <p-select
-                                        inputId="standard_custom"
-                                        formControlName="standard_custom"
-                                        [options]="standardCustomOptions"
-                                        placeholder="Select Type"
-                                        styleClass="w-full">
-                                    </p-select>
+                                    <p-select inputId="standard_custom" formControlName="standard_custom" [options]="standardCustomOptions" placeholder="Select Type" styleClass="w-full"></p-select>
                                     <p-message *ngIf="repoForm.controls['standard_custom'].invalid && repoForm.controls['standard_custom'].touched" severity="error" text="Object Type is required"></p-message>
                                 </div>
                                 <div class="cd-field">
@@ -1021,18 +549,16 @@ interface ExportColumn {
 
                         <!-- §3 Details -->
                         <div class="cd-section">
-                            <div class="cd-section-label">
-                                <i class="pi pi-align-left"></i> Details
-                            </div>
+                            <div class="cd-section-label"><i class="pi pi-align-left"></i> Details</div>
                             <div class="cd-grid-2">
                                 <div class="cd-field span-2">
                                     <label class="cd-field-label req">Detailed Requirement</label>
-                                    <textarea id="detailed_requirement" pInputTextarea rows="2" formControlName="detailed_requirement" placeholder="Describe the business requirement in detail…"></textarea>
+                                    <textarea id="detailed_requirement" pInputTextarea rows="5"  formControlName="detailed_requirement" placeholder="Describe the business requirement in detail…"></textarea>
                                     <p-message *ngIf="repoForm.controls['detailed_requirement'].invalid && repoForm.controls['detailed_requirement'].touched" severity="error" text="Detailed Requirement is required"></p-message>
                                 </div>
                                 <div class="cd-field span-2">
                                     <label class="cd-field-label req">Technical Details</label>
-                                    <textarea id="technical_details" pInputTextarea rows="2" formControlName="technical_details" placeholder="Z-object name, ABAP class, API endpoint…"></textarea>
+                                    <textarea id="technical_details" pInputTextarea rows="5"  formControlName="technical_details" placeholder="Z-object name, ABAP class, API endpoint…"></textarea>
                                     <p-message *ngIf="repoForm.controls['technical_details'].invalid && repoForm.controls['technical_details'].touched" severity="error" text="Technical Details is required"></p-message>
                                 </div>
                             </div>
@@ -1040,123 +566,41 @@ interface ExportColumn {
 
                         <!-- Footer -->
                         <div class="cd-footer">
-                            <button
-                                pButton pRipple
-                                type="button"
-                                icon="pi pi-times"
-                                class="p-button-outlined p-button-plain"
-                                label="Cancel"
-                                (click)="createdialog = false">
-                            </button>
-                            <button
-                                pButton pRipple
-                                type="button"
-                                icon="pi pi-paperclip"
-                                label="Next: Attach Document"
-                                [disabled]="repoForm.invalid"
-                                (click)="onSubmit()">
-                            </button>
+                            <button pButton pRipple type="button" icon="pi pi-times" class="p-button-outlined p-button-plain" label="Cancel" (click)="createdialog = false"></button>
+                            <button pButton pRipple type="button" icon="pi pi-paperclip" label="Next: Attach Document" [disabled]="repoForm.invalid" (click)="onSubmit()"></button>
                         </div>
-
                     </form>
                 </div>
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== EDIT REPOSITORY DIALOG ===================== -->
-        <p-dialog [(visible)]="editrepodialog" header="Create Repository" [modal]="true" [style]="{ width: '700px' }" [resizable]="false">
-            <ng-template pTemplate="content">
-                <form [formGroup]="repoForm" (ngSubmit)="onSubmit()" class="responsive-form">
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label for="customer_name">Customer Name</label>
-                            <input id="customer_name" pInputText formControlName="customer_name" />
-                        </div>
-                    </div>
-                    <div style="margin-top:24px;">
-                        <button pButton type="submit" label="Submit" [disabled]="repoForm.invalid"></button>
-                    </div>
-                </form>
-            </ng-template>
-        </p-dialog>
-
-        <!-- ===================== ATTACH CODE/PROCESS DOCUMENT DIALOG ===================== -->
-        <p-dialog
-            [(visible)]="uploadcodeprocessdocdialog"
-            [header]="isNewRepoAttachment ? 'Attach Code/Process Document (Required)' : 'Attach Code/Process Document for Reference'"
-            [modal]="true"
-            [style]="{ width: '450px' }"
-            [closable]="!isNewRepoAttachment">
-
+        <!-- ATTACH DIALOG -->
+        <p-dialog [(visible)]="uploadcodeprocessdocdialog" [header]="isNewRepoAttachment ? 'Attach Code/Process Document (Required)' : 'Attach Code/Process Document for Reference'" [modal]="true" [style]="{ width: '450px' }" [closable]="!isNewRepoAttachment">
             <div class="attachment-notice" *ngIf="isNewRepoAttachment">
-                <i class="pi pi-exclamation-circle" style="font-size: 1.2rem;"></i>
-                <span>Add Attachment <strong>required</strong> with Max size of 16mb </span>
+                <i class="pi pi-exclamation-circle" style="font-size:1.2rem"></i>
+                <span>Add Attachment <strong>required</strong> with Max size of 16mb</span>
             </div>
-
             <div class="flex align-items-c justify-content-c">
                 <div style="width:100%">
-                    <label class="custom-file-label">
-                        Choose File
-                        <span *ngIf="isNewRepoAttachment" style="color:red"> *</span>
-                    </label>
+                    <label class="custom-file-label">Choose File<span *ngIf="isNewRepoAttachment" style="color:red"> *</span></label>
                     <input #fileInput type="file" class="custom-file-input" (change)="onUpload($event)" accept=".xlsx,.pdf,.zip,.docx,.txt" />
-                    <small *ngIf="isNewRepoAttachment && !file" style="color: #856404; margin-top: 4px; display:block;">
-                        Please select a file to proceed.
-                    </small>
-                    <small *ngIf="file" style="color: #198754; margin-top: 4px; display:block;">
-                        <i class="pi pi-check-circle"></i> {{ file.name }}
-                    </small>
+                    <small *ngIf="isNewRepoAttachment && !file" style="color:#856404; margin-top:4px; display:block">Please select a file to proceed.</small>
+                    <small *ngIf="file" style="color:#198754; margin-top:4px; display:block"><i class="pi pi-check-circle"></i> {{ file.name }}</small>
                 </div>
             </div>
-
             <ng-template pTemplate="footer">
-                <button
-                    *ngIf="isNewRepoAttachment"
-                    pButton pRipple
-                    icon="pi pi-arrow-left"
-                    class="p-button-text"
-                    label="Back"
-                    (click)="onAttachmentBack()">
-                </button>
-
-                <button
-                    *ngIf="!isNewRepoAttachment"
-                    pButton pRipple
-                    icon="pi pi-times"
-                    class="p-button-text"
-                    label="Cancel"
-                    (click)="uploadcodeprocessdocdialog = false">
-                </button>
-
-                <button
-                    *ngIf="isNewRepoAttachment"
-                    pButton pRipple
-                    icon="pi pi-check"
-                    class="p-button-text"
-                    label="Save Solution"
-                    (click)="submitNewRepoWithAttachment()"
-                    [disabled]="!file">
-                </button>
-
-                <button
-                    *ngIf="!isNewRepoAttachment"
-                    pButton pRipple
-                    icon="pi pi-check"
-                    class="p-button-text"
-                    label="Attach"
-                    (click)="submitData(repository)"
-                    [disabled]="!file">
-                </button>
+                <button *ngIf="isNewRepoAttachment" pButton pRipple icon="pi pi-arrow-left" class="p-button-text" label="Back" (click)="onAttachmentBack()"></button>
+                <button *ngIf="!isNewRepoAttachment" pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="uploadcodeprocessdocdialog = false"></button>
+                <button *ngIf="isNewRepoAttachment" pButton pRipple icon="pi pi-check" class="p-button-text" label="Save Solution" (click)="submitNewRepoWithAttachment()" [disabled]="!file"></button>
+                <button *ngIf="!isNewRepoAttachment" pButton pRipple icon="pi pi-check" class="p-button-text" label="Attach" (click)="submitData(repository)" [disabled]="!file"></button>
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== DELETE DIALOG ===================== -->
+        <!-- DELETE DIALOG -->
         <p-dialog [(visible)]="deleteRepoDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
             <div class="flex align-items-c justify-content-c">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span *ngIf="repository">
-                    Are you sure you want to delete the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?
-                </span>
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size:2rem"></i>
+                <span *ngIf="repository">Are you sure you want to delete the <b>{{ repository.customer_name }}'s - {{ repository.module_name }}</b> Repository?</span>
             </div>
             <ng-template pTemplate="footer">
                 <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteRepoDialog = false"></button>
@@ -1164,26 +608,12 @@ interface ExportColumn {
             </ng-template>
         </p-dialog>
 
-        <!-- ===================== DOWNLOAD REQUEST DIALOG ===================== -->
-        <p-dialog
-            [(visible)]="downloadRequestDialog"
-            header="Request Download Access"
-            [modal]="true"
-            [style]="{ width: '450px' }">
+        <!-- DOWNLOAD REQUEST DIALOG -->
+        <p-dialog [(visible)]="downloadRequestDialog" header="Request Download Access" [modal]="true" [style]="{ width: '450px' }">
             <form [formGroup]="downloadRequestForm">
                 <label class="required" for="justification">Business Justification</label>
-                <textarea
-                    id="justification"
-                    pInputTextarea
-                    rows="3"
-                    formControlName="justification">
-                </textarea>
-                <p-message
-                    *ngIf="downloadRequestForm.controls['justification'].errors?.['required'] &&
-                           downloadRequestForm.controls['justification'].touched"
-                    severity="error"
-                    text="Business Justification is required">
-                </p-message>
+                <textarea id="justification" pInputTextarea rows="3" formControlName="justification"></textarea>
+                <p-message *ngIf="downloadRequestForm.controls['justification'].errors?.['required'] && downloadRequestForm.controls['justification'].touched" severity="error" text="Business Justification is required"></p-message>
             </form>
             <ng-template pTemplate="footer">
                 <button pButton type="button" class="p-button-text" label="Cancel" (click)="downloadRequestDialog = false"></button>
@@ -1193,363 +623,299 @@ interface ExportColumn {
     `,
     providers: [MessageService, ManageReposService, ConfirmationService]
 })
-export class AddSolutions implements OnInit {
-    adminDialog: boolean = false;
-    repositories = signal<Repository[]>([]);
+export class AddSolutions implements OnInit, AfterViewInit {
+
+    // ── Repo state ────────────────────────────────────────────────────────
+    repositories     = signal<Repository[]>([]);
     repository!: Repository;
     selectedrepositories: Repository[] = [];
-    submitted: boolean = false;
-    selectedFile: File | null = null;
-    searchTerm: string = '';
-    filteredRepoList: Repository[] = [];
-    downloadRequestDialog: boolean = false;
-    downloadRequestForm!: FormGroup;
-    selectedDownloadRepo!: Repository;
     exportColumns!: ExportColumn[];
-    isvalid: boolean = false;
-    issent: boolean = false;
     cols!: Column[];
-    downloadvalid: boolean = false;
-    uploaddialog: boolean = false;
-    approvedialog: boolean = false;
-    createdialog: boolean = false;
-    messages: any[] = [];
+
+    // ── UI flags ──────────────────────────────────────────────────────────
+    loading                   = true;
+    dropdownsLoading          = false;   // true while API calls for dropdowns run
+    adminDialog               = false;
+    uploaddialog              = false;
+    approvedialog             = false;
+    createdialog              = false;
+    sendforapprovaldialog     = false;
+    deleteRepoDialog          = false;
+    rejectdialog              = false;
+    editrepodialog            = false;
+    uploadcodeprocessdocdialog = false;
+    downloadRequestDialog     = false;
+    isNewRepoAttachment       = false;
+    isvalid                   = false;
+    issent                    = false;
+    customervalid             = false;
+    downloadvalid             = false;
+    attachvalid               = false;
+    sendforapproval           = false;
+
+    // ── Pagination ────────────────────────────────────────────────────────
     AddSolCurrentPage!: number;
-    page!: number;
     first!: number;
-    customervalid: boolean = false;
-    loading: boolean = true;
-    repoForm!: FormGroup;
-    approvalForm!: FormGroup;
     totalitems!: number;
     totalrecords: any;
-    attachvalid: boolean = false;
-    sendforapproval: boolean = false;
-    sendforapprovaldialog: boolean = false;
-    deleteRepoDialog: boolean = false;
-    rejectdialog: boolean = false;
-    domainOptions: string[] = [];
-    sectorOptions: { [key: string]: string[] } = {};
-    filteredDomains: string[] = [];
-    filteredSectors: string[] = [];
-    selectedDomain: string = '';
 
-    file: any;
-    pendingRepoData: any = null;
-    isNewRepoAttachment: boolean = false;
-
-    /** Controls which view is active: 'table' | 'card' */
+    // ── View mode ─────────────────────────────────────────────────────────
     viewMode: 'table' | 'card' = 'card';
+
+    // ── Forms ─────────────────────────────────────────────────────────────
+    repoForm!: FormGroup;
+    approvalForm!: FormGroup;
+    downloadRequestForm!: FormGroup;
+    messages: any[] = [];
+
+    // ── File handling ─────────────────────────────────────────────────────
+    file: any;
+    selectedFile: File | null = null;
+    selectedFiles: File[]     = [];
+    pendingRepoData: any      = null;
 
     @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
-    standardCustomOptions: string[] = [
-        'Standard',
-        'Custom',
-    ];
+    // ── Dropdown – static ─────────────────────────────────────────────────
+    standardCustomOptions = ['Standard', 'Custom'];
 
-    moduleOptions = [
-        'FI: Financial Accounting',
-        'CO: Controlling',
-        'MM: Materials Management',
-        'SD: Sales and Distribution',
-        'HCM: Human Capital Management',
-        'PP: Production Planning',
-        'PM: Plant Maintenance',
-        'QM: Quality Management',
-        'PS: Project System',
-        'FSCM: Financial Supply Chain Management',
-        'SRM: Supplier Relationship Management',
-        'CRM: Customer Relationship Management',
-        'LE: Logistics Execution',
-        'WM: Warehouse Management',
-        'EWM: Extended Warehouse Management',
-        'TRM: Treasury and Risk Management',
-        'FM: Funds Management',
-        'IM: Investment Management',
-        'PLM: Product Lifecycle Management',
-        'BI/BW: Business Intelligence / Business Warehouse',
-        'GRC: Governance, Risk, and Compliance',
-        'MDM: Master Data Management',
-        'EHS: Environment, Health, and Safety',
-        'SEM: Strategic Enterprise Management',
-        'BASIS: SAP Basis (technical administration)',
-        'ABAP: Advanced Business Application Programming (development)',
-        'PI/XI: Process Integration / Exchange Infrastructure (middleware)',
-        'EP: Enterprise Portal',
-        'SOLMAN: SAP Solution Manager',
-        'Fiori: SAP Fiori (UX and apps)',
-        'FLM: File Lifecycle Management',
-        'CPI: Cloud Platform Integration',
-        'BTP: Business Technology Platform',
-        'AI: Artificial Intelligence',
-        'Cloud ALM: Cloud Application Lifecycle Management',
-        'API: Application Programming Interface',
-        'SAC: SAP Analytics Cloud',
-        'Python: Python Programming Language',
-        'Salesforce: Salesforce Customer 360 Platform'
-    ];
+    // ── Dropdown – from API ───────────────────────────────────────────────
+    /** All domain names fetched from ManageDomainsService */
+    domainOptions: string[] = [];
+    /** Map of domain name → its sector names, built from API response */
+    sectorOptions: { [domain: string]: string[] } = {};
+    /** All module_name strings fetched from ManageReposService */
+    moduleOptions: string[] = [];
 
-    filteredModules: string[] = [];
-    editrepodialog: boolean = false;
+    // Autocomplete suggestion arrays (subset shown while typing)
+    filteredDomains:  string[] = [];
+    filteredSectors:  string[] = [];
+    filteredModules:  string[] = [];
+
+    selectedDomain = '';
+
+    // Misc
+    searchTerm       = '';
+    filteredRepoList: Repository[] = [];
+    selectedDownloadRepo!: Repository;
     business_justification: any;
-    uploadcodeprocessdocdialog: boolean = false;
 
-    get isAdmin(): boolean {
-        return this.downloadvalid === true;
-    }
-
+    get isAdmin(): boolean { return this.downloadvalid === true; }
     get isExportEnabled(): boolean {
-        if (this.isAdmin) {
-            return this.selectedrepositories.length > 0;
-        }
-        return this.selectedrepositories.length > 0 && this.selectedrepositories.every((repo) => repo.Approval_status === 'Approved');
-    }
-
-    ngOnInit() {
-        this.loadDomainsAndSectors();
-        const storedPage = localStorage.getItem('AddSolCurrentPage');
-        if (storedPage) {
-            this.AddSolCurrentPage = parseInt(storedPage);
-            this.loadDemoData(this.AddSolCurrentPage);
-            this.first = (this.AddSolCurrentPage - 1) * 10;
-        } else {
-            this.AddSolCurrentPage = 1;
-            localStorage.setItem('AddSolCurrentPage', this.AddSolCurrentPage.toString());
-            this.loadDemoData(this.AddSolCurrentPage);
-            this.first = (this.AddSolCurrentPage - 1) * 10;
-        }
-
-        const savedView = localStorage.getItem('addSolViewMode');
-        if (savedView === 'card' || savedView === 'table') {
-            this.viewMode = savedView;
-        }
-
-        this.form_records();
-        this.repoForm = new FormGroup({
-            customer_name: new FormControl('', Validators.required),
-            domain: new FormControl('', Validators.required),
-            sector: new FormControl('', Validators.required),
-            module_name: new FormControl('', Validators.required),
-            detailed_requirement: new FormControl('', Validators.required),
-            standard_custom: new FormControl('', Validators.required),
-            technical_details: new FormControl('', Validators.required),
-            customer_benefit: new FormControl('', Validators.required),
-        });
-        this.approvalForm = new FormGroup({
-            business_justification: new FormControl('', [
-                Validators.required,
-                Validators.minLength(10),
-                Validators.maxLength(250)
-            ])
-        });
-        this.messages = [];
-        this.downloadRequestForm = new FormGroup({
-            justification: new FormControl('', [
-                Validators.required,
-                Validators.minLength(10),
-                Validators.maxLength(250)
-            ])
-        });
+        if (this.isAdmin) return this.selectedrepositories.length > 0;
+        return this.selectedrepositories.length > 0 &&
+               this.selectedrepositories.every(r => r.Approval_status === 'Approved');
     }
 
     constructor(
         private managereposervice: ManageReposService,
-        public messageservice: MessageService,
-        private authservice: AuthenticationService,
+        private domainsService:    ManageReposService,
+        public  messageservice:    MessageService,
+        private authservice:       AuthenticationService,
         private confirmationService: ConfirmationService,
-        public router: Router
+        public  router:            Router
     ) {
-        this.authservice.user.subscribe((x) => {
-            if (x?.type == 'Superadmin') {
-                this.isvalid = true;
-                this.customervalid = true;
-                this.downloadvalid = true;
-                this.sendforapproval = false;
-                this.attachvalid = false;
-            } else if (x?.type == 'manager') {
-                this.isvalid = true;
-                this.attachvalid = true;
+        this.authservice.user.subscribe(x => {
+            if (x?.type === 'Superadmin') {
+                this.isvalid = true; this.customervalid = true;
+                this.downloadvalid = true; this.sendforapproval = false; this.attachvalid = false;
+            } else if (x?.type === 'manager') {
+                this.isvalid = true; this.attachvalid = true;
             } else {
-                this.isvalid = false;
-                this.customervalid = false;
-                this.downloadvalid = false;
-                this.sendforapproval = true;
-                this.attachvalid = true;
+                this.isvalid = false; this.customervalid = false;
+                this.downloadvalid = false; this.sendforapproval = true; this.attachvalid = true;
             }
         });
     }
 
-    saveViewMode() {
-        localStorage.setItem('addSolViewMode', this.viewMode);
+    ngOnInit() {
+        // ── Restore page ──────────────────────────────────────────────────
+        const storedPage = localStorage.getItem('AddSolCurrentPage');
+        this.AddSolCurrentPage = storedPage ? parseInt(storedPage) : 1;
+        if (!storedPage) localStorage.setItem('AddSolCurrentPage', '1');
+        this.loadDemoData(this.AddSolCurrentPage);
+        this.first = (this.AddSolCurrentPage - 1) * 10;
+
+        // ── Restore view ──────────────────────────────────────────────────
+        const savedView = localStorage.getItem('addSolViewMode');
+        if (savedView === 'card' || savedView === 'table') this.viewMode = savedView;
+
+        // ── Forms ─────────────────────────────────────────────────────────
+        this.form_records();
+        this.repoForm = new FormGroup({
+            customer_name:        new FormControl('', Validators.required),
+            domain:               new FormControl('', Validators.required),
+            sector:               new FormControl('', Validators.required),
+            module_name:          new FormControl('', Validators.required),
+            detailed_requirement: new FormControl('', Validators.required),
+            standard_custom:      new FormControl('', Validators.required),
+            technical_details:    new FormControl('', Validators.required),
+            customer_benefit:     new FormControl('', Validators.required),
+        });
+        this.approvalForm = new FormGroup({
+            business_justification: new FormControl('', [Validators.required, Validators.minLength(10), Validators.maxLength(250)])
+        });
+        this.downloadRequestForm = new FormGroup({
+            justification: new FormControl('', [Validators.required, Validators.minLength(10), Validators.maxLength(250)])
+        });
+        this.messages = [];
+
+        // ── Load dropdown data from APIs ──────────────────────────────────
+        this.loadDropdownData();
     }
 
-    onSearch(event: Event) {
-        const value = (event.target as HTMLInputElement).value.toLowerCase();
-        this.searchTerm = value;
-        this.first = 0;
-
-        if (!value) {
-            this.filteredRepoList = this.repositories();
-        } else {
-            this.filteredRepoList = this.repositories().filter(repository =>
-                repository.customer_name?.includes(value) ||
-                repository.module_name?.includes(value) ||
-                repository.domain?.includes(value) ||
-                repository.sector?.includes(value)
-            );
-        }
+    ngAfterViewInit() {
+        // When domain changes in the form → update sector suggestions
+        this.repoForm.get('domain')?.valueChanges.subscribe(domain => {
+            this.selectedDomain = domain || '';
+            this.filteredSectors = [];
+            this.repoForm.patchValue({ sector: '' }, { emitEvent: false });
+        });
     }
 
-    openDownloadRequestDialog(repo: Repository) {
-        if (repo.id == null) return;
-        this.selectedDownloadRepo = repo;
-        this.downloadRequestDialog = true;
-    }
+    // ════════════════════════════════════════════════════════════════════════
+    //  DROPDOWN DATA  —  loaded from ManageDomainsService + ManageReposService
+    // ════════════════════════════════════════════════════════════════════════
 
-    submitDownloadRequest() {
-        if (this.downloadRequestForm.invalid) {
-            this.downloadRequestForm.markAllAsTouched();
-            return;
-        }
+    loadDropdownData() {
+        this.dropdownsLoading = true;
 
-        const justification = this.downloadRequestForm.get('justification')?.value;
+        forkJoin({
+            domains: this.domainsService.getAllDomains(),
+            modules: this.managereposervice.getmodules()
+        }).subscribe({
+            next: ({ domains, modules }) => {
+                // ── Domains ───────────────────────────────────────────────
+                this.domainOptions = (domains as Domain[])
+                    .map(d => d.name)
+                    .filter(Boolean)
+                    .sort((a, b) => a.localeCompare(b));
 
-        this.managereposervice
-            .requestDownload(this.selectedDownloadRepo.id, justification)
-            .subscribe({
-                next: _ => {
-                    this.messageservice.add({
-                        severity: 'success',
-                        summary: 'Download request submitted',
-                        detail: 'Waiting for Superadmin approval'
-                    });
-                    this.downloadRequestDialog = false;
-                    this.downloadRequestForm.reset();
-                },
-                error: _ => {
-                    this.messageservice.add({
-                        severity: 'error',
-                        summary: 'Failed to submit request',
-                        detail: 'Please try again later'
-                    });
-                }
-            });
-    }
+                // ── Sectors map: domain name → sector names ───────────────
+                this.sectorOptions = {};
+                (domains as Domain[]).forEach(d => {
+                    this.sectorOptions[d.name] = d.sectors
+                        .map((s: any) => s.name)
+                        .filter(Boolean)
+                        .sort((a:any, b:any) => a.localeCompare(b));
+                });
 
-    downloadWorkbook(id: number, filename: string) {
-        this.managereposervice.downloadWorkbook(id).subscribe(
-            (blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.click();
-                window.URL.revokeObjectURL(url);
+                // ── Modules ───────────────────────────────────────────────
+                const modArr: any[] = Array.isArray(modules) ? modules : [];
+                this.moduleOptions = modArr
+                    .map((m: any) => m.module_name)
+                    .filter(Boolean)
+                    .sort((a: string, b: string) => a.localeCompare(b));
+
+                this.dropdownsLoading = false;
             },
-            (error) => {
-                this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' });
+            error: () => {
+                this.dropdownsLoading = false;
+                this.messageservice.add({
+                    severity: 'warn',
+                    summary: 'Dropdown Load Failed',
+                    detail: 'Could not load domains/sectors/modules from server.'
+                });
             }
-        );
+        });
     }
 
-    openAttachment(attachmentId: number) {
-        const url = `http://127.0.0.1:5001/repos/refview/${attachmentId}`;
-        window.open(url, '_blank');
+    // ── AutoComplete filter methods ───────────────────────────────────────
+
+    filterDomain(event: any) {
+        const q = event.query.toLowerCase();
+        this.filteredDomains = this.domainOptions.filter(o => o.toLowerCase().includes(q));
+    }
+
+    filterSector(event: any) {
+        const q = event.query.toLowerCase();
+        const sectors = this.selectedDomain ? (this.sectorOptions[this.selectedDomain] || []) : [];
+        this.filteredSectors = sectors.filter(o => o.toLowerCase().includes(q));
+    }
+
+    filterModule(event: any) {
+        const q = event.query.toLowerCase();
+        this.filteredModules = this.moduleOptions.filter(o => o.toLowerCase().includes(q));
+    }
+
+    onDomainSelect(event: any) {
+        this.selectedDomain = event.value;
+        this.repoForm.patchValue({ sector: '' });
+        this.filteredSectors = this.sectorOptions[this.selectedDomain] || [];
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  REST OF THE COMPONENT  (unchanged business logic)
+    // ════════════════════════════════════════════════════════════════════════
+
+    saveViewMode() { localStorage.setItem('addSolViewMode', this.viewMode); }
+
+    loadDemoData(page: number) {
+        this.managereposervice.getalladdedrepos(page).subscribe((data: any) => {
+            this.repositories.set(Array.isArray(data) ? data : []);
+            this.loading = false;
+        });
+        this.cols = [
+            { field: 'id',                   header: 'S.No.' },
+            { field: 'customer_name',        header: 'Customer Name' },
+            { field: 'domain',               header: 'Domain' },
+            { field: 'sector',               header: 'Sector' },
+            { field: 'module_name',          header: 'Module Name' },
+            { field: 'detailed_requirement', header: 'Detailed Requirement' },
+            { field: 'standard_custom',      header: 'Standard/Custom' },
+            { field: 'technical_details',    header: 'Technical Details / Z Object Name' },
+            { field: 'customer_benefit',     header: 'Customer Benefit' },
+            { field: 'remarks',              header: 'Remarks' },
+            { field: 'attach_code_or_document', header: 'Code/Process Document' }
+        ];
+        this.exportColumns = this.cols.map(c => ({ title: c.header, dataKey: c.field }));
+    }
+
+    form_records() {
+        this.managereposervice.get_addedrepo_records().subscribe((data: any) => {
+            this.totalitems  = data.length;
+            this.totalrecords = data.totalrecords;
+        });
+    }
+
+    onPageChange(event: any) {
+        this.AddSolCurrentPage = event.page + 1;
+        this.loadDemoData(this.AddSolCurrentPage);
+        localStorage.setItem('AddSolCurrentPage', this.AddSolCurrentPage.toString());
+    }
+
+    isRepoSelected(repo: Repository) { return this.selectedrepositories.some(r => r.id === repo.id); }
+    onCheckboxChange(repo: Repository, event: Event) {
+        this.toggleRepoSelection(repo, (event.target as HTMLInputElement).checked);
+    }
+    toggleRepoSelection(repo: Repository, checked: boolean) {
+        checked ? this.selectedrepositories.push(repo)
+                : this.selectedrepositories = this.selectedrepositories.filter(r => r.id !== repo.id);
     }
 
     getApprovalSeverity(status: string | undefined): string {
-        const safeStatus = status ?? 'Not Approved';
-        switch (safeStatus) {
+        switch (status ?? 'Not Approved') {
             case 'Approved': return 'success';
             case 'Rejected': return 'danger';
             case 'Sent for Approval': return 'warn';
-            case 'Not Approved': return 'info';
             default: return 'info';
         }
     }
 
-    filterModule(event: any) {
-        const query = event.query.toLowerCase();
-        this.filteredModules = this.moduleOptions.filter(option =>
-            option.toLowerCase().includes(query)
-        );
+    formatDate(dateString?: string): string {
+        if (!dateString) return '';
+        const d = new Date(dateString);
+        return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
     }
 
-    loadDemoData(page: number) {
-        this.managereposervice.getalladdedrepos(page).subscribe((data: any) => {
-            if (Array.isArray(data)) {
-                this.repositories.set(data);
-            } else {
-                console.error('Expected array but received:', data);
-                this.repositories.set([]);
-            }
-            this.loading = false;
-        });
-        this.cols = [
-            { field: 'id', header: 'S.No.' },
-            { field: 'customer_name', header: 'Customer Name' },
-            { field: 'domain', header: 'Domain' },
-            { field: 'sector', header: 'Sector' },
-            { field: 'module_name', header: 'Module Name' },
-            { field: 'detailed_requirement', header: 'Detailed Requirement' },
-            { field: 'standard_custom', header: 'Standard/Custom' },
-            { field: 'technical_details', header: 'Technical Details / Z Object Name' },
-            { field: 'customer_benefit', header: 'Customer Benefit' },
-            { field: 'remarks', header: 'Remarks' },
-            { field: 'attach_code_or_document', header: 'Code/Process Document' }
-        ];
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
-    }
+    opendialog()    { this.createdialog = true; }
+    upload_dialog() { this.uploaddialog = true; }
 
-    onFileSelected(event: any) {
-        const file: File = event.target.files[0];
-        if (file && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            this.selectedFile = file;
-        } else {
-            this.messageservice.add({ severity: 'error', summary: 'Please Select a Valid .xlsx Excel File', detail: 'Via UploadService' });
-            this.selectedFile = null;
-        }
-    }
-
-    Reporeject(repository: Repository) {
-        this.managereposervice.RepoRejection(this.repository).subscribe((data: any) => {
-            this.approvedialog = false;
-            this.messageservice.add({ severity: 'success', summary: 'Repository has been Rejected', detail: 'Via ApprovalService' });
-            this.reloadPage();
-        });
-    }
-
-    Repo_approval(repository: any) {
-        if (this.approvalForm.invalid) {
-            this.approvalForm.markAllAsTouched();
-            return;
-        }
-
-        const justification = this.approvalForm.get('business_justification')?.value;
-
-        this.managereposervice.SendforApproval(repository.id, justification).subscribe({
-            next: (res) => {
-                this.messageservice.add({ severity: 'success', summary: 'Repository has successfully sent for Approval', detail: 'Via ApprovalService' });
-                this.sendforapprovaldialog = false;
-                this.reloadPage();
-                this.approvalForm.reset();
-            },
-            error: (err) => {
-                this.messageservice.add({ severity: 'error', summary: 'Error Found, Failed Sending for Approval', detail: 'Via ApprovalService' });
-            }
-        });
-    }
-
-    delete_Repo(repository: Repository) {
-        this.deleteRepoDialog = true;
-        this.repository = { ...repository };
-    }
-
-    reject_dialog(repository: Repository) {
-        this.rejectdialog = true;
-        this.repository = { ...repository };
-    }
+    delete_Repo(repository: Repository)  { this.deleteRepoDialog = true; this.repository = { ...repository }; }
+    reject_dialog(repository: Repository){ this.rejectdialog = true; this.repository = { ...repository }; }
+    approve_dialog(repository: Repository){ this.approvedialog = true; this.repository = { ...repository }; }
+    sendforapproval_dialog(repository: Repository){ this.sendforapprovaldialog = true; this.repository = { ...repository }; }
+    editRepo(repository: Repository)     { this.repository = { ...repository }; this.editrepodialog = true; }
 
     upload_ref(repository: Repository) {
         this.repository = { ...repository };
@@ -1559,94 +925,18 @@ export class AddSolutions implements OnInit {
         this.uploadcodeprocessdocdialog = true;
     }
 
-    onCheckboxChange(repo: Repository, event: Event) {
-        const checked = (event.target as HTMLInputElement).checked;
-        this.toggleRepoSelection(repo, checked);
+    openDownloadRequestDialog(repo: Repository) {
+        if (repo.id == null) return;
+        this.selectedDownloadRepo = repo;
+        this.downloadRequestDialog = true;
     }
 
-    editRepo(repository: Repository) {
-        this.repository = { ...repository };
-        this.editrepodialog = true;
-    }
-
-    selectedFiles: File[] = [];
-
-    onFilesSelected(event: any) {
-        const files: FileList = event.target.files;
-        this.selectedFiles = Array.from(files);
-    }
-
-    uploadFiles() {
-        if (!this.selectedFiles.length) return;
-
-        const formData = new FormData();
-        let excelFile: File | null = null;
-        const attachmentFiles: File[] = [];
-
-        this.selectedFiles.forEach(file => {
-            if (file.name.endsWith('.xlsx')) {
-                excelFile = file;
-            } else {
-                attachmentFiles.push(file);
-            }
+    submitDownloadRequest() {
+        if (this.downloadRequestForm.invalid) { this.downloadRequestForm.markAllAsTouched(); return; }
+        this.managereposervice.requestDownload(this.selectedDownloadRepo.id, this.downloadRequestForm.get('justification')?.value).subscribe({
+            next: _ => { this.messageservice.add({ severity: 'success', summary: 'Download request submitted', detail: 'Waiting for Superadmin approval' }); this.downloadRequestDialog = false; this.downloadRequestForm.reset(); },
+            error: _ => { this.messageservice.add({ severity: 'error', summary: 'Failed to submit request', detail: 'Please try again later' }); }
         });
-
-        if (!excelFile) {
-            this.messageservice.add({ severity: 'error', summary: 'Please Select an Excel File', detail: 'Via UploadService' });
-            return;
-        }
-
-        formData.append('file', excelFile);
-        attachmentFiles.forEach(file => {
-            formData.append('attachments', file, file.name);
-        });
-
-        this.managereposervice.uploadExcel(formData).subscribe({
-            next: (res) => {
-                this.messageservice.add({ severity: 'success', summary: 'Repository has been Uploaded', detail: 'Via UploadService' });
-                this.selectedFiles = [];
-                this.uploaddialog = false;
-                this.reloadPage();
-            },
-            error: (err) => {
-                this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' });
-            }
-        });
-    }
-
-    isRepoSelected(repo: Repository): boolean {
-        return this.selectedrepositories.some((r) => r.id === repo.id);
-    }
-
-    exportCSV() {
-        if (this.selectedrepositories.length === 0) return;
-
-        const worksheetData = this.selectedrepositories.map((repo) => {
-            const row: any = {};
-            this.exportColumns.forEach((col) => {
-                row[col.title] = (repo as any)[col.dataKey];
-            });
-            return row;
-        });
-
-        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(worksheetData);
-        const workbook: XLSX.WorkBook = {
-            Sheets: { Repositories: worksheet },
-            SheetNames: ['Repositories']
-        };
-
-        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-        saveAs(data, 'selected_repositories.xlsx');
-        this.messageservice.add({ severity: 'success', summary: 'Repository has been Exported', detail: 'Via ExportService' });
-    }
-
-    toggleRepoSelection(repo: Repository, checked: boolean) {
-        if (checked) {
-            this.selectedrepositories.push(repo);
-        } else {
-            this.selectedrepositories = this.selectedrepositories.filter((r) => r.id !== repo.id);
-        }
     }
 
     onSubmit() {
@@ -1657,38 +947,21 @@ export class AddSolutions implements OnInit {
             this.clearFileInput();
             this.isNewRepoAttachment = true;
             this.uploadcodeprocessdocdialog = true;
-        } else {
-            this.repoForm.markAllAsTouched();
-        }
+        } else { this.repoForm.markAllAsTouched(); }
     }
 
     submitNewRepoWithAttachment() {
-        if (!this.file) {
-            this.messageservice.add({ severity: 'warn', summary: 'Attachment Required', detail: 'Please select a file before saving.' });
-            return;
-        }
-
+        if (!this.file) { this.messageservice.add({ severity: 'warn', summary: 'Attachment Required', detail: 'Please select a file before saving.' }); return; }
         this.managereposervice.createRepository(this.pendingRepoData).subscribe({
             next: (res: any) => {
                 this.repository = { id: res.id } as Repository;
-
-                const formData = new FormData();
-                formData.set('file', this.file);
-
-                this.managereposervice.uploadreference(this.repository, formData).subscribe({
-                    next: () => {
-                        this.messageservice.add({ severity: 'success', summary: 'Solution Saved Successfully', detail: 'Repository and attachment uploaded.' });
-                        this.resetNewRepoState();
-                    },
-                    error: () => {
-                        this.messageservice.add({ severity: 'error', summary: 'Attachment Upload Failed', detail: 'Repository was created. Use the paperclip icon to retry.' });
-                        this.resetNewRepoState();
-                    }
+                const fd = new FormData(); fd.set('file', this.file);
+                this.managereposervice.uploadreference(this.repository, fd).subscribe({
+                    next: () => { this.messageservice.add({ severity: 'success', summary: 'Solution Saved Successfully', detail: 'Repository and attachment uploaded.' }); this.resetNewRepoState(); },
+                    error: () => { this.messageservice.add({ severity: 'error', summary: 'Attachment Upload Failed', detail: 'Repository was created. Use the paperclip icon to retry.' }); this.resetNewRepoState(); }
                 });
             },
-            error: () => {
-                this.messageservice.add({ severity: 'error', summary: 'Repository Creation Failed', detail: 'Please try again.' });
-            }
+            error: () => { this.messageservice.add({ severity: 'error', summary: 'Repository Creation Failed', detail: 'Please try again.' }); }
         });
     }
 
@@ -1702,36 +975,11 @@ export class AddSolutions implements OnInit {
     }
 
     submitData(repository: Repository) {
-        if (!this.file) {
-            this.messageservice.add({
-                severity: 'warn',
-                summary: 'No File Selected',
-                detail: 'Please select a file before attaching.'
-            });
-            return;
-        }
-
-        const formData = new FormData();
-        formData.set('file', this.file);
-
-        this.managereposervice.uploadreference(this.repository, formData).subscribe(
-            (data: any) => {
-                this.uploadcodeprocessdocdialog = false;
-                this.file = null;
-                this.messageservice.add({
-                    severity: 'success',
-                    summary: 'Uploaded File Successfully',
-                    detail: 'Via UploadService'
-                });
-                this.loadDemoData(this.AddSolCurrentPage);
-            },
-            (err) => {
-                this.messageservice.add({
-                    severity: 'error',
-                    summary: 'Upload Failed',
-                    detail: 'Via UploadService'
-                });
-            }
+        if (!this.file) { this.messageservice.add({ severity: 'warn', summary: 'No File Selected', detail: 'Please select a file before attaching.' }); return; }
+        const fd = new FormData(); fd.set('file', this.file);
+        this.managereposervice.uploadreference(this.repository, fd).subscribe(
+            () => { this.uploadcodeprocessdocdialog = false; this.file = null; this.messageservice.add({ severity: 'success', summary: 'Uploaded File Successfully', detail: 'Via UploadService' }); this.loadDemoData(this.AddSolCurrentPage); },
+            () => { this.messageservice.add({ severity: 'error', summary: 'Upload Failed', detail: 'Via UploadService' }); }
         );
     }
 
@@ -1740,186 +988,109 @@ export class AddSolutions implements OnInit {
         this.isNewRepoAttachment = false;
         this.file = null;
         this.clearFileInput();
-        if (this.pendingRepoData) {
-            this.repoForm.patchValue(this.pendingRepoData);
-        }
+        if (this.pendingRepoData) this.repoForm.patchValue(this.pendingRepoData);
         this.createdialog = true;
     }
 
-    private clearFileInput() {
-        if (this.fileInputRef?.nativeElement) {
-            this.fileInputRef.nativeElement.value = '';
-        }
-    }
+    private clearFileInput() { if (this.fileInputRef?.nativeElement) this.fileInputRef.nativeElement.value = ''; }
 
     onUpload(event: any) {
-        const selected = event.target.files[0];
-        if (!selected) return;
-
-        const maxSizeMB = 16;
-        const maxSizeBytes = maxSizeMB * 1024 * 1024;
-
-        if (selected.size > maxSizeBytes) {
-            this.messageservice.add({
-                severity: 'error',
-                summary: 'File Too Large',
-                detail: `File size exceeds ${maxSizeMB}MB limit. Please choose a smaller file.`
-            });
-            this.file = null;
-            this.clearFileInput();
-            return;
+        const selected = event.target.files[0]; if (!selected) return;
+        const maxBytes = 16 * 1024 * 1024;
+        if (selected.size > maxBytes) {
+            this.messageservice.add({ severity: 'error', summary: 'File Too Large', detail: 'File size exceeds 16MB limit.' });
+            this.file = null; this.clearFileInput(); return;
         }
-
         this.file = selected;
     }
 
-    onPageChange(event: any) {
-        this.AddSolCurrentPage = event.page + 1;
-        this.loadDemoData(this.AddSolCurrentPage);
-        localStorage.setItem('AddSolCurrentPage', this.AddSolCurrentPage.toString());
+    onFileSelected(event: any) {
+        const file: File = event.target.files[0];
+        this.selectedFile = (file && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ? file : null;
+        if (!this.selectedFile) this.messageservice.add({ severity: 'error', summary: 'Please Select a Valid .xlsx Excel File', detail: 'Via UploadService' });
     }
 
-    cancelEdit() {
-        this.repoForm.reset();
+    onFilesSelected(event: any) { this.selectedFiles = Array.from(event.target.files); }
+
+    uploadFiles() {
+        if (!this.selectedFiles.length) return;
+        const fd = new FormData();
+        let excelFile: File | null = null;
+        this.selectedFiles.forEach(f => { if (f.name.endsWith('.xlsx')) { excelFile = f; } else { fd.append('attachments', f, f.name); } });
+        if (!excelFile) { this.messageservice.add({ severity: 'error', summary: 'Please Select an Excel File', detail: 'Via UploadService' }); return; }
+        fd.append('file', excelFile);
+        this.managereposervice.uploadExcel(fd).subscribe({
+            next: () => { this.messageservice.add({ severity: 'success', summary: 'Repository has been Uploaded', detail: 'Via UploadService' }); this.selectedFiles = []; this.uploaddialog = false; this.reloadPage(); },
+            error: () => { this.messageservice.add({ severity: 'error', summary: 'Repository Upload has been Failed', detail: 'Via DeleteService' }); }
+        });
     }
 
-    upload_dialog() {
-        this.uploaddialog = true;
+    exportCSV() {
+        if (!this.selectedrepositories.length) return;
+        const worksheetData = this.selectedrepositories.map(repo => {
+            const row: any = {}; this.exportColumns.forEach(c => { row[c.title] = (repo as any)[c.dataKey]; }); return row;
+        });
+        const ws = XLSX.utils.json_to_sheet(worksheetData);
+        const wb: XLSX.WorkBook = { Sheets: { Repositories: ws }, SheetNames: ['Repositories'] };
+        saveAs(new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' }), 'selected_repositories.xlsx');
+        this.messageservice.add({ severity: 'success', summary: 'Repository has been Exported', detail: 'Via ExportService' });
     }
 
-    approve_dialog(repository: Repository) {
-        this.approvedialog = true;
-        this.repository = { ...repository };
-    }
-
-    sendforapproval_dialog(repository: Repository) {
-        this.sendforapprovaldialog = true;
-        this.repository = { ...repository };
-    }
-
-    formatDate(dateString?: string): string {
-        if (!dateString) {
-            return '';
-        }
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+    Repo_approval(repository: any) {
+        if (this.approvalForm.invalid) { this.approvalForm.markAllAsTouched(); return; }
+        this.managereposervice.SendforApproval(repository.id, this.approvalForm.get('business_justification')?.value).subscribe({
+            next: () => { this.messageservice.add({ severity: 'success', summary: 'Repository sent for Approval', detail: 'Via ApprovalService' }); this.sendforapprovaldialog = false; this.reloadPage(); this.approvalForm.reset(); },
+            error: () => { this.messageservice.add({ severity: 'error', summary: 'Failed Sending for Approval', detail: 'Via ApprovalService' }); }
+        });
     }
 
     Repoapproval(repository: Repository) {
-        this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
+        this.managereposervice.RepoApproval(this.repository).subscribe(() => {
             this.approvedialog = false;
             this.messageservice.add({ severity: 'success', summary: 'Repository has been Approved', detail: 'Via ApprovalService' });
             this.reloadPage();
         });
     }
 
-    opendialog() {
-        this.createdialog = true;
-    }
-
-    form_records() {
-        this.managereposervice.get_addedrepo_records().subscribe((data: any) => {
-            this.totalitems = data.length;
-            this.totalrecords = data.totalrecords;
+    Reporeject(repository: Repository) {
+        this.managereposervice.RepoRejection(this.repository).subscribe(() => {
+            this.approvedialog = false;
+            this.messageservice.add({ severity: 'success', summary: 'Repository has been Rejected', detail: 'Via ApprovalService' });
+            this.reloadPage();
         });
     }
 
-    reloadPage() {
-        window.location.reload();
+    delete_repo(repository: Repository): void {
+        this.managereposervice.delete_repo(this.repository).subscribe(() => {
+            this.deleteRepoDialog = false;
+            this.messageservice.add({ severity: 'success', summary: 'Repository has been Deleted', detail: 'Via DeleteService' });
+            this.reloadPage();
+        });
     }
 
     download_ref(repository: Repository, id: any) {
         this.repository = { ...repository };
-
-        const raw = localStorage.getItem('token');
-        if (!raw) { return; }
-
-        const parsed = JSON.parse(raw);
-        const jwt = parsed.access_token;
-
-        const url = `http://10.6.102.245:5002/repos/refdownload/${id}?access_token=${jwt}`;
-        window.open(url, '_blank');
+        const raw = localStorage.getItem('token'); if (!raw) return;
+        const jwt = JSON.parse(raw).access_token;
+        window.open(`http://10.6.102.245:5002/repos/refdownload/${id}?access_token=${jwt}`, '_blank');
     }
 
-    delete_repo(repository: Repository): void {
-        this.managereposervice.delete_repo(this.repository).subscribe(
-            (data) => {
-                this.deleteRepoDialog = false;
-                this.messageservice.add({ severity: 'success', summary: 'Repository has been Deleted', detail: 'Via DeleteService' });
-                this.reloadPage();
-            });
+    onSearch(event: Event) {
+        const value = (event.target as HTMLInputElement).value.toLowerCase();
+        this.searchTerm = value;
+        this.first = 0;
+        this.filteredRepoList = value ? this.repositories().filter(r =>
+            r.customer_name?.toLowerCase().includes(value) || r.module_name?.toLowerCase().includes(value) ||
+            r.domain?.toLowerCase().includes(value) || r.sector?.toLowerCase().includes(value)) : this.repositories();
     }
 
-    loadDomainsAndSectors() {
-        const excelData = [
-            { domain: 'Technology', sectors: ['Software', 'Hardware', 'IT Services', 'AI Data Science'] },
-            { domain: 'Healthcare', sectors: ['Hospitals', 'Pharmaceuticals', 'Biotechnology', 'Medical Devices'] },
-            { domain: 'Finance', sectors: ['Banking', 'Insurance', 'Investment', 'FinTech'] },
-            { domain: 'Education', sectors: ['Schools', 'Universities', 'EdTech', 'Vocational Training'] },
-            { domain: 'Manufacturing', sectors: ['Automotive', 'Electronics', 'Textiles', 'Machinery'] },
-            { domain: 'Energy', sectors: ['Oil Gas', 'Renewables', 'Utilities', 'Mining'] },
-            { domain: 'Retail', sectors: ['E-commerce', 'FMCG', 'Luxury Goods', 'Consumer Electronics'] },
-            { domain: 'Agriculture', sectors: ['Farming', 'AgriTech', 'Food Processing', 'Dairy'] },
-            { domain: 'Transport', sectors: ['Aviation', 'Shipping', 'Railways', 'Logistics'] },
-            { domain: 'Media Entertainment', sectors: ['Film', 'Television', 'Gaming', 'Publishing'] },
-            { domain: 'Government', sectors: ['Public Sector Defense', 'Administration', 'Infrastructure', 'Policy'] },
-            { domain: 'Telecommunications', sectors: ['Mobile Networks', 'Broadband', 'Satellite', 'IoT'] },
-            { domain: 'Real Estate', sectors: ['Residential', 'Commercial', 'Industrial', 'Smart Cities'] },
-            { domain: 'Hospitality', sectors: ['Hotels', 'Restaurants', 'Travel Agencies', 'Tourism'] },
-            { domain: 'Legal', sectors: ['Law Firms', 'Corporate Law', 'Intellectual Property', 'Compliance'] },
-            { domain: 'Environmental Services', sectors: ['Waste Management', 'Recycling', 'Water Treatment', 'Sustainability'] },
-            { domain: 'Consulting', sectors: ['Construction Civil Engineering', 'Urban Development', 'Smart Infrastructure', 'Housing Projects'] },
-            { domain: 'Fashion', sectors: ['Apparel', 'Footwear', 'Accessories', 'Luxury Brands'] },
-            { domain: 'Sports', sectors: ['Professional Teams', 'Sportswear', 'Events Management', 'Fitness'] },
-            { domain: 'Food Beverage', sectors: ['Restaurants', 'Packaged Foods', 'Beverages', 'Nutrition'] },
-            { domain: 'Aerospace Defense', sectors: ['Aviation', 'Commercial Airlines', 'Space Exploration', 'Drones'] },
-            { domain: 'Chemicals', sectors: ['Industrial Chemicals', 'Petrochemicals', 'Agrochemicals', 'Specialty Chemicals'] },
-            { domain: 'Logistics', sectors: ['Supply Chain Warehousing', 'Distribution', 'Freight Forwarding', 'Cold Chain'] },
-            { domain: 'Non-Profit', sectors: ['NGOs Charities', 'Foundations', 'Social Work', 'Community Development'] },
-            { domain: 'Cybersecurity', sectors: ['Network Security', 'Data Protection', 'Cloud Security', 'Risk Management'] },
-            { domain: 'Human Resources', sectors: ['Recruitment', 'Training', 'Payroll', 'Employee Engagement'] },
-            { domain: 'Art Culture', sectors: ['Museums', 'Performing Arts', 'Heritage Conservation', 'Design'] }
-        ];
-
-        this.domainOptions = [...new Set(excelData.map(item => item.domain))];
-        excelData.forEach(item => {
-            this.sectorOptions[item.domain] = item.sectors;
-        });
-    }
-
-    filterDomain(event: any) {
-        const query = event.query.toLowerCase();
-        this.filteredDomains = this.domainOptions.filter(option =>
-            option.toLowerCase().includes(query)
-        );
-    }
-
-    ngAfterViewInit() {
-        this.repoForm.get('domain')?.valueChanges.subscribe(domain => {
-            this.selectedDomain = domain || '';
-            this.filteredSectors = [];
-            this.repoForm.patchValue({ sector: '' });
-            if (domain && this.sectorOptions[domain]) {
-                this.filteredSectors = this.sectorOptions[domain];
-            }
-        });
-    }
-
-    filterSector(event: any) {
-        const query = event.query.toLowerCase();
-        if (this.selectedDomain && this.sectorOptions[this.selectedDomain]) {
-            this.filteredSectors = this.sectorOptions[this.selectedDomain].filter(option =>
-                option.toLowerCase().includes(query)
-            );
-        }
-    }
-
-    onDomainSelect(event: any) {
-        this.selectedDomain = event.value;
-        this.repoForm.patchValue({ sector: '' });
-        this.filteredSectors = this.sectorOptions[this.selectedDomain] || [];
+    cancelEdit() { this.repoForm.reset(); }
+    reloadPage()  { window.location.reload(); }
+    openAttachment(id: number) { window.open(`http://127.0.0.1:5001/repos/refview/${id}`, '_blank'); }
+    downloadWorkbook(id: number, filename: string) {
+        this.managereposervice.downloadWorkbook(id).subscribe((blob: Blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); window.URL.revokeObjectURL(url);
+        }, () => { this.messageservice.add({ severity: 'error', summary: 'Error Downloading the File', detail: 'Via ExportService' }); });
     }
 }
