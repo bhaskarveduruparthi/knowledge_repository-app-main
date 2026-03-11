@@ -34,6 +34,8 @@ export class AppMenu implements OnInit {
             icon: 'pi pi-fw pi-briefcase',
             items: [
                 { label: 'Manage Users', icon: 'pi pi-fw pi-users', routerLink: ['/app/pages/manageusers'] },
+                { label: 'Manage Domains & Sectors', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/manage-domains-sectors'] },
+                { label: 'Manage Modules', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/manage-modules'] },
                 { label: 'Approve Downloads', icon: 'pi pi-fw pi-download', routerLink: ['/app/pages/managedownloads'] },
                 { label: 'Validate Solutions', icon: 'pi pi-fw pi-check', routerLink: ['/app/pages/manageapprovals'] }
             

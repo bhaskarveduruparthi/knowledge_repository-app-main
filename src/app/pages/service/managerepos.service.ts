@@ -28,6 +28,28 @@ export interface Repository {
   download_approved?: boolean;
 }
 
+export interface Sector {
+    id: number;
+    name: string;
+    domain_id: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface Domain {
+    id: number;
+    name: string;
+    sectors: Sector[];
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface BulkSectorResult {
+    created: string[];
+    skipped: string[];
+}
+
+
 export interface DownloadRequest {
   id: number;
   knr_id: number;
@@ -122,6 +144,36 @@ export class ManageReposService {
   getallviewlogs(page: number) {
     return this.http.get(`${this.url}repos/getviewlogs?page=${page}`);
   }
+
+  getmodules(){
+    return this.http.get(`${this.url}repos/getmodules`);
+  }
+
+  addModule(payload: { module_name: string; key_name: string }) {
+    return this.http.post<any>(
+        `${this.url}repos/addmodule`,
+        payload,
+        
+    );
+}
+
+// ── PUT update module ─────────────────────────────────────────────────────────
+editModule(id: number, payload: { module_name: string; key_name: string }) {
+    return this.http.put<any>(
+        `${this.url}repos/editmodule/${id}`,
+        payload,
+        
+    );
+}
+
+// ── DELETE module ─────────────────────────────────────────────────────────────
+deleteModule(id: number) {
+    return this.http.delete<any>(
+        `${this.url}repos/deletemodule/${id}`,
+        
+    );
+}
+
 
   getallapprovedrepos(page: number) {
     return this.http.get(`${this.url}repos/getallapprovedrepos?page=${page}`);
@@ -325,4 +377,73 @@ export class ManageReposService {
   getAvailableYears(): Observable<any> {
     return this.http.get(`${this.url}repos/manager-stats/years`);
   }
+
+  getAllDomains(): Observable<Domain[]> {
+        return this.http.get<Domain[]>(`${this.url}repos/domains`);
+    }
+
+    /** Get a single domain by ID */
+    getDomainById(id: number): Observable<Domain> {
+        return this.http.get<Domain>(`${this.url}repos/domains/${id}`);
+    }
+
+    /**
+     * Create a new domain.
+     * Optionally include sectors[] to create them inline.
+     */
+    createDomain(payload: { name: string; sectors?: string[] }): Observable<Domain> {
+        return this.http.post<Domain>(`${this.url}repos/domains`, payload);
+    }
+
+    /** Rename an existing domain */
+    updateDomain(id: number, payload: { name: string }): Observable<Domain> {
+        return this.http.put<Domain>(`${this.url}repos/domains/${id}`, payload);
+    }
+
+    /** Delete a domain and all its sectors (cascade) */
+    deleteDomain(id: number): Observable<{ message: string }> {
+        return this.http.delete<{ message: string }>(`${this.url}repos/domains/${id}`);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  SECTOR APIs
+    // ════════════════════════════════════════════════════════════════════════
+
+    /** Get all sectors for a specific domain */
+    getSectorsByDomain(domainId: number): Observable<Sector[]> {
+        return this.http.get<Sector[]>(`${this.url}repos/domains/${domainId}/sectors`);
+    }
+
+    /** Get all sectors across all domains */
+    getAllSectors(): Observable<Sector[]> {
+        return this.http.get<Sector[]>(`${this.url}repos/sectors`);
+    }
+
+    /** Get a single sector by ID */
+    getSectorById(id: number): Observable<Sector> {
+        return this.http.get<Sector>(`${this.url}repos/sectors/${id}`);
+    }
+
+    /** Add a single sector to a domain */
+    createSector(domainId: number, payload: { name: string }): Observable<Sector> {
+        return this.http.post<Sector>(`${this.url}repos/domains/${domainId}/sectors`, payload);
+    }
+
+    /** Rename / move a sector */
+    updateSector(id: number, payload: { name: string; domain_id?: number }): Observable<Sector> {
+        return this.http.put<Sector>(`${this.url}repos/sectors/${id}`, payload);
+    }
+
+    /** Delete a single sector */
+    deleteSector(id: number): Observable<{ message: string }> {
+        return this.http.delete<{ message: string }>(`${this.url}repos/sectors/${id}`);
+    }
+
+    /** Add multiple sectors to a domain in one request */
+    bulkCreateSectors(domainId: number, sectors: string[]): Observable<BulkSectorResult> {
+        return this.http.post<BulkSectorResult>(
+            `${this.url}repos/domains/${domainId}/sectors/bulk`,
+            { sectors }
+        );
+    }
 }

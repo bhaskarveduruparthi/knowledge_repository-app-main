@@ -15,6 +15,8 @@ import { ManageDownloads } from './downloads/downloads';
 import { AddSolutions } from './addsolutions/addsolutions';
 import { UserWiseReportComponent } from './user-wisereport/user-wisereport';
 import { ViewHistory } from './viewhistory/viewhistory';
+import { ManageDomainsSectors } from './managedomains_sectors/managedomains_sectors';
+import { ManageModules } from './managemodules/managemodules';
 
 
 export default [
@@ -23,6 +25,8 @@ export default [
      {path: 'addsolutions', component: AddSolutions, title: 'Add Solutions'},
      {path: 'manageapprovals', component: ManageApprovals, title: 'Manage Approvals'},
      {path: 'managedownloads', component: ManageDownloads, title: 'Manage Downloads'},
+     {path:'manage-domains-sectors', component: ManageDomainsSectors, title: 'Manage Domains & Sectors'},
+     {path: 'manage-modules', component: ManageModules, title: 'Manage Modules'},
      {path: 'approved', component: ManageApprovalsReport, title: 'Approved Solutions'},
      {path: 'pending', component: ManagePendingReport, title: 'Pending Solutions'},
      {path: 'unapproved', component: ManageUnapprovedReport, title: 'Unapproved Solutions'},

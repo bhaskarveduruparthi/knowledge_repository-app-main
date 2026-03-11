@@ -25,12 +25,14 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { PanelModule } from 'primeng/panel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
-import { ManageReposService } from '../service/managerepos.service';
+import { ManageReposService,Domain } from '../service/managerepos.service';
+
 import { AuthenticationService } from '../service/authentication.service';
-import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { debounceTime, Subject, takeUntil, forkJoin } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer";
+import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer';
 
 @Component({
   selector: 'app-home',
@@ -62,27 +64,25 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     ConfirmDialogModule,
     PasswordModule,
     MessageModule,
+    ProgressSpinnerModule,
     SecureFileViewerComponent
   ],
-  providers: [
-    MessageService,
-    ConfirmationService
-  ],
+  providers: [MessageService, ConfirmationService],
   styles: [`
     :host {
-      --color-bg:       #EEF4E9;
-      --color-surface:  #FFFFFF;
-      --color-border:   #D8E8CC;
-      --color-primary:  #2D6A4F;
+      --color-bg:            #EEF4E9;
+      --color-surface:       #FFFFFF;
+      --color-border:        #D8E8CC;
+      --color-primary:       #2D6A4F;
       --color-primary-light: #52B788;
-      --color-accent:   #B7E4C7;
-      --color-text:     #1B2D24;
-      --color-muted:    #6B8F77;
-      --color-tag-bg:   #D8F3DC;
-      --color-tag-text: #1B4332;
-      --radius-card:    16px;
-      --shadow-card:    0 2px 12px rgba(45, 106, 79, 0.08), 0 1px 3px rgba(45, 106, 79, 0.06);
-      --shadow-hover:   0 8px 32px rgba(45, 106, 79, 0.15), 0 2px 8px rgba(45, 106, 79, 0.08);
+      --color-accent:        #B7E4C7;
+      --color-text:          #1B2D24;
+      --color-muted:         #6B8F77;
+      --color-tag-bg:        #D8F3DC;
+      --color-tag-text:      #1B4332;
+      --radius-card:         16px;
+      --shadow-card:         0 2px 12px rgba(45,106,79,.08), 0 1px 3px rgba(45,106,79,.06);
+      --shadow-hover:        0 8px 32px rgba(45,106,79,.15), 0 2px 8px rgba(45,106,79,.08);
       font-family: 'DM Sans', sans-serif;
     }
 
@@ -103,7 +103,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       margin: 0 0 8px;
       letter-spacing: -0.5px;
       text-align: center;
-      animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: slideDown 0.6s cubic-bezier(0.16,1,0.3,1) both;
     }
     .subheading {
       font-size: 1rem;
@@ -111,19 +111,21 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       margin: 0 0 36px;
       font-weight: 400;
       text-align: center;
-      animation: slideDown 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: slideDown 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both;
     }
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ── Search shell ─────────────────────────────────────────────────────── */
     .search-shell {
       width: 100%;
-      max-width: 720px;
+      max-width: 780px;
       margin-bottom: 12px;
-      animation: slideDown 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: slideDown 0.6s 0.15s cubic-bezier(0.16,1,0.3,1) both;
     }
+
     .search-bar {
       display: flex;
       align-items: center;
@@ -133,12 +135,14 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       padding: 6px 8px 6px 0;
       gap: 0;
       box-shadow: var(--shadow-card);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color .2s, box-shadow .2s;
     }
     .search-bar:focus-within {
       border-color: var(--color-primary-light);
-      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.18), var(--shadow-card);
+      box-shadow: 0 0 0 3px rgba(82,183,136,.18), var(--shadow-card);
     }
+
+    /* native <select> for filter type */
     .filter-select {
       appearance: none;
       background: transparent;
@@ -156,17 +160,20 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       background-repeat: no-repeat;
       background-size: 1.1em;
     }
+
     .vr {
       width: 1px;
       height: 28px;
       background: var(--color-border);
       flex-shrink: 0;
     }
+
+    /* plain text input (Any) */
     .search-input {
       flex: 1;
       border: none;
       padding: 10px 14px;
-      font-size: 18px;
+      font-size: 15px;
       color: var(--color-text);
       outline: none;
       background: transparent;
@@ -174,7 +181,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     }
     .search-input::placeholder { color: #a8bcb0; }
 
-    /* PrimeNG p-select inside search bar styling */
+    /* p-select wrapper */
     .value-select-wrapper {
       flex: 1;
       padding: 2px 8px;
@@ -196,15 +203,25 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       font-family: 'DM Sans', sans-serif;
       padding: 8px 6px;
     }
-    .value-select-wrapper ::ng-deep .p-select-dropdown {
-      color: var(--color-primary);
-    }
+    .value-select-wrapper ::ng-deep .p-select-dropdown { color: var(--color-primary); }
     .value-select-wrapper ::ng-deep .p-select-option.p-selected {
       background: var(--color-tag-bg) !important;
       color: var(--color-tag-text) !important;
     }
     .value-select-wrapper ::ng-deep .p-select-option:hover {
       background: var(--color-accent) !important;
+    }
+
+    /* loading skeleton inside dropdown */
+    .dropdown-loading {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      color: var(--color-muted);
+      font-size: 13.5px;
+      font-style: italic;
     }
 
     .btn-search {
@@ -220,7 +237,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       font-weight: 600;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
-      transition: background 0.18s, transform 0.1s;
+      transition: background .18s, transform .1s;
       flex-shrink: 0;
     }
     .btn-search:hover  { background: #1e4d39; }
@@ -239,21 +256,23 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       font-weight: 500;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
-      transition: color 0.18s;
+      transition: color .18s;
       flex-shrink: 0;
     }
     .btn-clear:hover { color: var(--color-primary); }
 
+    /* ── Status line ──────────────────────────────────────────────────────── */
     .status {
       font-size: 13.5px;
       font-weight: 500;
       margin-bottom: 24px;
       height: 20px;
     }
-    .status.found    { color: var(--color-primary); }
-    .status.empty    { color: #c0392b; }
-    .status.all      { color: var(--color-muted); }
+    .status.found { color: var(--color-primary); }
+    .status.empty { color: #c0392b; }
+    .status.all   { color: var(--color-muted); }
 
+    /* ── Spinner ──────────────────────────────────────────────────────────── */
     .spinner-wrap {
       display: flex;
       justify-content: center;
@@ -265,10 +284,11 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       border: 3px solid var(--color-accent);
       border-top-color: var(--color-primary);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Card grid ────────────────────────────────────────────────────────── */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -286,10 +306,10 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: transform 0.2s cubic-bezier(0.16,1,0.3,1),
-                  box-shadow 0.2s cubic-bezier(0.16,1,0.3,1),
-                  border-color 0.2s;
-      animation: cardIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
+      transition: transform .2s cubic-bezier(0.16,1,0.3,1),
+                  box-shadow .2s cubic-bezier(0.16,1,0.3,1),
+                  border-color .2s;
+      animation: cardIn .45s cubic-bezier(0.16,1,0.3,1) both;
     }
     .repo-card:hover {
       transform: translateY(-4px);
@@ -301,153 +321,66 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .card-body {
-      padding: 22px 24px 20px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
+    .card-body { padding: 22px 24px 20px; display: flex; flex-direction: column; flex: 1; }
 
-    .card-header-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
+    .card-header-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
     .card-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
+      width: 42px; height: 42px; border-radius: 10px;
       background: var(--color-tag-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .card-icon svg { color: var(--color-primary); }
     .card-title-group { flex: 1; min-width: 0; }
     .card-title {
-      font-size: 1.05rem;
-      color: var(--color-text);
-      margin: 0 0 3px;
-      line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 1.05rem; color: var(--color-text); margin: 0 0 3px;
+      line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .card-domain-pill {
-      display: inline-flex;
-      align-items: center;
-      background: var(--color-tag-bg);
-      color: var(--color-tag-text);
-      font-size: 11.5px;
-      font-weight: 600;
-      padding: 2px 10px;
-      border-radius: 99px;
-      letter-spacing: 0.02em;
+      display: inline-flex; align-items: center;
+      background: var(--color-tag-bg); color: var(--color-tag-text);
+      font-size: 11.5px; font-weight: 600; padding: 2px 10px;
+      border-radius: 99px; letter-spacing: .02em;
     }
 
-    .card-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .meta-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .card-meta { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .meta-row  { display: flex; align-items: center; gap: 10px; }
     .meta-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-muted);
-      width: 90px;
-      flex-shrink: 0;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--color-muted); width: 90px; flex-shrink: 0;
     }
-    .meta-value {
-      font-size: 13.5px;
-      color: var(--color-text);
-      font-weight: 400;
-    }
-    .badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 99px;
-      font-size: 12px;
-      font-weight: 600;
-    }
+    .meta-value { font-size: 13.5px; color: var(--color-text); }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
     .badge-standard { background: #e0f2fe; color: #0369a1; }
     .badge-custom   { background: #fef3c7; color: #92400e; }
 
-    .card-divider {
-      height: 1px;
-      background: var(--color-border);
-      margin: 0 0 16px;
-    }
+    .card-divider { height: 1px; background: var(--color-border); margin: 0 0 16px; }
 
-    .card-footer {
-      margin-top: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-author {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .card-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+    .card-author { display: flex; align-items: center; gap: 8px; }
     .author-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       background: var(--color-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--color-primary);
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--color-primary); flex-shrink: 0;
     }
-    .author-name {
-      font-size: 12.5px;
-      color: var(--color-muted);
-      font-weight: 500;
-    }
+    .author-name { font-size: 12.5px; color: var(--color-muted); font-weight: 500; }
+
     .btn-details {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: var(--color-primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 7px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.18s, transform 0.1s;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--color-primary); color: #fff; border: none; border-radius: 8px;
+      padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: background .18s, transform .1s;
     }
     .btn-details:hover  { background: #1e4d39; }
     .btn-details:active { transform: scale(0.97); }
-    .btn-details svg { flex-shrink: 0; }
 
+    /* Detail dialog table */
     .detail-table { width: 100%; border-collapse: collapse; }
     .detail-table tr { border-bottom: 1px solid #f0f4f0; }
     .detail-table tr:last-child { border-bottom: none; }
     .detail-table td { padding: 13px 16px; font-size: 14px; vertical-align: top; }
     .detail-table .dt-label {
-      font-weight: 700;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-muted);
-      width: 190px;
-      background: #f7faf7;
+      font-weight: 700; font-size: 12px; text-transform: uppercase;
+      letter-spacing: .05em; color: var(--color-muted); width: 190px; background: #f7faf7;
     }
     .detail-table .dt-value { color: var(--color-text); }
   `],
@@ -456,13 +389,13 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
     <div class="page">
 
       <h1 class="heading">Search Solutions</h1>
-      <p class="subheading">Explore, and Discover Approved solutions</p>
+      <p class="subheading">Explore and Discover Approved Solutions</p>
 
-      <!-- Search bar -->
+      <!-- ── Search bar ───────────────────────────────────────────────────── -->
       <div class="search-shell">
         <div class="search-bar">
 
-          <!-- Filter type selector (native select) -->
+          <!-- Filter type selector -->
           <select [(ngModel)]="selectedFilter" class="filter-select"
             (change)="onFilterChange()" aria-label="Filter By">
             <option *ngFor="let opt of filterOptions" [value]="opt">{{ opt }}</option>
@@ -470,7 +403,7 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
 
           <div class="vr"></div>
 
-          <!-- Plain text input for "Any" -->
+          <!-- ANY – plain text -->
           <input
             *ngIf="selectedFilter === 'Any'"
             type="text"
@@ -478,60 +411,75 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             placeholder="Search knowledge repository…"
             (ngModelChange)="onSearchInputChange($event)"
             (keydown.enter)="onSearch()"
-            class="search-input"
-          />
+            class="search-input" />
 
-          <!-- PrimeNG p-select for Domain -->
-          <div class="value-select-wrapper" *ngIf="selectedFilter === 'Domain'">
-            <p-select
-              [options]="domainOptions"
-              [(ngModel)]="selectedDropdownValue"
-              placeholder="Select a Domain…"
-              [filter]="true"
-              appendTo="body"
-              filterPlaceholder="Search domains…"
-              [showClear]="true"
-              (onChange)="onDropdownValueChange($event)"
-              (onClear)="onDropdownClear()"
-              styleClass="w-full"
-            ></p-select>
-          </div>
+          <!-- DOMAIN – live dropdown -->
+          <ng-container *ngIf="selectedFilter === 'Domain'">
+            <div *ngIf="dropdownsLoading" class="dropdown-loading">
+              <i class="pi pi-spin pi-spinner"></i> Loading domains…
+            </div>
+            <div class="value-select-wrapper" *ngIf="!dropdownsLoading">
+              <p-select
+                [options]="domainOptions"
+                [(ngModel)]="selectedDropdownValue"
+                placeholder="Select a Domain…"
+                [filter]="true"
+                appendTo="body"
+                filterPlaceholder="Search domains…"
+                [showClear]="true"
+                (onChange)="onDropdownValueChange($event)"
+                (onClear)="onDropdownClear()"
+                styleClass="w-full">
+              </p-select>
+            </div>
+          </ng-container>
 
-          <!-- PrimeNG p-select for Sector -->
-          <div class="value-select-wrapper" *ngIf="selectedFilter === 'Sector'">
-            <p-select
-              [options]="sectorOptions"
-              [(ngModel)]="selectedDropdownValue"
-              placeholder="Select a Sector…"
-              [filter]="true"
-              appendTo="body"
-              filterPlaceholder="Search sectors…"
-              [showClear]="true"
-              (onChange)="onDropdownValueChange($event)"
-              (onClear)="onDropdownClear()"
-              styleClass="w-full"
-            ></p-select>
-          </div>
+          <!-- SECTOR – live dropdown -->
+          <ng-container *ngIf="selectedFilter === 'Sector'">
+            <div *ngIf="dropdownsLoading" class="dropdown-loading">
+              <i class="pi pi-spin pi-spinner"></i> Loading sectors…
+            </div>
+            <div class="value-select-wrapper" *ngIf="!dropdownsLoading">
+              <p-select
+                [options]="sectorOptions"
+                [(ngModel)]="selectedDropdownValue"
+                placeholder="Select a Sector…"
+                [filter]="true"
+                appendTo="body"
+                filterPlaceholder="Search sectors…"
+                [showClear]="true"
+                (onChange)="onDropdownValueChange($event)"
+                (onClear)="onDropdownClear()"
+                styleClass="w-full">
+              </p-select>
+            </div>
+          </ng-container>
 
-          <!-- PrimeNG p-select for Module -->
-          <div class="value-select-wrapper" *ngIf="selectedFilter === 'Module'">
-            <p-select
-              [options]="moduleOptions"
-              [(ngModel)]="selectedDropdownValue"
-              placeholder="Select a Module…"
-              appendTo="body"
-              [filter]="true"
-              filterPlaceholder="Search modules…"
-              [showClear]="true"
-              (onChange)="onDropdownValueChange($event)"
-              (onClear)="onDropdownClear()"
-              styleClass="w-full"
-            ></p-select>
-          </div>
+          <!-- MODULE – live dropdown -->
+          <ng-container *ngIf="selectedFilter === 'Module'">
+            <div *ngIf="dropdownsLoading" class="dropdown-loading">
+              <i class="pi pi-spin pi-spinner"></i> Loading modules…
+            </div>
+            <div class="value-select-wrapper" *ngIf="!dropdownsLoading">
+              <p-select
+                [options]="moduleOptions"
+                [(ngModel)]="selectedDropdownValue"
+                placeholder="Select a Module…"
+                appendTo="body"
+                [filter]="true"
+                filterPlaceholder="Search modules…"
+                [showClear]="true"
+                (onChange)="onDropdownValueChange($event)"
+                (onClear)="onDropdownClear()"
+                styleClass="w-full">
+              </p-select>
+            </div>
+          </ng-container>
 
-          <!-- Clear button -->
+          <!-- Clear -->
           <button
-            *ngIf="(selectedFilter === 'Any' && searchText.trim()) || (selectedFilter !== 'Any' && selectedDropdownValue)"
+            *ngIf="(selectedFilter === 'Any' && searchText.trim()) ||
+                   (selectedFilter !== 'Any' && selectedDropdownValue)"
             class="btn-clear"
             (click)="clearSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
@@ -541,12 +489,9 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             Clear
           </button>
 
-          <!-- Search button (only relevant for "Any" text search) -->
-          <button
-            *ngIf="selectedFilter === 'Any'"
-            class="btn-search"
-            (click)="onSearch()"
-            [disabled]="isLoading">
+          <!-- Search (only for "Any" free-text) -->
+          <button *ngIf="selectedFilter === 'Any'"
+            class="btn-search" (click)="onSearch()" [disabled]="isLoading">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="6.5" cy="6.5" r="5.5"/>
@@ -558,10 +503,11 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
         </div>
       </div>
 
-      <!-- Status -->
+      <!-- ── Status line ──────────────────────────────────────────────────── -->
       <ng-container *ngIf="!isLoading">
         <div *ngIf="isSearchActive && displayedRepos.length > 0" class="status found">
-          {{ displayedRepos.length }} result{{ displayedRepos.length !== 1 ? 's' : '' }} found for "{{ lastSearchText }}"
+          {{ displayedRepos.length }} result{{ displayedRepos.length !== 1 ? 's' : '' }}
+          found for "{{ lastSearchText }}"
         </div>
         <div *ngIf="isSearchActive && displayedRepos.length === 0" class="status empty">
           No results found for "{{ lastSearchText }}"
@@ -569,22 +515,18 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
         <div *ngIf="!isSearchActive && displayedRepos.length > 0" class="status all">
           Showing all {{ displayedRepos.length }} approved repositories
         </div>
-        <div *ngIf="!isSearchActive && displayedRepos.length === 0 && !isLoading" class="status all">
-          &nbsp;
-        </div>
+        <div *ngIf="!isSearchActive && displayedRepos.length === 0 && !isLoading" class="status all">&nbsp;</div>
       </ng-container>
 
-      <!-- Loading -->
+      <!-- ── Loading spinner ──────────────────────────────────────────────── -->
       <div class="spinner-wrap" *ngIf="isLoading">
         <div class="spinner"></div>
       </div>
 
-      <!-- Card Grid -->
+      <!-- ── Card grid ─────────────────────────────────────────────────────── -->
       <div class="grid" [ngClass]="{'single': displayedRepos.length === 1}" *ngIf="!isLoading">
-
         <div class="repo-card" *ngFor="let repo of displayedRepos; let i = index"
           [style.animation-delay]="(i * 0.05) + 's'">
-
           <div class="card-body">
             <div class="card-header-row">
               <div class="card-icon">
@@ -597,7 +539,9 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
                 </svg>
               </div>
               <div class="card-title-group">
-                <div class="card-title" [title]="repo.module_name"><strong>{{ repo.module_name }}</strong></div>
+                <div class="card-title" [title]="repo.module_name">
+                  <strong>{{ repo.module_name }}</strong>
+                </div>
                 <span class="card-domain-pill">Domain: {{ repo.domain }}</span>
               </div>
             </div>
@@ -610,9 +554,10 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
               <div class="meta-row">
                 <span class="meta-label">Object Type</span>
                 <span class="badge"
-  [ngClass]="normalizeStandardCustom(repo.standard_custom) === 'Standard' ? 'badge-standard' : 'badge-custom'">
-  {{ normalizeStandardCustom(repo.standard_custom) }}
-</span>
+                  [ngClass]="normalizeStandardCustom(repo.standard_custom) === 'Standard'
+                    ? 'badge-standard' : 'badge-custom'">
+                  {{ normalizeStandardCustom(repo.standard_custom) }}
+                </span>
               </div>
             </div>
 
@@ -634,34 +579,38 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- Details Dialog -->
+      <!-- ── Details Dialog ───────────────────────────────────────────────── -->
       <p-dialog
         header="Repository Details"
         [(visible)]="dialogVisible"
         [modal]="true"
         [style]="{width: '90vw', maxWidth: '800px', height: '90vh'}"
         [contentStyle]="{height: 'calc(100% - 60px)', overflow: 'auto'}"
-        (onHide)="closeDetails()"
-      >
+        (onHide)="closeDetails()">
         <ng-template pTemplate="content">
           <div *ngIf="selectedRepo" style="padding: 1rem;">
             <table class="detail-table">
               <tbody>
-                <tr><td class="dt-label">Domain</td><td class="dt-value">{{ selectedRepo.domain }}</td></tr>
-                <tr><td class="dt-label">Sector</td><td class="dt-value">{{ selectedRepo.sector }}</td></tr>
-                <tr><td class="dt-label">Module Name</td><td class="dt-value">{{ selectedRepo.module_name }}</td></tr>
-                <tr><td class="dt-label">Detailed Requirement</td><td class="dt-value">{{ selectedRepo.detailed_requirement }}</td></tr>
-                <tr><td class="dt-label">Standard / Custom</td><td class="dt-value">{{ normalizeStandardCustom(selectedRepo.standard_custom) }}</td></tr>
-                <tr><td class="dt-label">Technical Details</td><td class="dt-value">{{ selectedRepo.technical_details }}</td></tr>
-                <tr><td class="dt-label">Customer Benefit</td><td class="dt-value">{{ selectedRepo.customer_benefit }}</td></tr>
+                <tr><td class="dt-label">Domain</td>
+                    <td class="dt-value">{{ selectedRepo.domain }}</td></tr>
+                <tr><td class="dt-label">Sector</td>
+                    <td class="dt-value">{{ selectedRepo.sector }}</td></tr>
+                <tr><td class="dt-label">Module Name</td>
+                    <td class="dt-value">{{ selectedRepo.module_name }}</td></tr>
+                <tr><td class="dt-label">Detailed Requirement</td>
+                    <td class="dt-value">{{ selectedRepo.detailed_requirement }}</td></tr>
+                <tr><td class="dt-label">Standard / Custom</td>
+                    <td class="dt-value">{{ normalizeStandardCustom(selectedRepo.standard_custom) }}</td></tr>
+                <tr><td class="dt-label">Technical Details</td>
+                    <td class="dt-value">{{ selectedRepo.technical_details }}</td></tr>
+                <tr><td class="dt-label">Customer Benefit</td>
+                    <td class="dt-value">{{ selectedRepo.customer_benefit }}</td></tr>
               </tbody>
             </table>
           </div>
         </ng-template>
-
         <ng-template pTemplate="footer">
           <ng-container *ngIf="selectedRepo">
             <app-secure-file-viewer
@@ -670,22 +619,18 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
               [disabled]="selectedRepo.attach_code_or_document === 'UPLOADED'"
               apiBase="http://10.6.102.245:5002">
             </app-secure-file-viewer>
-
-            <button
-              pButton type="button"
+            <button pButton type="button"
               [label]="isAttachmentLoading ? 'Loading…' : 'Download Attachment'"
               [disabled]="isAttachmentLoading"
               (click)="openAttachment(selectedRepo)"
-              *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved === true"
-            ></button>
-
-            <button
-              pButton type="button"
+              *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved === true">
+            </button>
+            <button pButton type="button"
               label="Request Download Access"
               severity="info"
               (click)="requestDownload(selectedRepo)"
-              *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved !== true"
-            ></button>
+              *ngIf="selectedRepo.attach_code_or_document === 'ATTACHED' && selectedRepo.download_approved !== true">
+            </button>
           </ng-container>
         </ng-template>
       </p-dialog>
@@ -695,41 +640,50 @@ import { SecureFileViewerComponent } from "../securefileviewer/securefileviewer"
 })
 export class Home implements OnInit, OnDestroy {
 
+  // ── Filter config ─────────────────────────────────────────────────────────
   filterOptions: string[] = ['Any', 'Domain', 'Sector', 'Module'];
-  selectedFilter: string = 'Any';
-  searchText: string = '';
+  selectedFilter: string  = 'Any';
+  searchText: string      = '';
 
-  // PrimeNG dropdown options — populated after repos load
+  // ── Dropdown option arrays — populated from APIs ──────────────────────────
   domainOptions:  string[] = [];
   sectorOptions:  string[] = [];
   moduleOptions:  string[] = [];
 
-  // Bound value for the p-select dropdowns
+  /** True while the three dropdown datasets are being fetched */
+  dropdownsLoading: boolean = false;
+
+  /** Bound value for Domain / Sector / Module p-select */
   selectedDropdownValue: string | null = null;
 
-  isAttachmentLoading: boolean = false;
-
-  allRepos: any[] = [];
+  // ── Repo data ─────────────────────────────────────────────────────────────
+  allRepos:       any[] = [];
   displayedRepos: any[] = [];
 
-  isLoading: boolean = false;
-  isSearchActive: boolean = false;
-  lastSearchText: string = '';
+  // ── UI flags ──────────────────────────────────────────────────────────────
+  isLoading:           boolean = false;
+  isSearchActive:      boolean = false;
+  isAttachmentLoading: boolean = false;
+  lastSearchText:      string  = '';
 
+  // ── Dialog ────────────────────────────────────────────────────────────────
   dialogVisible: boolean = false;
-  selectedRepo: any = null;
+  selectedRepo:  any     = null;
 
+  // ── RxJS ──────────────────────────────────────────────────────────────────
   private searchInput$ = new Subject<string>();
-  private destroy$    = new Subject<void>();
+  private destroy$     = new Subject<void>();
 
   constructor(
-    private authservice: AuthenticationService,
-    private messageservice: MessageService,
+    private authservice:       AuthenticationService,
+    private messageservice:    MessageService,
     private managereposervice: ManageReposService,
-    private http: HttpClient,
+    private domainsService:    ManageReposService,
+    private http:              HttpClient,
   ) {}
 
   ngOnInit() {
+    // Debounced free-text search
     this.searchInput$.pipe(
       debounceTime(300),
       takeUntil(this.destroy$)
@@ -744,13 +698,19 @@ export class Home implements OnInit, OnDestroy {
       }
     });
 
+    // Load repos + all dropdown data in parallel
     this.loadAllRepos();
+    this.loadDropdownData();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  DATA LOADING
+  // ════════════════════════════════════════════════════════════════════════
 
   loadAllRepos() {
     this.isLoading = true;
@@ -759,7 +719,6 @@ export class Home implements OnInit, OnDestroy {
         this.allRepos       = repos;
         this.displayedRepos = repos;
         this.isLoading      = false;
-        this.buildFilterOptions();
       },
       error: (err) => {
         this.isLoading = false;
@@ -772,17 +731,55 @@ export class Home implements OnInit, OnDestroy {
     });
   }
 
-  /** Extract unique sorted values for each filterable field */
-  private buildFilterOptions() {
-    const unique = (field: string): string[] =>
-      [...new Set(this.allRepos.map(r => r[field]).filter(Boolean))].sort();
+  /**
+   * Fetch domains (with nested sectors) and modules from their respective
+   * APIs in parallel, then flatten into sorted string arrays for the dropdowns.
+   */
+  loadDropdownData() {
+    this.dropdownsLoading = true;
 
-    this.domainOptions = unique('domain');
-    this.sectorOptions = unique('sector');
-    this.moduleOptions = unique('module_name');
+    forkJoin({
+      domains: this.domainsService.getAllDomains(),
+      modules: this.managereposervice.getmodules()
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: ({ domains, modules }: { domains: Domain[]; modules: any }) => {
+
+        // ── Domains ───────────────────────────────────────────────────────
+        this.domainOptions = (domains as Domain[])
+          .map(d => d.name)
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b));
+
+        // ── Sectors – flatten all sectors across every domain ─────────────
+        const allSectors = (domains as Domain[])
+          .flatMap(d => d.sectors.map(s => s.name))
+          .filter(Boolean);
+        // deduplicate & sort
+        this.sectorOptions = [...new Set(allSectors)].sort((a, b) => a.localeCompare(b));
+
+        // ── Modules ───────────────────────────────────────────────────────
+        const modArray: any[] = Array.isArray(modules) ? modules : [];
+        this.moduleOptions = modArray
+          .map((m: any) => m.module_name)
+          .filter(Boolean)
+          .sort((a: string, b: string) => a.localeCompare(b));
+
+        this.dropdownsLoading = false;
+      },
+      error: () => {
+        this.dropdownsLoading = false;
+        this.messageservice.add({
+          severity: 'warn',
+          summary: 'Dropdown Load Failed',
+          detail: 'Could not load filter options. You can still use free-text search.'
+        });
+      }
+    });
   }
 
-  // ── Search handlers ──────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════
+  //  SEARCH HANDLERS
+  // ════════════════════════════════════════════════════════════════════════
 
   onSearch() {
     const trimmed = this.searchText.trim();
@@ -799,7 +796,6 @@ export class Home implements OnInit, OnDestroy {
   }
 
   onFilterChange() {
-    // Reset values when the filter type changes
     this.searchText            = '';
     this.selectedDropdownValue = null;
     this.displayedRepos        = this.allRepos;
@@ -807,7 +803,7 @@ export class Home implements OnInit, OnDestroy {
     this.lastSearchText        = '';
   }
 
-  /** Called when the user picks a value from Domain / Sector / Module p-select */
+  /** User picks a value from Domain / Sector / Module p-select → search immediately */
   onDropdownValueChange(event: any) {
     const value = event.value;
     if (value) {
@@ -819,7 +815,6 @@ export class Home implements OnInit, OnDestroy {
     }
   }
 
-  /** Called when the user clears the p-select */
   onDropdownClear() {
     this.selectedDropdownValue = null;
     this.displayedRepos        = this.allRepos;
@@ -857,16 +852,19 @@ export class Home implements OnInit, OnDestroy {
     this.lastSearchText        = '';
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  //  HELPERS
+  // ════════════════════════════════════════════════════════════════════════
+
   normalizeStandardCustom(value: string): string {
-  if (!value) return '';
-  const lower = value.trim().toLowerCase();
-  if (lower === 'standard') return 'Standard';
-  if (lower === 'custom') return 'Custom';
-  return value; // fallback: return as-is
+    if (!value) return '';
+    const lower = value.trim().toLowerCase();
+    if (lower === 'standard') return 'Standard';
+    if (lower === 'custom')   return 'Custom';
+    return value;
   }
 
-  // ── Dialog ───────────────────────────────────────────────────────────────
-
+  // ── Dialog ────────────────────────────────────────────────────────────────
   showDetails(repo: any) {
     this.selectedRepo  = repo;
     this.dialogVisible = true;
@@ -877,15 +875,19 @@ export class Home implements OnInit, OnDestroy {
     this.dialogVisible = false;
   }
 
-  // ── Attachment ───────────────────────────────────────────────────────────
-
+  // ── Attachment ────────────────────────────────────────────────────────────
   openAttachment(repo: any) {
     const base    = 'http://10.6.102.245:5002';
     const fileUrl = `${base}/repos/refview/${repo.id}`;
-    const token   = localStorage.getItem('access_token') || localStorage.getItem('token') || '';
+    const raw     = localStorage.getItem('token') || '';
+    const token   = raw ? (JSON.parse(raw)?.access_token ?? raw) : '';
 
     if (!token) {
-      this.messageservice.add({ severity: 'warn', summary: 'Not logged in', detail: 'You must be logged in to view attachments.' });
+      this.messageservice.add({
+        severity: 'warn',
+        summary: 'Not logged in',
+        detail: 'You must be logged in to view attachments.'
+      });
       return;
     }
 
@@ -900,7 +902,6 @@ export class Home implements OnInit, OnDestroy {
         setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
 
         if (!newTab) {
-          this.messageservice.add({ severity: 'info', summary: 'Popup Blocked', detail: 'Your browser blocked the popup. The file will download instead.' });
           const a    = document.createElement('a');
           a.href     = objectUrl;
           a.download = repo.attachment_filename || `repository_${repo.id}`;
@@ -912,13 +913,15 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.isAttachmentLoading = false;
-        if (err.status === 403) {
-          this.messageservice.add({ severity: 'warn', summary: 'Access Denied', detail: 'You need Superadmin approval before you can view this attachment.' });
-        } else if (err.status === 401) {
-          this.messageservice.add({ severity: 'error', summary: 'Unauthorised', detail: 'Please log in again.' });
-        } else {
-          this.messageservice.add({ severity: 'error', summary: 'Failed to open attachment', detail: err.message || 'Could not load the file. Please try again.' });
-        }
+        const detail =
+          err.status === 403 ? 'You need Superadmin approval before viewing this attachment.' :
+          err.status === 401 ? 'Please log in again.' :
+          err.message || 'Could not load the file. Please try again.';
+        this.messageservice.add({
+          severity: err.status === 403 ? 'warn' : 'error',
+          summary: err.status === 403 ? 'Access Denied' : 'Failed to open attachment',
+          detail
+        });
       }
     });
   }
@@ -926,13 +929,25 @@ export class Home implements OnInit, OnDestroy {
   requestDownload(repo: any) {
     this.managereposervice.requestDownload(repo.id, '').subscribe({
       next: () => {
-        this.messageservice.add({ severity: 'success', summary: 'Request Sent', detail: 'Your download request has been sent to the Superadmin for approval.' });
+        this.messageservice.add({
+          severity: 'success',
+          summary: 'Request Sent',
+          detail: 'Your download request has been sent to the Superadmin for approval.'
+        });
       },
       error: (err) => {
         if (err.status === 400) {
-          this.messageservice.add({ severity: 'info', summary: 'Already Requested', detail: 'Your request is already pending approval.' });
+          this.messageservice.add({
+            severity: 'info',
+            summary: 'Already Requested',
+            detail: 'Your request is already pending approval.'
+          });
         } else {
-          this.messageservice.add({ severity: 'error', summary: 'Request Failed', detail: err.message || 'Could not send request. Please try again.' });
+          this.messageservice.add({
+            severity: 'error',
+            summary: 'Request Failed',
+            detail: err.message || 'Could not send request. Please try again.'
+          });
         }
       }
     });
