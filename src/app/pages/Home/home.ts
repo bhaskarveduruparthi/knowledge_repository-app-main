@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -27,12 +27,13 @@ import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
-import { ManageReposService,Domain } from '../service/managerepos.service';
-
+import { ManageReposService, Domain } from '../service/managerepos.service';
 import { AuthenticationService } from '../service/authentication.service';
 import { debounceTime, Subject, takeUntil, forkJoin } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer';
+
+const PAGE_SIZE = 12; // cards per scroll batch
 
 @Component({
   selector: 'app-home',
@@ -142,7 +143,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       box-shadow: 0 0 0 3px rgba(82,183,136,.18), var(--shadow-card);
     }
 
-    /* native <select> for filter type */
     .filter-select {
       appearance: none;
       background: transparent;
@@ -168,7 +168,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       flex-shrink: 0;
     }
 
-    /* plain text input (Any) */
     .search-input {
       flex: 1;
       border: none;
@@ -181,7 +180,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
     }
     .search-input::placeholder { color: #a8bcb0; }
 
-    /* p-select wrapper */
     .value-select-wrapper {
       flex: 1;
       padding: 2px 8px;
@@ -212,7 +210,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       background: var(--color-accent) !important;
     }
 
-    /* loading skeleton inside dropdown */
     .dropdown-loading {
       flex: 1;
       display: flex;
@@ -286,7 +283,46 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       border-radius: 50%;
       animation: spin .7s linear infinite;
     }
+    /* Smaller inline spinner for "load more" */
+    .spinner-sm {
+      width: 22px;
+      height: 22px;
+      border-width: 2px;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Load-more sentinel & inline spinner ────────────────────────────── */
+    .load-more-sentinel {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 28px 0 8px;
+    }
+    .load-more-text {
+      font-size: 13px;
+      color: var(--color-muted);
+      font-style: italic;
+      margin-top: 4px;
+    }
+    .end-of-results {
+      width: 100%;
+      text-align: center;
+      padding: 28px 0 8px;
+      font-size: 13px;
+      color: var(--color-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .end-of-results::before,
+    .end-of-results::after {
+      content: '';
+      flex: 1;
+      max-width: 120px;
+      height: 1px;
+      background: var(--color-border);
+    }
 
     /* ── Card grid ────────────────────────────────────────────────────────── */
     .grid {
@@ -383,6 +419,30 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       letter-spacing: .05em; color: var(--color-muted); width: 190px; background: #f7faf7;
     }
     .detail-table .dt-value { color: var(--color-text); }
+
+    /* ── Skeleton cards (shown while loading next batch) ─────────────────── */
+    .skeleton-card {
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      height: 220px;
+    }
+    .skeleton-body { padding: 22px 24px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .skeleton-line {
+      border-radius: 6px;
+      background: linear-gradient(90deg, #e8f0e8 25%, #d4e8d4 50%, #e8f0e8 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+    .skeleton-line.w-60  { height: 14px; width: 60%; }
+    .skeleton-line.w-40  { height: 12px; width: 40%; }
+    .skeleton-line.w-80  { height: 12px; width: 80%; }
+    .skeleton-line.w-30  { height: 12px; width: 30%; }
+    @keyframes shimmer {
+      to { background-position: -200% 0; }
+    }
   `],
   template: `
     <p-toast></p-toast>
@@ -395,7 +455,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       <div class="search-shell">
         <div class="search-bar">
 
-          <!-- Filter type selector -->
           <select [(ngModel)]="selectedFilter" class="filter-select"
             (change)="onFilterChange()" aria-label="Filter By">
             <option *ngFor="let opt of filterOptions" [value]="opt">{{ opt }}</option>
@@ -403,7 +462,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
 
           <div class="vr"></div>
 
-          <!-- ANY – plain text -->
           <input
             *ngIf="selectedFilter === 'Any'"
             type="text"
@@ -413,75 +471,52 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
             (keydown.enter)="onSearch()"
             class="search-input" />
 
-          <!-- DOMAIN – live dropdown -->
           <ng-container *ngIf="selectedFilter === 'Domain'">
             <div *ngIf="dropdownsLoading" class="dropdown-loading">
               <i class="pi pi-spin pi-spinner"></i> Loading domains…
             </div>
             <div class="value-select-wrapper" *ngIf="!dropdownsLoading">
-              <p-select
-                [options]="domainOptions"
-                [(ngModel)]="selectedDropdownValue"
-                placeholder="Select a Domain…"
-                [filter]="true"
-                appendTo="body"
-                filterPlaceholder="Search domains…"
-                [showClear]="true"
-                (onChange)="onDropdownValueChange($event)"
-                (onClear)="onDropdownClear()"
+              <p-select [options]="domainOptions" [(ngModel)]="selectedDropdownValue"
+                placeholder="Select a Domain…" [filter]="true" appendTo="body"
+                filterPlaceholder="Search domains…" [showClear]="true"
+                (onChange)="onDropdownValueChange($event)" (onClear)="onDropdownClear()"
                 styleClass="w-full">
               </p-select>
             </div>
           </ng-container>
 
-          <!-- SECTOR – live dropdown -->
           <ng-container *ngIf="selectedFilter === 'Sector'">
             <div *ngIf="dropdownsLoading" class="dropdown-loading">
               <i class="pi pi-spin pi-spinner"></i> Loading sectors…
             </div>
             <div class="value-select-wrapper" *ngIf="!dropdownsLoading">
-              <p-select
-                [options]="sectorOptions"
-                [(ngModel)]="selectedDropdownValue"
-                placeholder="Select a Sector…"
-                [filter]="true"
-                appendTo="body"
-                filterPlaceholder="Search sectors…"
-                [showClear]="true"
-                (onChange)="onDropdownValueChange($event)"
-                (onClear)="onDropdownClear()"
+              <p-select [options]="sectorOptions" [(ngModel)]="selectedDropdownValue"
+                placeholder="Select a Sector…" [filter]="true" appendTo="body"
+                filterPlaceholder="Search sectors…" [showClear]="true"
+                (onChange)="onDropdownValueChange($event)" (onClear)="onDropdownClear()"
                 styleClass="w-full">
               </p-select>
             </div>
           </ng-container>
 
-          <!-- MODULE – live dropdown -->
           <ng-container *ngIf="selectedFilter === 'Module'">
             <div *ngIf="dropdownsLoading" class="dropdown-loading">
               <i class="pi pi-spin pi-spinner"></i> Loading modules…
             </div>
             <div class="value-select-wrapper" *ngIf="!dropdownsLoading">
-              <p-select
-                [options]="moduleOptions"
-                [(ngModel)]="selectedDropdownValue"
-                placeholder="Select a Module…"
-                appendTo="body"
-                [filter]="true"
-                filterPlaceholder="Search modules…"
-                [showClear]="true"
-                (onChange)="onDropdownValueChange($event)"
-                (onClear)="onDropdownClear()"
+              <p-select [options]="moduleOptions" [(ngModel)]="selectedDropdownValue"
+                placeholder="Select a Module…" appendTo="body" [filter]="true"
+                filterPlaceholder="Search modules…" [showClear]="true"
+                (onChange)="onDropdownValueChange($event)" (onClear)="onDropdownClear()"
                 styleClass="w-full">
               </p-select>
             </div>
           </ng-container>
 
-          <!-- Clear -->
           <button
             *ngIf="(selectedFilter === 'Any' && searchText.trim()) ||
                    (selectedFilter !== 'Any' && selectedDropdownValue)"
-            class="btn-clear"
-            (click)="clearSearch()">
+            class="btn-clear" (click)="clearSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="2" x2="2" y2="12"/><line x1="2" y1="2" x2="12" y2="12"/>
@@ -489,7 +524,6 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
             Clear
           </button>
 
-          <!-- Search (only for "Any" free-text) -->
           <button *ngIf="selectedFilter === 'Any'"
             class="btn-search" (click)="onSearch()" [disabled]="isLoading">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
@@ -506,27 +540,28 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
       <!-- ── Status line ──────────────────────────────────────────────────── -->
       <ng-container *ngIf="!isLoading">
         <div *ngIf="isSearchActive && displayedRepos.length > 0" class="status found">
-          {{ displayedRepos.length }} result{{ displayedRepos.length !== 1 ? 's' : '' }}
+          {{ totalCount }} result{{ totalCount !== 1 ? 's' : '' }}
           found for "{{ lastSearchText }}"
         </div>
         <div *ngIf="isSearchActive && displayedRepos.length === 0" class="status empty">
           No results found for "{{ lastSearchText }}"
         </div>
-        <div *ngIf="!isSearchActive && displayedRepos.length > 0" class="status all">
-          Showing all {{ displayedRepos.length }} approved repositories
+        <div *ngIf="!isSearchActive && totalCount > 0" class="status all">
+          Showing {{ displayedRepos.length }} of {{ totalCount }} approved repositories
         </div>
-        <div *ngIf="!isSearchActive && displayedRepos.length === 0 && !isLoading" class="status all">&nbsp;</div>
+        <div *ngIf="!isSearchActive && totalCount === 0 && !isLoading" class="status all">&nbsp;</div>
       </ng-container>
 
-      <!-- ── Loading spinner ──────────────────────────────────────────────── -->
-      <div class="spinner-wrap" *ngIf="isLoading">
+      <!-- ── Loading spinner (initial load only) ───────────────────────────── -->
+      <div class="spinner-wrap" *ngIf="isLoading && displayedRepos.length === 0">
         <div class="spinner"></div>
       </div>
 
       <!-- ── Card grid ─────────────────────────────────────────────────────── -->
-      <div class="grid" [ngClass]="{'single': displayedRepos.length === 1}" *ngIf="!isLoading">
+      <div class="grid" [ngClass]="{'single': displayedRepos.length === 1}"
+        *ngIf="displayedRepos.length > 0">
         <div class="repo-card" *ngFor="let repo of displayedRepos; let i = index"
-          [style.animation-delay]="(i * 0.05) + 's'">
+          [style.animation-delay]="(i % pageSize * 0.05) + 's'">
           <div class="card-body">
             <div class="card-header-row">
               <div class="card-icon">
@@ -579,6 +614,32 @@ import { SecureFileViewerComponent } from '../securefileviewer/securefileviewer'
             </div>
           </div>
         </div>
+
+        <!-- ── Skeleton placeholders while loading more ──────────────────── -->
+        <ng-container *ngIf="isLoadingMore">
+          <div class="skeleton-card" *ngFor="let s of skeletonArray">
+            <div class="skeleton-body">
+              <div class="skeleton-line w-60"></div>
+              <div class="skeleton-line w-40"></div>
+              <div class="skeleton-line w-80"></div>
+              <div class="skeleton-line w-30"></div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- ── Load-more sentinel (IntersectionObserver target) ──────────────── -->
+      <div #scrollSentinel class="load-more-sentinel" *ngIf="!isSearchActive && hasMore && !isLoading">
+        <div *ngIf="isLoadingMore">
+          <div class="spinner spinner-sm"></div>
+          <div class="load-more-text">Loading more…</div>
+        </div>
+      </div>
+
+      <!-- ── End of results indicator ─────────────────────────────────────── -->
+      <div class="end-of-results"
+        *ngIf="!isLoading && !isLoadingMore && displayedRepos.length > 0 && (!hasMore || isSearchActive)">
+        All {{ displayedRepos.length }} result{{ displayedRepos.length !== 1 ? 's' : '' }} shown
       </div>
 
       <!-- ── Details Dialog ───────────────────────────────────────────────── -->
@@ -645,20 +706,26 @@ export class Home implements OnInit, OnDestroy {
   selectedFilter: string  = 'Any';
   searchText: string      = '';
 
-  // ── Dropdown option arrays — populated from APIs ──────────────────────────
+  // ── Dropdown option arrays ────────────────────────────────────────────────
   domainOptions:  string[] = [];
   sectorOptions:  string[] = [];
   moduleOptions:  string[] = [];
-
-  /** True while the three dropdown datasets are being fetched */
   dropdownsLoading: boolean = false;
-
-  /** Bound value for Domain / Sector / Module p-select */
   selectedDropdownValue: string | null = null;
 
   // ── Repo data ─────────────────────────────────────────────────────────────
-  allRepos:       any[] = [];
   displayedRepos: any[] = [];
+  totalCount:     number  = 0;
+
+  // ── Infinite scroll state ─────────────────────────────────────────────────
+  readonly pageSize = PAGE_SIZE;
+  currentPage:   number  = 1;
+  hasMore:       boolean = true;
+  isLoadingMore: boolean = false;
+  skeletonArray: null[]  = Array(PAGE_SIZE).fill(null);
+
+  private observer!: IntersectionObserver;
+  private sentinelEl: HTMLElement | null = null;
 
   // ── UI flags ──────────────────────────────────────────────────────────────
   isLoading:           boolean = false;
@@ -680,6 +747,7 @@ export class Home implements OnInit, OnDestroy {
     private managereposervice: ManageReposService,
     private domainsService:    ManageReposService,
     private http:              HttpClient,
+    private elRef:             ElementRef,
   ) {}
 
   ngOnInit() {
@@ -692,33 +760,72 @@ export class Home implements OnInit, OnDestroy {
       if (trimmed) {
         this.executeSearch(trimmed);
       } else {
-        this.displayedRepos = this.allRepos;
-        this.isSearchActive = false;
-        this.lastSearchText = '';
+        this.resetToAllRepos();
       }
     });
 
-    // Load repos + all dropdown data in parallel
-    this.loadAllRepos();
+    this.loadFirstPage();
     this.loadDropdownData();
+    this.setupIntersectionObserver();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.observer) { this.observer.disconnect(); }
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  //  DATA LOADING
+  //  INTERSECTION OBSERVER — fires when sentinel scrolls into view
   // ════════════════════════════════════════════════════════════════════════
 
-  loadAllRepos() {
-    this.isLoading = true;
-    this.managereposervice.getAllRepositories().subscribe({
-      next: (repos) => {
-        this.allRepos       = repos;
-        this.displayedRepos = repos;
+  private setupIntersectionObserver() {
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && this.hasMore && !this.isLoadingMore && !this.isSearchActive) {
+          this.loadNextPage();
+        }
+      },
+      { rootMargin: '200px' }   // start loading 200px before sentinel hits viewport
+    );
+  }
+
+  /**
+   * Called by Angular after *ngIf renders the sentinel element.
+   * We watch for DOM mutations so we can (re-)observe whenever the sentinel appears.
+   */
+  private observeSentinel() {
+    // Give Angular one tick to render the sentinel
+    setTimeout(() => {
+      const el = this.elRef.nativeElement.querySelector('.load-more-sentinel');
+      if (el && el !== this.sentinelEl) {
+        if (this.sentinelEl) { this.observer.unobserve(this.sentinelEl); }
+        this.sentinelEl = el;
+        this.observer.observe(el);
+      }
+    }, 0);
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  DATA LOADING — paginated
+  // ════════════════════════════════════════════════════════════════════════
+
+  /** First page load (shows full-page spinner) */
+  loadFirstPage() {
+    this.isLoading      = true;
+    this.currentPage    = 1;
+    this.displayedRepos = [];
+    this.hasMore        = true;
+
+    this.managereposervice.getAllRepositories(1, PAGE_SIZE).subscribe({
+      next: (res: any) => {
+        this.displayedRepos = res.items ?? res;
+        this.totalCount     = res.total ?? res.length;
+        this.hasMore        = res.has_more ?? false;
+        this.currentPage    = 1;
         this.isLoading      = false;
+        this.observeSentinel();
       },
       error: (err) => {
         this.isLoading = false;
@@ -731,9 +838,47 @@ export class Home implements OnInit, OnDestroy {
     });
   }
 
+  /** Subsequent pages (shows skeleton cards inline, no full-page spinner) */
+  loadNextPage() {
+    if (this.isLoadingMore || !this.hasMore) { return; }
+
+    this.isLoadingMore = true;
+    const nextPage     = this.currentPage + 1;
+
+    this.managereposervice.getAllRepositories(nextPage, PAGE_SIZE).subscribe({
+      next: (res: any) => {
+        const newItems = res.items ?? [];
+        this.displayedRepos = [...this.displayedRepos, ...newItems];
+        this.totalCount     = res.total ?? this.totalCount;
+        this.hasMore        = res.has_more ?? false;
+        this.currentPage    = nextPage;
+        this.isLoadingMore  = false;
+
+        if (this.hasMore) {
+          this.observeSentinel();   // re-observe after ngIf toggles the sentinel
+        }
+      },
+      error: (err) => {
+        this.isLoadingMore = false;
+        this.messageservice.add({
+          severity: 'error',
+          summary: 'Failed to load more',
+          detail: err.message || 'Unknown error'
+        });
+      }
+    });
+  }
+
+  /** Resets back to the paginated all-repos view (called when clearing search) */
+  private resetToAllRepos() {
+    this.isSearchActive        = false;
+    this.lastSearchText        = '';
+    this.selectedDropdownValue = null;
+    this.loadFirstPage();
+  }
+
   /**
-   * Fetch domains (with nested sectors) and modules from their respective
-   * APIs in parallel, then flatten into sorted string arrays for the dropdowns.
+   * Fetch all dropdown data (domains → sectors, modules) in parallel.
    */
   loadDropdownData() {
     this.dropdownsLoading = true;
@@ -744,20 +889,16 @@ export class Home implements OnInit, OnDestroy {
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ domains, modules }: { domains: Domain[]; modules: any }) => {
 
-        // ── Domains ───────────────────────────────────────────────────────
         this.domainOptions = (domains as Domain[])
           .map(d => d.name)
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b));
 
-        // ── Sectors – flatten all sectors across every domain ─────────────
         const allSectors = (domains as Domain[])
           .flatMap(d => d.sectors.map(s => s.name))
           .filter(Boolean);
-        // deduplicate & sort
         this.sectorOptions = [...new Set(allSectors)].sort((a, b) => a.localeCompare(b));
 
-        // ── Modules ───────────────────────────────────────────────────────
         const modArray: any[] = Array.isArray(modules) ? modules : [];
         this.moduleOptions = modArray
           .map((m: any) => m.module_name)
@@ -778,16 +919,12 @@ export class Home implements OnInit, OnDestroy {
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  //  SEARCH HANDLERS
+  //  SEARCH HANDLERS — search always returns all results at once
   // ════════════════════════════════════════════════════════════════════════
 
   onSearch() {
     const trimmed = this.searchText.trim();
-    if (!trimmed) {
-      this.displayedRepos = this.allRepos;
-      this.isSearchActive = false;
-      return;
-    }
+    if (!trimmed) { this.resetToAllRepos(); return; }
     this.executeSearch(trimmed);
   }
 
@@ -798,38 +935,35 @@ export class Home implements OnInit, OnDestroy {
   onFilterChange() {
     this.searchText            = '';
     this.selectedDropdownValue = null;
-    this.displayedRepos        = this.allRepos;
-    this.isSearchActive        = false;
     this.lastSearchText        = '';
+    this.resetToAllRepos();
   }
 
-  /** User picks a value from Domain / Sector / Module p-select → search immediately */
   onDropdownValueChange(event: any) {
     const value = event.value;
-    if (value) {
-      this.executeSearch(value);
-    } else {
-      this.displayedRepos = this.allRepos;
-      this.isSearchActive = false;
-      this.lastSearchText = '';
-    }
+    if (value) { this.executeSearch(value); }
+    else        { this.resetToAllRepos(); }
   }
 
   onDropdownClear() {
     this.selectedDropdownValue = null;
-    this.displayedRepos        = this.allRepos;
-    this.isSearchActive        = false;
-    this.lastSearchText        = '';
+    this.resetToAllRepos();
   }
 
   private executeSearch(query: string) {
     this.isLoading      = true;
     this.lastSearchText = query;
+    // Disconnect observer — search results are not paginated
+    if (this.observer && this.sentinelEl) {
+      this.observer.unobserve(this.sentinelEl);
+    }
 
     this.managereposervice.searchRepositories(this.selectedFilter, query).subscribe({
       next: (results) => {
         this.displayedRepos = results;
+        this.totalCount     = results.length;
         this.isSearchActive = true;
+        this.hasMore        = false;   // search = full result, no paging
         this.isLoading      = false;
       },
       error: (err) => {
@@ -844,12 +978,9 @@ export class Home implements OnInit, OnDestroy {
   }
 
   clearSearch() {
-    this.searchText            = '';
-    this.selectedFilter        = 'Any';
-    this.selectedDropdownValue = null;
-    this.displayedRepos        = this.allRepos;
-    this.isSearchActive        = false;
-    this.lastSearchText        = '';
+    this.searchText     = '';
+    this.selectedFilter = 'Any';
+    this.resetToAllRepos();
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -864,7 +995,6 @@ export class Home implements OnInit, OnDestroy {
     return value;
   }
 
-  // ── Dialog ────────────────────────────────────────────────────────────────
   showDetails(repo: any) {
     this.selectedRepo  = repo;
     this.dialogVisible = true;
@@ -875,7 +1005,6 @@ export class Home implements OnInit, OnDestroy {
     this.dialogVisible = false;
   }
 
-  // ── Attachment ────────────────────────────────────────────────────────────
   openAttachment(repo: any) {
     const base    = 'http://10.6.102.245:5002';
     const fileUrl = `${base}/repos/refview/${repo.id}`;
@@ -883,11 +1012,8 @@ export class Home implements OnInit, OnDestroy {
     const token   = raw ? (JSON.parse(raw)?.access_token ?? raw) : '';
 
     if (!token) {
-      this.messageservice.add({
-        severity: 'warn',
-        summary: 'Not logged in',
-        detail: 'You must be logged in to view attachments.'
-      });
+      this.messageservice.add({ severity: 'warn', summary: 'Not logged in',
+        detail: 'You must be logged in to view attachments.' });
       return;
     }
 
@@ -929,25 +1055,16 @@ export class Home implements OnInit, OnDestroy {
   requestDownload(repo: any) {
     this.managereposervice.requestDownload(repo.id, '').subscribe({
       next: () => {
-        this.messageservice.add({
-          severity: 'success',
-          summary: 'Request Sent',
-          detail: 'Your download request has been sent to the Superadmin for approval.'
-        });
+        this.messageservice.add({ severity: 'success', summary: 'Request Sent',
+          detail: 'Your download request has been sent to the Superadmin for approval.' });
       },
       error: (err) => {
         if (err.status === 400) {
-          this.messageservice.add({
-            severity: 'info',
-            summary: 'Already Requested',
-            detail: 'Your request is already pending approval.'
-          });
+          this.messageservice.add({ severity: 'info', summary: 'Already Requested',
+            detail: 'Your request is already pending approval.' });
         } else {
-          this.messageservice.add({
-            severity: 'error',
-            summary: 'Request Failed',
-            detail: err.message || 'Could not send request. Please try again.'
-          });
+          this.messageservice.add({ severity: 'error', summary: 'Request Failed',
+            detail: err.message || 'Could not send request. Please try again.' });
         }
       }
     });

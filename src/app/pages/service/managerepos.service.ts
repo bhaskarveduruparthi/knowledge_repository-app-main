@@ -96,9 +96,18 @@ export class ManageReposService {
 
   // ─── HOME PAGE ───────────────────────────────────────────────────────────────
 
-  getAllRepositories(): Observable<Repository[]> {
-    return this.http.get<Repository[]>(`${this.url}repos/all-approved`);
-  }
+  getAllRepositories(page: number = 1, perPage: number = 12): Observable<{ items: Repository[]; total: number; page: number; has_more: boolean }> {
+  const params = new HttpParams()
+    .set('page', page.toString())
+    .set('per_page', perPage.toString());
+  return this.http.get<{ items: Repository[]; total: number; page: number; has_more: boolean }>(
+    `${this.url}repos/all-approved`,
+    { params }
+  );
+}
+
+
+ 
 
   // Existing search used by other components — NOT changed
   searchRepositories(filter: string, query: string): Observable<Repository[]> {
