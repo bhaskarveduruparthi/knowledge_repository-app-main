@@ -80,7 +80,7 @@ import { Domain, ManageReposService, Sector } from '../service/managerepos.servi
         }
 
         /* Domain row */
-        .domain-row td { background: #f0f4ff; font-weight: 700; }
+        .domain-row td {  font-weight: 700; }
         .domain-name {
             font-size: .93rem; color: #1e3a6e;
             display: flex; align-items: center; gap: .5rem;
