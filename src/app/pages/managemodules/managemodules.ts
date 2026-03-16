@@ -30,7 +30,7 @@ export interface Module {
         .page-card {
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(17,34,78,0.09);
+            box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5);
             padding: 1.5rem;
         }
 

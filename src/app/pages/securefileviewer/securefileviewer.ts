@@ -849,24 +849,132 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
     }
 
     private async renderExcel(blob: Blob) {
-        try {
-            const arrayBuffer = await blob.arrayBuffer();
-            const workbook = XLSX.read(arrayBuffer);
-            const firstSheet = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheet];
+    try {
+        const arrayBuffer = await blob.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer);
+        const sheetNames = workbook.SheetNames;
+
+        const buildSheetHtml = (sheetName: string): string => {
+            const worksheet = workbook.Sheets[sheetName];
             const html = XLSX.utils.sheet_to_html(worksheet);
-            const htmlWithRowNums = this.injectExcelRowNumbers(html);
-            this.updateContent(`
-                <div class="excel-scroll">
-                    <div class="excel-wrapper">
-                        <div class="excel-viewer">${htmlWithRowNums}</div>
+            return this.injectExcelRowNumbers(html);
+        };
+
+        const tabsHtml = sheetNames.length > 1
+            ? `
+            <div class="excel-tabs" id="excel-tabs">
+                ${sheetNames.map((name, i) => `
+                    <button class="excel-tab ${i === 0 ? 'active' : ''}" 
+                            onclick="switchSheet(${i})" 
+                            data-index="${i}">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18M9 3v18"/>
+                        </svg>
+                        ${this.escapeHtml(name)}
+                    </button>
+                `).join('')}
+            </div>`
+            : '';
+
+        const sheetsDataHtml = sheetNames.map((name, i) => `
+            <div class="sheet-panel ${i === 0 ? 'active' : ''}" data-sheet="${i}">
+                <div class="excel-viewer">${buildSheetHtml(name)}</div>
+            </div>
+        `).join('');
+
+        const tabStyles = sheetNames.length > 1 ? `
+            <style>
+                .excel-tabs {
+                    display: flex;
+                    gap: 2px;
+                    padding: 0.6rem 1rem 0;
+                    background: var(--green-100);
+                    border-bottom: 2px solid var(--green-200);
+                    overflow-x: auto;
+                    scrollbar-width: thin;
+                    flex-shrink: 0;
+                }
+                .excel-tab {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    padding: 0.45rem 1rem;
+                    border: 1px solid transparent;
+                    border-bottom: none;
+                    border-radius: 6px 6px 0 0;
+                    background: rgba(255,255,255,0.55);
+                    color: var(--text-secondary);
+                    font-size: 12px;
+                    font-family: 'IBM Plex Mono', monospace;
+                    font-weight: 500;
+                    cursor: pointer;
+                    white-space: nowrap;
+                    transition: background 0.15s, color 0.15s;
+                    letter-spacing: 0.02em;
+                }
+                .excel-tab:hover {
+                    background: rgba(255,255,255,0.85);
+                    color: var(--text-primary);
+                }
+                .excel-tab.active {
+                    background: #ffffff;
+                    color: var(--green-600);
+                    border-color: var(--green-200);
+                    font-weight: 600;
+                }
+                .excel-tabs-scroll-wrapper {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    overflow: hidden;
+                }
+                .sheet-panel { display: none; flex: 1; overflow: auto; }
+                .sheet-panel.active { display: block; }
+            </style>
+        ` : '';
+
+        const switchScript = sheetNames.length > 1 ? `
+            <script>
+                function switchSheet(index) {
+                    document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('.excel-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelector('.sheet-panel[data-sheet="' + index + '"]').classList.add('active');
+                    document.querySelector('.excel-tab[data-index="' + index + '"]').classList.add('active');
+                }
+            </script>
+        ` : '';
+
+        const wrapperClass = sheetNames.length > 1 ? 'excel-tabs-scroll-wrapper' : '';
+
+        this.updateContent(`
+            ${tabStyles}
+            <div class="excel-scroll" style="${sheetNames.length > 1 ? 'padding:0; display:flex; flex-direction:column;' : ''}">
+                <div class="${wrapperClass}">
+                    ${tabsHtml}
+                    <div style="${sheetNames.length > 1 ? 'flex:1; overflow:auto; padding:1.75rem;' : ''}">
+                        <div class="excel-wrapper" style="display:block;">
+                            ${sheetsDataHtml}
+                        </div>
                     </div>
                 </div>
-            `);
-        } catch {
-            this.showError('Failed to render Excel document.');
-        }
+            </div>
+            ${switchScript}
+        `);
+    } catch {
+        this.showError('Failed to render Excel document.');
     }
+}
+
+private escapeHtml(str: string): string {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+
 
     private injectExcelRowNumbers(html: string): string {
         let rowIndex = 0;

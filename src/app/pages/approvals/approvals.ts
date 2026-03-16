@@ -67,6 +67,14 @@ interface ExportColumn {
             padding: 2rem;
         }
 
+        :host ::ng-deep .p-card .p-card-body {
+    box-shadow: none;
+}
+
+:host ::ng-deep .p-card {
+    box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5) !important;
+}
+
         /* ── Toolbar ── */
         .toolbar-shell {
             display: flex;
@@ -175,7 +183,7 @@ interface ExportColumn {
             background: #fff;
             border-radius: 20px;
             border: 1px solid rgba(165, 214, 167, 0.6);
-            box-shadow: 0 4px 20px rgba(67, 160, 71, 0.09), 0 1px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 14px 0 rgba(76,175,80,0.10);
             padding: 1.5rem 1.5rem 1.25rem;
             display: flex;
             flex-direction: column;
@@ -194,7 +202,7 @@ interface ExportColumn {
 
         .repo-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 36px rgba(67, 160, 71, 0.15), 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 6px 28px 0 rgba(76,175,80,0.22);
         }
 
         /* Card header */

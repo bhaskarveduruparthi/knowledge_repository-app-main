@@ -44,11 +44,7 @@ interface MonthOption {
 @Component({
     selector: 'app-user-wise-report',
     standalone: true,
-    imports: [
-        CommonModule, FormsModule, ButtonModule, ToastModule,
-        ToolbarModule, InputTextModule, SelectModule, DialogModule, TableModule,
-        TagModule, ChartModule, CardModule
-    ],
+    imports: [CommonModule, FormsModule, ButtonModule, ToastModule, ToolbarModule, InputTextModule, SelectModule, DialogModule, TableModule, TagModule, ChartModule, CardModule],
     providers: [MessageService, ManageAdminsService, ManageReposService],
     styles: `
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -56,224 +52,987 @@ interface MonthOption {
         :host {
             display: block;
             min-height: 100vh;
-            background: #f0f4f8;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5);
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        .page-wrap { max-width: 1600px; margin: 0 auto; padding: 0; }
+        .page-wrap {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0;
+        }
 
         /* ── Hero ── */
         .hero {
             background: linear-gradient(135deg, #1c4535 0%, #2e7d52 50%, #1565a8 100%);
+            border-radius: 10px 10px 0 0;
             padding: 2.25rem 3rem 0 3rem;
             position: relative;
             overflow: hidden;
         }
         .hero::before {
-            content: ''; position: absolute; top: -60px; right: -60px;
-            width: 280px; height: 280px; border-radius: 50%;
-            background: rgba(255,255,255,0.05);
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
         }
         .hero::after {
-            content: ''; position: absolute; bottom: -40px; left: 40%;
-            width: 200px; height: 200px; border-radius: 50%;
-            background: rgba(255,255,255,0.04);
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 40%;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
         }
-        .hero-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
-        .hero-brand { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-        .hero-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.18); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
-        .hero-title-wrap h1 { font-size: 1.85rem; font-weight: 800; color: #fff; margin: 0 0 0.25rem 0; letter-spacing: -0.5px; }
-        .hero-title-wrap p  { font-size: 0.88rem; color: rgba(255,255,255,0.72); margin: 0; }
-        .hero-actions { display: flex; gap: 0.75rem; align-items: center; }
-        .btn-hero { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.6rem 1.2rem; border-radius: 9px; font-size: 0.83rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; border: none; }
-        .btn-hero.outline { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.28); }
-        .btn-hero.outline:hover { background: rgba(255,255,255,0.2); }
-        .btn-hero.excel { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; box-shadow: 0 3px 12px rgba(34,197,94,0.4); }
-        .btn-hero.excel:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(34,197,94,0.5); }
-        .btn-hero.excel:disabled { opacity: 0.45; cursor: not-allowed; }
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+        .hero-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .hero-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .hero-title-wrap h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 0 0.25rem 0;
+            letter-spacing: -0.5px;
+        }
+        .hero-title-wrap p {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.72);
+            margin: 0;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 9px;
+            font-size: 0.83rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border: none;
+        }
+        .btn-hero.outline {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+        }
+        .btn-hero.outline:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .btn-hero.excel {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(34, 197, 94, 0.4);
+        }
+        .btn-hero.excel:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(34, 197, 94, 0.5);
+        }
+        .btn-hero.excel:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
 
         /* ── KPI Strip ── */
-        .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; position: relative; z-index: 2; margin-top: 1.5rem; }
-        .kpi-tile { padding: 1.25rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); transition: background 0.2s; }
-        .kpi-tile:last-child { border-right: none; }
-        .kpi-tile:hover { background: rgba(255,255,255,0.06); }
-        .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6); font-weight: 700; margin-bottom: 0.4rem; }
-        .kpi-value { font-size: 2.2rem; font-weight: 800; line-height: 1; margin-bottom: 0.2rem; }
-        .kpi-tile.k-users   .kpi-value { color: #7ee8a2; }
-        .kpi-tile.k-total   .kpi-value { color: #93c5fd; }
-        .kpi-tile.k-approve .kpi-value { color: #86efac; }
-        .kpi-tile.k-pending .kpi-value { color: #fde68a; }
-        .kpi-tile.k-reject  .kpi-value { color: #fca5a5; }
-        .kpi-sub { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0;
+            position: relative;
+            z-index: 2;
+            margin-top: 1.5rem;
+        }
+        .kpi-tile {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s;
+        }
+        .kpi-tile:last-child {
+            border-right: none;
+        }
+        .kpi-tile:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .kpi-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+        .kpi-tile.k-users .kpi-value {
+            color: #7ee8a2;
+        }
+        .kpi-tile.k-total .kpi-value {
+            color: #93c5fd;
+        }
+        .kpi-tile.k-approve .kpi-value {
+            color: #86efac;
+        }
+        .kpi-tile.k-pending .kpi-value {
+            color: #fde68a;
+        }
+        .kpi-tile.k-reject .kpi-value {
+            color: #fca5a5;
+        }
+        .kpi-sub {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.45);
+        }
 
         /* ── Filter Bar ── */
-        .filter-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 1rem 3rem; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .filter-bar-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; white-space: nowrap; }
-        .filter-divider { width: 1px; height: 28px; background: #e2e8f0; }
-        .filter-item { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 180px; max-width: 260px; }
-        .filter-item i { color: #94a3b8; font-size: 0.9rem; flex-shrink: 0; }
-        ::ng-deep .filter-item .p-select { border: 1px solid #e2e8f0 !important; border-radius: 8px !important; background: #f8fafc !important; width: 100%; }
-        ::ng-deep .filter-item .p-select:hover { border-color: #2e7d52 !important; }
-        ::ng-deep .filter-item .p-select .p-select-label { font-size: 0.83rem !important; color: #334155 !important; padding: 0.55rem 0.85rem !important; }
-        .search-wrap { flex: 1; min-width: 200px; max-width: 280px; position: relative; }
-        .search-wrap i { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem; }
-        .search-input { width: 100%; padding: 0.55rem 0.85rem 0.55rem 2.2rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.83rem; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; transition: border-color 0.2s; }
-        .search-input:focus { outline: none; border-color: #2e7d52; background: #fff; }
-        .search-input::placeholder { color: #94a3b8; }
-        .btn-clear-filter { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
-        .btn-clear-filter:hover { border-color: #cbd5e1; background: #f1f5f9; color: #334155; }
+        .filter-bar {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .filter-bar-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        .filter-divider {
+            width: 1px;
+            height: 28px;
+            background: #e2e8f0;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 180px;
+            max-width: 260px;
+        }
+        .filter-item i {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        ::ng-deep .filter-item .p-select {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            background: #f8fafc !important;
+            width: 100%;
+        }
+        ::ng-deep .filter-item .p-select:hover {
+            border-color: #2e7d52 !important;
+        }
+        ::ng-deep .filter-item .p-select .p-select-label {
+            font-size: 0.83rem !important;
+            color: #334155 !important;
+            padding: 0.55rem 0.85rem !important;
+        }
+        .search-wrap {
+            flex: 1;
+            min-width: 200px;
+            max-width: 280px;
+            position: relative;
+        }
+        .search-wrap i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            font-size: 0.83rem;
+            color: #334155;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #2e7d52;
+            background: #fff;
+        }
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+        .btn-clear-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            white-space: nowrap;
+        }
+        .btn-clear-filter:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+            color: #334155;
+        }
 
         /* ── Content ── */
-        .content { padding: 2rem 3rem; }
-        .section-label { display: flex; align-items: center; gap: 0.6rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 1.25rem; }
-        .section-label::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+        .content {
+            padding: 2rem 3rem;
+        }
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 1.25rem;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
 
         /* ── Chart Grid ── */
-        .charts-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-bottom: 1.25rem; }
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
 
-        .chart-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e8edf2; position: relative; overflow: hidden; }
-        .chart-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-        .chart-card.accent-green::before  { background: linear-gradient(90deg, #1c4535, #22c55e); }
-        .chart-card.accent-blue::before   { background: linear-gradient(90deg, #1565a8, #38bdf8); }
-        .chart-card.accent-purple::before { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
-        .chart-card.accent-orange::before { background: linear-gradient(90deg, #c2410c, #fb923c); }
+        .chart-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.05),
+                0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e8edf2;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        .chart-card.accent-green::before {
+            background: linear-gradient(90deg, #1c4535, #22c55e);
+        }
+        .chart-card.accent-blue::before {
+            background: linear-gradient(90deg, #1565a8, #38bdf8);
+        }
+        .chart-card.accent-purple::before {
+            background: linear-gradient(90deg, #6d28d9, #a78bfa);
+        }
+        .chart-card.accent-orange::before {
+            background: linear-gradient(90deg, #c2410c, #fb923c);
+        }
 
-        .chart-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
-        .chart-card-title { font-size: 0.9rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; line-height: 1.3; }
-        .chart-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
-        .chart-icon.green  { background: #dcfce7; color: #16a34a; }
-        .chart-icon.blue   { background: #dbeafe; color: #1d4ed8; }
-        .chart-icon.purple { background: #ede9fe; color: #7c3aed; }
-        .chart-icon.orange { background: #ffedd5; color: #c2410c; }
-        .chart-badge { font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-green  { background: #dcfce7; color: #15803d; }
-        .badge-blue   { background: #dbeafe; color: #1d4ed8; }
-        .badge-purple { background: #ede9fe; color: #7c3aed; }
-        .badge-orange { background: #ffedd5; color: #c2410c; }
+        .chart-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+        }
+        .chart-card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            line-height: 1.3;
+        }
+        .chart-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .chart-icon.green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        .chart-icon.blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .chart-icon.purple {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+        .chart-icon.orange {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+        .chart-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-green {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .badge-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .badge-purple {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+        .badge-orange {
+            background: #ffedd5;
+            color: #c2410c;
+        }
 
-        ::ng-deep .chart-card .p-chart { height: 320px !important; }
+        ::ng-deep .chart-card .p-chart {
+            height: 320px !important;
+        }
 
         /* ── Engagement Insights Row ── */
-        .insights-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
 
-        .insight-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e8edf2; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        .insight-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-        .insight-card.accent-red::before   { background: linear-gradient(90deg, #b91c1c, #f87171); }
-        .insight-card.accent-amber::before { background: linear-gradient(90deg, #b45309, #fbbf24); }
-        .insight-card.accent-slate::before { background: linear-gradient(90deg, #334155, #94a3b8); }
+        .insight-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.05),
+                0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e8edf2;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .insight-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        .insight-card.accent-red::before {
+            background: linear-gradient(90deg, #b91c1c, #f87171);
+        }
+        .insight-card.accent-amber::before {
+            background: linear-gradient(90deg, #b45309, #fbbf24);
+        }
+        .insight-card.accent-slate::before {
+            background: linear-gradient(90deg, #334155, #94a3b8);
+        }
 
-        .insight-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .insight-title { font-size: 0.9rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; }
-        .insight-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
-        .insight-icon.red   { background: #fee2e2; color: #b91c1c; }
-        .insight-icon.amber { background: #fef3c7; color: #b45309; }
-        .insight-icon.slate { background: #f1f5f9; color: #475569; }
+        .insight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        .insight-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .insight-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .insight-icon.red {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .insight-icon.amber {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .insight-icon.slate {
+            background: #f1f5f9;
+            color: #475569;
+        }
 
-        .insight-count-badge { font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.7rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
-        .badge-red   { background: #fee2e2; color: #b91c1c; }
-        .badge-amber { background: #fef3c7; color: #92400e; }
-        .badge-slate { background: #f1f5f9; color: #475569; }
+        .insight-count-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+        .badge-red {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .badge-amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-slate {
+            background: #f1f5f9;
+            color: #475569;
+        }
 
-        .insight-list { flex: 1; overflow-y: auto; max-height: 260px; display: flex; flex-direction: column; gap: 0.5rem; }
-        .insight-list::-webkit-scrollbar { width: 4px; }
-        .insight-list::-webkit-scrollbar-track { background: #f8fafc; }
-        .insight-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+        .insight-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .insight-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .insight-list::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        .insight-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
 
-        .insight-user-row { display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0.65rem; border-radius: 8px; background: #f8fafc; border: 1px solid #f1f5f9; transition: background 0.15s; }
-        .insight-user-row:hover { background: #f1f5f9; }
+        .insight-user-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 0.65rem;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+        .insight-user-row:hover {
+            background: #f1f5f9;
+        }
 
-        .insight-avatar { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.68rem; flex-shrink: 0; }
-        .ins-av-0 { background: linear-gradient(135deg, #b91c1c, #f87171); }
-        .ins-av-1 { background: linear-gradient(135deg, #b45309, #fbbf24); }
-        .ins-av-2 { background: linear-gradient(135deg, #334155, #94a3b8); }
+        .insight-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.68rem;
+            flex-shrink: 0;
+        }
+        .ins-av-0 {
+            background: linear-gradient(135deg, #b91c1c, #f87171);
+        }
+        .ins-av-1 {
+            background: linear-gradient(135deg, #b45309, #fbbf24);
+        }
+        .ins-av-2 {
+            background: linear-gradient(135deg, #334155, #94a3b8);
+        }
 
-        .insight-user-info { flex: 1; min-width: 0; }
-        .insight-user-name { font-size: 0.78rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .insight-user-meta { font-size: 0.68rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .insight-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .insight-user-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .insight-user-meta {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-        .insight-user-tag { font-size: 0.68rem; font-weight: 600; padding: 0.18rem 0.5rem; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }
-        .tag-red   { background: #fee2e2; color: #b91c1c; }
-        .tag-amber { background: #fef3c7; color: #92400e; }
-        .tag-slate { background: #f1f5f9; color: #475569; }
+        .insight-user-tag {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 0.18rem 0.5rem;
+            border-radius: 5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .tag-red {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .tag-amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .tag-slate {
+            background: #f1f5f9;
+            color: #475569;
+        }
 
-        .insight-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; gap: 0.5rem; }
-        .insight-empty i { font-size: 1.75rem; color: #cbd5e1; }
-        .insight-empty span { font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+        .insight-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            gap: 0.5rem;
+        }
+        .insight-empty i {
+            font-size: 1.75rem;
+            color: #cbd5e1;
+        }
+        .insight-empty span {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
 
         /* ── Table ── */
-        .table-card { background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e8edf2; overflow: hidden; }
-        .table-card-header { display: flex; justify-content: space-between; align-items: center; padding: 1.4rem 1.75rem; border-bottom: 1px solid #f1f5f9; }
-        .table-card-title { display: flex; align-items: center; gap: 0.75rem; font-size: 1rem; font-weight: 800; color: #1e293b; }
-        .count-chip { background: #1c4535; color: white; padding: 0.18rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .table-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.05),
+                0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e8edf2;
+            overflow: hidden;
+        }
+        .table-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.4rem 1.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        .count-chip {
+            background: #1c4535;
+            color: white;
+            padding: 0.18rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
 
         ::ng-deep .p-datatable .p-datatable-thead > tr > th,
         ::ng-deep .p-datatable-thead > tr > th,
         ::ng-deep th.p-sortable-column,
-        ::ng-deep th[psortablecolumn] { background: #1e293b !important; background-color: #1e293b !important; color: #fff !important; font-weight: 700 !important; padding: 0.9rem 1.25rem !important; border: none !important; border-bottom: 2px solid #0f172a !important; font-size: 0.75rem !important; text-transform: uppercase !important; letter-spacing: 0.6px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; white-space: nowrap; }
+        ::ng-deep th[psortablecolumn] {
+            background: #1e293b !important;
+            background-color: #1e293b !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            padding: 0.9rem 1.25rem !important;
+            border: none !important;
+            border-bottom: 2px solid #0f172a !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.6px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            white-space: nowrap;
+        }
         ::ng-deep .p-datatable .p-datatable-thead > tr > th .p-sortable-column-icon,
         ::ng-deep .p-datatable .p-datatable-thead > tr > th .p-icon,
-        ::ng-deep .p-datatable .p-datatable-thead > tr > th svg { color: rgba(255,255,255,0.5) !important; fill: rgba(255,255,255,0.5) !important; }
-        ::ng-deep .p-datatable .p-datatable-thead > tr > th:hover { background: #334155 !important; background-color: #334155 !important; }
-        ::ng-deep .p-datatable .p-datatable-tbody > tr > td { padding: 0.95rem 1.25rem !important; border-bottom: 1px solid #f1f5f9 !important; vertical-align: middle; font-size: 0.875rem; font-family: 'Plus Jakarta Sans', sans-serif; }
-        ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td { border-bottom: none !important; }
-        ::ng-deep .p-datatable .p-datatable-tbody > tr:hover { background: #f8fafc !important; }
-        ::ng-deep .p-datatable .p-paginator { border: none !important; border-top: 1px solid #f1f5f9 !important; padding: 1rem 1.25rem !important; }
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th svg {
+            color: rgba(255, 255, 255, 0.5) !important;
+            fill: rgba(255, 255, 255, 0.5) !important;
+        }
+        ::ng-deep .p-datatable .p-datatable-thead > tr > th:hover {
+            background: #334155 !important;
+            background-color: #334155 !important;
+        }
+        ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+            padding: 0.95rem 1.25rem !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            vertical-align: middle;
+            font-size: 0.875rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
+            border-bottom: none !important;
+        }
+        ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+            background: #f8fafc !important;
+        }
+        ::ng-deep .p-datatable .p-paginator {
+            border: none !important;
+            border-top: 1px solid #f1f5f9 !important;
+            padding: 1rem 1.25rem !important;
+        }
 
-        .user-cell { display: flex; align-items: center; gap: 0.85rem; }
-        .avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.75rem; flex-shrink: 0; }
-        .avatar-0 { background: linear-gradient(135deg, #1c4535, #22c55e); }
-        .avatar-1 { background: linear-gradient(135deg, #1565a8, #38bdf8); }
-        .avatar-2 { background: linear-gradient(135deg, #6d28d9, #a78bfa); }
-        .avatar-3 { background: linear-gradient(135deg, #c2410c, #fb923c); }
-        .avatar-4 { background: linear-gradient(135deg, #0f766e, #2dd4bf); }
-        .user-name { font-weight: 700; color: #1e293b; font-size: 0.875rem; }
-        .user-id   { font-size: 0.72rem; color: #94a3b8; }
-        .num-total { font-size: 1rem; font-weight: 800; color: #1c4535; }
-        .num-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 24px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; padding: 0 0.5rem; }
-        .num-badge.approved { background: #dcfce7; color: #15803d; }
-        .num-badge.pending  { background: #fef9c3; color: #a16207; }
-        .num-badge.rejected { background: #fee2e2; color: #b91c1c; }
-        .login-badge { display: inline-flex; align-items: center; gap: 0.35rem; background: #dbeafe; color: #1d4ed8; padding: 0.28rem 0.65rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
-        .irm-tag { display: inline-block; padding: 0.22rem 0.65rem; background: #f0fdf4; color: #15803d; border-radius: 6px; font-size: 0.78rem; font-weight: 600; border: 1px solid #bbf7d0; }
-        .date-text { font-size: 0.8rem; color: #94a3b8; }
-        .view-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.38rem 0.85rem; border-radius: 7px; border: 1px solid #e2e8f0; background: #fff; color: #1c4535; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .view-btn:hover { background: #f0fdf4; border-color: #22c55e; color: #15803d; }
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .avatar-0 {
+            background: linear-gradient(135deg, #1c4535, #22c55e);
+        }
+        .avatar-1 {
+            background: linear-gradient(135deg, #1565a8, #38bdf8);
+        }
+        .avatar-2 {
+            background: linear-gradient(135deg, #6d28d9, #a78bfa);
+        }
+        .avatar-3 {
+            background: linear-gradient(135deg, #c2410c, #fb923c);
+        }
+        .avatar-4 {
+            background: linear-gradient(135deg, #0f766e, #2dd4bf);
+        }
+        .user-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.875rem;
+        }
+        .user-id {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+        .num-total {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #1c4535;
+        }
+        .num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 24px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0 0.5rem;
+        }
+        .num-badge.approved {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .num-badge.pending {
+            background: #fef9c3;
+            color: #a16207;
+        }
+        .num-badge.rejected {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .login-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 0.28rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .irm-tag {
+            display: inline-block;
+            padding: 0.22rem 0.65rem;
+            background: #f0fdf4;
+            color: #15803d;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid #bbf7d0;
+        }
+        .date-text {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.38rem 0.85rem;
+            border-radius: 7px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #1c4535;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .view-btn:hover {
+            background: #f0fdf4;
+            border-color: #22c55e;
+            color: #15803d;
+        }
 
-        ::ng-deep .p-tag { font-weight: 700 !important; font-size: 0.74rem !important; padding: 0.28rem 0.7rem !important; border-radius: 20px !important; }
+        ::ng-deep .p-tag {
+            font-weight: 700 !important;
+            font-size: 0.74rem !important;
+            padding: 0.28rem 0.7rem !important;
+            border-radius: 20px !important;
+        }
 
-        .loading-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420px; gap: 1.25rem; }
-        .leaf-spinner { width: 48px; height: 48px; border: 3px solid #dcfce7; border-top: 3px solid #22c55e; border-radius: 50%; animation: spin 0.85s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { font-size: 1rem; font-weight: 600; color: #475569; }
-        .empty-state { text-align: center; padding: 4rem 2rem; }
-        .empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; color: #cbd5e1; }
-        .empty-state p { font-size: 0.95rem; color: #94a3b8; }
+        .loading-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+            gap: 1.25rem;
+        }
+        .leaf-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #dcfce7;
+            border-top: 3px solid #22c55e;
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .loading-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+        .empty-state p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
 
         /* ── Dialog ── */
-        ::ng-deep .solutions-dialog .p-dialog { max-width: 92vw !important; width: 1100px !important; border-radius: 16px !important; overflow: hidden !important; box-shadow: 0 25px 60px rgba(0,0,0,0.25) !important; }
-        ::ng-deep .solutions-dialog .p-dialog-header { background: linear-gradient(135deg, #1c4535 0%, #1565a8 100%) !important; color: white !important; padding: 1.5rem 2rem !important; border-radius: 0 !important; }
-        ::ng-deep .solutions-dialog .p-dialog-header .p-dialog-title { font-size: 1.2rem !important; font-weight: 800 !important; color: #fff !important; }
-        ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon { color: rgba(255,255,255,0.8) !important; }
-        ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon:hover { background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; }
-        ::ng-deep .solutions-dialog .p-dialog-content { padding: 0 !important; overflow: hidden !important; border-radius: 0 0 16px 16px !important; }
-        ::ng-deep .solutions-dialog .p-datatable { border-radius: 0 0 16px 16px !important; overflow: hidden !important; }
-        ::ng-deep .solutions-dialog .p-datatable .p-datatable-wrapper { border-radius: 0 !important; overflow-x: auto !important; }
-        ::ng-deep .solutions-dialog .p-datatable .p-paginator { border-radius: 0 0 16px 16px !important; border: none !important; border-top: 1px solid #f1f5f9 !important; padding: 1rem 1.5rem !important; }
-        ::ng-deep .solutions-dialog .p-datatable .p-datatable-tbody > tr > td { padding: 0.9rem 1.25rem !important; font-size: 0.875rem !important; }
+        ::ng-deep .solutions-dialog .p-dialog {
+            max-width: 92vw !important;
+            width: 1100px !important;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25) !important;
+        }
+        ::ng-deep .solutions-dialog .p-dialog-header {
+            background: linear-gradient(135deg, #1c4535 0%, #1565a8 100%) !important;
+            color: white !important;
+            padding: 1.5rem 2rem !important;
+            border-radius: 0 !important;
+        }
+        ::ng-deep .solutions-dialog .p-dialog-header .p-dialog-title {
+            font-size: 1.2rem !important;
+            font-weight: 800 !important;
+            color: #fff !important;
+        }
+        ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        ::ng-deep .solutions-dialog .p-dialog-header-icons .p-dialog-header-icon:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-radius: 50% !important;
+        }
+        ::ng-deep .solutions-dialog .p-dialog-content {
+            padding: 0 !important;
+            overflow: hidden !important;
+            border-radius: 0 0 16px 16px !important;
+        }
+        ::ng-deep .solutions-dialog .p-datatable {
+            border-radius: 0 0 16px 16px !important;
+            overflow: hidden !important;
+        }
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-wrapper {
+            border-radius: 0 !important;
+            overflow-x: auto !important;
+        }
+        ::ng-deep .solutions-dialog .p-datatable .p-paginator {
+            border-radius: 0 0 16px 16px !important;
+            border: none !important;
+            border-top: 1px solid #f1f5f9 !important;
+            padding: 1rem 1.5rem !important;
+        }
+        ::ng-deep .solutions-dialog .p-datatable .p-datatable-tbody > tr > td {
+            padding: 0.9rem 1.25rem !important;
+            font-size: 0.875rem !important;
+        }
 
         /* ── Responsive ── */
-        @media (max-width: 1100px) { .kpi-strip { grid-template-columns: repeat(3,1fr); } .insights-row { grid-template-columns: 1fr; } }
-        @media (max-width: 900px)  { .hero { padding: 1.75rem 1.5rem 0 1.5rem; } .filter-bar { padding: 0.85rem 1.5rem; } .content { padding: 1.5rem; } .charts-row { grid-template-columns: 1fr; } .kpi-strip { grid-template-columns: repeat(2,1fr); } .insights-row { grid-template-columns: 1fr; } }
-        @media (max-width: 640px)  { .kpi-strip { grid-template-columns: 1fr 1fr; } .hero-actions { flex-wrap: wrap; } .filter-item { max-width: 100%; flex: 1 1 150px; } }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media (max-width: 1100px) {
+            .kpi-strip {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .insights-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .hero {
+                padding: 1.75rem 1.5rem 0 1.5rem;
+            }
+            .filter-bar {
+                padding: 0.85rem 1.5rem;
+            }
+            .content {
+                padding: 1.5rem;
+            }
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+            .kpi-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .insights-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            .kpi-strip {
+                grid-template-columns: 1fr 1fr;
+            }
+            .hero-actions {
+                flex-wrap: wrap;
+            }
+            .filter-item {
+                max-width: 100%;
+                flex: 1 1 150px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     `,
     template: `
         <p-toast />
         <div class="page-wrap">
-
             <!-- Hero -->
             <div class="hero">
                 <div class="hero-top">
@@ -284,12 +1043,8 @@ interface MonthOption {
                         </div>
                     </div>
                     <div class="hero-actions">
-                        <button class="btn-hero outline" (click)="loadReportData()">
-                            <i class="pi pi-refresh"></i> Refresh
-                        </button>
-                        <button class="btn-hero excel" (click)="exportToExcel()" [disabled]="loading || filteredStats.length === 0">
-                            <i class="pi pi-file-excel"></i> Export Excel
-                        </button>
+                        <button class="btn-hero outline" (click)="loadReportData()"><i class="pi pi-refresh"></i> Refresh</button>
+                        <button class="btn-hero excel" (click)="exportToExcel()" [disabled]="loading || filteredStats.length === 0"><i class="pi pi-file-excel"></i> Export Excel</button>
                     </div>
                 </div>
                 <div class="kpi-strip" *ngIf="!loading">
@@ -337,48 +1092,56 @@ interface MonthOption {
                     <i class="pi pi-search"></i>
                     <input class="search-input" type="text" [(ngModel)]="searchText" (input)="applyFilters()" placeholder="Search name or ID…" />
                 </div>
-                <button class="btn-clear-filter" (click)="clearFilters()">
-                    <i class="pi pi-times"></i> Clear
-                </button>
+                <button class="btn-clear-filter" (click)="clearFilters()"><i class="pi pi-times"></i> Clear</button>
             </div>
 
             <!-- Content -->
             <div class="content">
-
                 <div *ngIf="loading" class="loading-overlay">
                     <div class="leaf-spinner"></div>
                     <div class="loading-text">Loading report data…</div>
                 </div>
 
                 <ng-container *ngIf="!loading">
-
                     <!-- Analytics Charts -->
                     <div class="section-label"><i class="pi pi-chart-bar"></i> Analytics Overview</div>
                     <div class="charts-row">
                         <div class="chart-card accent-green">
                             <div class="chart-card-header">
-                                <div class="chart-card-title"><div class="chart-icon green"><i class="pi pi-trophy"></i></div>Top Contributors</div>
+                                <div class="chart-card-title">
+                                    <div class="chart-icon green"><i class="pi pi-trophy"></i></div>
+                                    Top Contributors
+                                </div>
                                 <span class="chart-badge badge-green">Stacked</span>
                             </div>
                             <p-chart type="bar" [data]="topContributorsChartData" [options]="barChartOptions" />
                         </div>
                         <div class="chart-card accent-orange">
                             <div class="chart-card-header">
-                                <div class="chart-card-title"><div class="chart-icon orange"><i class="pi pi-calendar"></i></div>Monthly Trend</div>
+                                <div class="chart-card-title">
+                                    <div class="chart-icon orange"><i class="pi pi-calendar"></i></div>
+                                    Monthly Trend
+                                </div>
                                 <span class="chart-badge badge-orange">Trend</span>
                             </div>
                             <p-chart type="bar" [data]="monthlySolutionsChartData" [options]="monthlyBarChartOptions" />
                         </div>
                         <div class="chart-card accent-purple" *ngIf="!selectedIRM">
                             <div class="chart-card-header">
-                                <div class="chart-card-title"><div class="chart-icon purple"><i class="pi pi-sitemap"></i></div>Solutions by IRM</div>
+                                <div class="chart-card-title">
+                                    <div class="chart-icon purple"><i class="pi pi-sitemap"></i></div>
+                                    Solutions by IRM
+                                </div>
                                 <span class="chart-badge badge-purple">Donut</span>
                             </div>
                             <p-chart type="doughnut" [data]="irmChartData" [options]="pieChartOptions" />
                         </div>
                         <div class="chart-card accent-blue">
                             <div class="chart-card-header">
-                                <div class="chart-card-title"><div class="chart-icon blue"><i class="pi pi-sign-in"></i></div>Login Activity</div>
+                                <div class="chart-card-title">
+                                    <div class="chart-icon blue"><i class="pi pi-sign-in"></i></div>
+                                    Login Activity
+                                </div>
                                 <span class="chart-badge badge-blue">By Logins</span>
                             </div>
                             <p-chart type="bar" [data]="loginActivityChartData" [options]="loginChartOptions" />
@@ -388,7 +1151,6 @@ interface MonthOption {
                     <!-- ── Engagement Insights ── -->
                     <div class="section-label"><i class="pi pi-exclamation-triangle"></i> Engagement Insights</div>
                     <div class="insights-row">
-
                         <!-- 1. Never Logged In -->
                         <div class="insight-card accent-red">
                             <div class="insight-header">
@@ -469,7 +1231,6 @@ interface MonthOption {
                                 </div>
                             </ng-template>
                         </div>
-
                     </div>
 
                     <!-- User Table -->
@@ -482,7 +1243,15 @@ interface MonthOption {
                                 <span class="count-chip">{{ filteredStats.length }}</span>
                             </div>
                         </div>
-                        <p-table [value]="filteredStats" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50,100]" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first}–{last} of {totalRecords}" responsiveLayout="scroll">
+                        <p-table
+                            [value]="filteredStats"
+                            [paginator]="true"
+                            [rows]="10"
+                            [rowsPerPageOptions]="[10, 25, 50, 100]"
+                            [showCurrentPageReport]="true"
+                            currentPageReportTemplate="Showing {first}–{last} of {totalRecords}"
+                            responsiveLayout="scroll"
+                        >
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th pSortableColumn="name" style="min-width:200px;">User <p-sortIcon field="name" /></th>
@@ -507,37 +1276,58 @@ interface MonthOption {
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span class="irm-tag">{{ user.irm || 'N/A' }}</span></td>
-                                    <td class="text-center"><span class="login-badge"><i class="pi pi-sign-in"></i>{{ user.login_count }}</span></td>
-                                    <td class="text-center"><span class="date-text">{{ formatDateOnly(user.last_login) }}</span></td>
-                                    <td class="text-center"><span class="num-total">{{ user.total_solutions }}</span></td>
-                                    <td class="text-center"><span class="num-badge approved">{{ user.approved }}</span></td>
-                                    <td class="text-center"><span class="num-badge pending">{{ user.pending }}</span></td>
-                                    <td class="text-center"><span class="num-badge rejected">{{ user.rejected }}</span></td>
+                                    <td>
+                                        <span class="irm-tag">{{ user.irm || 'N/A' }}</span>
+                                    </td>
                                     <td class="text-center">
-                                        <button class="view-btn" (click)="viewUserSolutions(user)">
-                                            <i class="pi pi-eye"></i> View
-                                        </button>
+                                        <span class="login-badge"><i class="pi pi-sign-in"></i>{{ user.login_count }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="date-text">{{ formatDateOnly(user.last_login) }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="num-total">{{ user.total_solutions }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="num-badge approved">{{ user.approved }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="num-badge pending">{{ user.pending }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="num-badge rejected">{{ user.rejected }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="view-btn" (click)="viewUserSolutions(user)"><i class="pi pi-eye"></i> View</button>
                                     </td>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="emptymessage">
-                                <tr><td colspan="9">
-                                    <div class="empty-state">
-                                        <i class="pi pi-inbox"></i>
-                                        <p>No user data matches your current filters.</p>
-                                    </div>
-                                </td></tr>
+                                <tr>
+                                    <td colspan="9">
+                                        <div class="empty-state">
+                                            <i class="pi pi-inbox"></i>
+                                            <p>No user data matches your current filters.</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </ng-template>
                         </p-table>
                     </div>
-
                 </ng-container>
             </div>
         </div>
 
         <!-- Solutions Dialog -->
-        <p-dialog [(visible)]="showSolutionsDialog" [modal]="true" [style]="{ width: '90vw', maxWidth: '1100px', overflow: 'hidden', borderRadius: '16px' }" [contentStyle]="{ padding: '0', overflow: 'hidden', borderRadius: '0 0 16px 16px' }" [draggable]="false" [resizable]="false" styleClass="solutions-dialog">
+        <p-dialog
+            [(visible)]="showSolutionsDialog"
+            [modal]="true"
+            [style]="{ width: '90vw', maxWidth: '1100px', overflow: 'hidden', borderRadius: '16px' }"
+            [contentStyle]="{ padding: '0', overflow: 'hidden', borderRadius: '0 0 16px 16px' }"
+            [draggable]="false"
+            [resizable]="false"
+            styleClass="solutions-dialog"
+        >
             <ng-template pTemplate="header">
                 <div>
                     <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.3rem;color:#fff;">Solutions — {{ selectedUser?.name }}</div>
@@ -547,7 +1337,13 @@ interface MonthOption {
             <p-table [value]="selectedUser?.solutions || []" [paginator]="true" [rows]="5" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first}–{last} of {totalRecords}" responsiveLayout="scroll">
                 <ng-template pTemplate="header">
                     <tr>
-                        <th>Customer</th><th>Module</th><th>Domain</th><th>Sector</th><th>Created</th><th>Status</th><th>Approver</th>
+                        <th>Customer</th>
+                        <th>Module</th>
+                        <th>Domain</th>
+                        <th>Sector</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Approver</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-solution>
@@ -630,7 +1426,7 @@ export class UserWiseReportComponent implements OnInit {
         }).subscribe({
             next: (data: any) => {
                 this.allSolutions = Array.isArray(data.repos) ? data.repos : [];
-                const usersData   = Array.isArray(data.users) ? data.users : [];
+                const usersData = Array.isArray(data.users) ? data.users : [];
                 this.loginHistory = Array.isArray(data.loginHistory) ? data.loginHistory : [];
 
                 this.allUsers = usersData.filter((u: any) => u.type?.toLowerCase() === 'user');
@@ -639,7 +1435,7 @@ export class UserWiseReportComponent implements OnInit {
                 const fullStats = this.buildStatsForUsers(this.allUsers);
 
                 // For the charts/table only keep users with some activity
-                this.userStats = fullStats.filter(s => s.total_solutions > 0 || s.login_count > 0);
+                this.userStats = fullStats.filter((s) => s.total_solutions > 0 || s.login_count > 0);
 
                 this.generateMonthOptions();
                 this.generateIRMOptions();
@@ -661,15 +1457,13 @@ export class UserWiseReportComponent implements OnInit {
     /** Build UserStats for an arbitrary list of users using full solution + login data */
     private buildStatsForUsers(users: any[]): UserStats[] {
         return users.map((user) => {
-            const userSolutions = this.allSolutions.filter(s =>
-                s.yash_id === user.yash_id || s.username === user.name
-            );
-            const approved = userSolutions.filter(s => s.Approval_status?.toLowerCase() === 'approved').length;
-            const pending  = userSolutions.filter(s => !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval').length;
-            const rejected = userSolutions.filter(s => s.Approval_status?.toLowerCase() === 'rejected').length;
+            const userSolutions = this.allSolutions.filter((s) => s.yash_id === user.yash_id || s.username === user.name);
+            const approved = userSolutions.filter((s) => s.Approval_status?.toLowerCase() === 'approved').length;
+            const pending = userSolutions.filter((s) => !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval').length;
+            const rejected = userSolutions.filter((s) => s.Approval_status?.toLowerCase() === 'rejected').length;
 
-            const userLogins = this.loginHistory.filter(login => {
-                const matchId   = String(login.yash_id || '') === String(user.yash_id || '');
+            const userLogins = this.loginHistory.filter((login) => {
+                const matchId = String(login.yash_id || '') === String(user.yash_id || '');
                 const matchName = login.username === user.name;
                 const isSuccess = login.success === true || login.message === 'Login successful' || login.status === 'success';
                 return (matchId || matchName) && isSuccess;
@@ -677,18 +1471,24 @@ export class UserWiseReportComponent implements OnInit {
 
             let lastLogin = 'Never';
             if (userLogins.length > 0) {
-                const sorted = [...userLogins].sort((a, b) =>
-                    new Date(b.timestamp || b.login_time || b.created_at || 0).getTime() -
-                    new Date(a.timestamp || a.login_time || a.created_at || 0).getTime()
-                );
+                const sorted = [...userLogins].sort((a, b) => new Date(b.timestamp || b.login_time || b.created_at || 0).getTime() - new Date(a.timestamp || a.login_time || a.created_at || 0).getTime());
                 lastLogin = sorted[0].timestamp || sorted[0].login_time || sorted[0].created_at || 'Never';
             }
 
             return {
-                yash_id: user.yash_id, name: user.name, email: user.email || '',
-                b_unit: user.b_unit || 'N/A', irm: user.irm || 'N/A', type: user.type || 'user',
-                total_solutions: userSolutions.length, approved, pending, rejected,
-                login_count: userLogins.length, last_login: lastLogin, solutions: userSolutions
+                yash_id: user.yash_id,
+                name: user.name,
+                email: user.email || '',
+                b_unit: user.b_unit || 'N/A',
+                irm: user.irm || 'N/A',
+                type: user.type || 'user',
+                total_solutions: userSolutions.length,
+                approved,
+                pending,
+                rejected,
+                login_count: userLogins.length,
+                last_login: lastLogin,
+                solutions: userSolutions
             };
         });
     }
@@ -699,16 +1499,14 @@ export class UserWiseReportComponent implements OnInit {
      */
     computeEngagementInsights(fullStats: UserStats[]) {
         // 1. Never logged in
-        this.neverLoggedInUsers = fullStats
-            .filter(u => u.login_count === 0)
-            .sort((a, b) => a.name.localeCompare(b.name));
+        this.neverLoggedInUsers = fullStats.filter((u) => u.login_count === 0).sort((a, b) => a.name.localeCompare(b.name));
 
         // 2. No login for more than 60 days (≈2 months)
         const cutoff = new Date();
         cutoff.setDate(cutoff.getDate() - 60);
 
         this.inactiveUsers = fullStats
-            .filter(u => {
+            .filter((u) => {
                 if (u.login_count === 0) return false; // already in neverLoggedIn
                 if (u.last_login === 'Never') return false;
                 const last = new Date(u.last_login);
@@ -717,9 +1515,7 @@ export class UserWiseReportComponent implements OnInit {
             .sort((a, b) => new Date(a.last_login).getTime() - new Date(b.last_login).getTime()); // most inactive first
 
         // 3. No solutions at all
-        this.noSolutionUsers = fullStats
-            .filter(u => u.total_solutions === 0)
-            .sort((a, b) => a.name.localeCompare(b.name));
+        this.noSolutionUsers = fullStats.filter((u) => u.total_solutions === 0).sort((a, b) => a.name.localeCompare(b.name));
     }
 
     /** Days since a given date string */
@@ -732,77 +1528,86 @@ export class UserWiseReportComponent implements OnInit {
 
     generateMonthOptions() {
         const months = new Set<string>();
-        this.allSolutions.forEach(s => {
+        this.allSolutions.forEach((s) => {
             if (s.created_at) {
                 const d = new Date(s.created_at);
                 months.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
             }
         });
-        this.monthOptions = Array.from(months).sort().reverse().map(mv => {
-            const [y, m] = mv.split('-');
-            return { label: new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), value: mv };
-        });
+        this.monthOptions = Array.from(months)
+            .sort()
+            .reverse()
+            .map((mv) => {
+                const [y, m] = mv.split('-');
+                return { label: new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), value: mv };
+            });
     }
 
     generateIRMOptions() {
         const irms = new Set<string>();
-        this.userStats.forEach(s => { if (s.irm && s.irm !== 'N/A') irms.add(s.irm); });
+        this.userStats.forEach((s) => {
+            if (s.irm && s.irm !== 'N/A') irms.add(s.irm);
+        });
         this.irmOptions = Array.from(irms).sort();
     }
 
     applyFilters() {
         let filtered = [...this.userStats];
 
-        if (this.selectedIRM)        filtered = filtered.filter(s => s.irm === this.selectedIRM);
+        if (this.selectedIRM) filtered = filtered.filter((s) => s.irm === this.selectedIRM);
         if (this.searchText?.trim()) {
             const q = this.searchText.trim().toLowerCase();
-            filtered = filtered.filter(s =>
-                s.name?.toLowerCase().includes(q) || s.yash_id?.toString().toLowerCase().includes(q) ||
-                s.email?.toLowerCase().includes(q) || s.irm?.toLowerCase().includes(q)
-            );
+            filtered = filtered.filter((s) => s.name?.toLowerCase().includes(q) || s.yash_id?.toString().toLowerCase().includes(q) || s.email?.toLowerCase().includes(q) || s.irm?.toLowerCase().includes(q));
         }
         if (this.selectedMonth) {
-            filtered = filtered.map(stat => {
-                const sols = stat.solutions.filter(s => {
-                    if (!s.created_at) return false;
-                    const d = new Date(s.created_at);
-                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === this.selectedMonth;
-                });
-                const approved = sols.filter(s => s.Approval_status?.toLowerCase() === 'approved').length;
-                const pending  = sols.filter(s => !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval').length;
-                const rejected = sols.filter(s => s.Approval_status?.toLowerCase() === 'rejected').length;
+            filtered = filtered
+                .map((stat) => {
+                    const sols = stat.solutions.filter((s) => {
+                        if (!s.created_at) return false;
+                        const d = new Date(s.created_at);
+                        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === this.selectedMonth;
+                    });
+                    const approved = sols.filter((s) => s.Approval_status?.toLowerCase() === 'approved').length;
+                    const pending = sols.filter((s) => !s.Approval_status || s.Approval_status.toLowerCase() === 'sent for approval').length;
+                    const rejected = sols.filter((s) => s.Approval_status?.toLowerCase() === 'rejected').length;
 
-                const logins = this.loginHistory.filter(l => {
-                    const matchId   = String(l.yash_id || '') === String(stat.yash_id || '');
-                    const matchName = l.username === stat.name;
-                    const isSuccess = l.success === true || l.message === 'Login successful' || l.status === 'success';
-                    if (!(matchId || matchName) || !isSuccess) return false;
-                    const ts = l.timestamp || l.login_time || l.created_at;
-                    if (!ts) return false;
-                    const d = new Date(ts);
-                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === this.selectedMonth;
-                });
+                    const logins = this.loginHistory.filter((l) => {
+                        const matchId = String(l.yash_id || '') === String(stat.yash_id || '');
+                        const matchName = l.username === stat.name;
+                        const isSuccess = l.success === true || l.message === 'Login successful' || l.status === 'success';
+                        if (!(matchId || matchName) || !isSuccess) return false;
+                        const ts = l.timestamp || l.login_time || l.created_at;
+                        if (!ts) return false;
+                        const d = new Date(ts);
+                        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === this.selectedMonth;
+                    });
 
-                let lastLogin = 'Never';
-                if (logins.length > 0) {
-                    const sorted = [...logins].sort((a, b) =>
-                        new Date(b.timestamp || b.login_time || b.created_at || 0).getTime() -
-                        new Date(a.timestamp || a.login_time || a.created_at || 0).getTime()
-                    );
-                    lastLogin = sorted[0].timestamp || sorted[0].login_time || sorted[0].created_at || 'Never';
-                }
-                return { ...stat, total_solutions: sols.length, approved, pending, rejected, login_count: logins.length, last_login: lastLogin, solutions: sols };
-            }).filter(s => s.total_solutions > 0 || s.login_count > 0);
+                    let lastLogin = 'Never';
+                    if (logins.length > 0) {
+                        const sorted = [...logins].sort((a, b) => new Date(b.timestamp || b.login_time || b.created_at || 0).getTime() - new Date(a.timestamp || a.login_time || a.created_at || 0).getTime());
+                        lastLogin = sorted[0].timestamp || sorted[0].login_time || sorted[0].created_at || 'Never';
+                    }
+                    return { ...stat, total_solutions: sols.length, approved, pending, rejected, login_count: logins.length, last_login: lastLogin, solutions: sols };
+                })
+                .filter((s) => s.total_solutions > 0 || s.login_count > 0);
         }
 
         this.filteredStats = filtered.sort((a, b) => b.total_solutions - a.total_solutions);
         this.updateCharts();
     }
 
-    getTotalSolutions() { return this.filteredStats.reduce((s, u) => s + u.total_solutions, 0); }
-    getTotalApproved()  { return this.filteredStats.reduce((s, u) => s + u.approved, 0); }
-    getTotalPending()   { return this.filteredStats.reduce((s, u) => s + u.pending, 0); }
-    getTotalRejected()  { return this.filteredStats.reduce((s, u) => s + u.rejected, 0); }
+    getTotalSolutions() {
+        return this.filteredStats.reduce((s, u) => s + u.total_solutions, 0);
+    }
+    getTotalApproved() {
+        return this.filteredStats.reduce((s, u) => s + u.approved, 0);
+    }
+    getTotalPending() {
+        return this.filteredStats.reduce((s, u) => s + u.pending, 0);
+    }
+    getTotalRejected() {
+        return this.filteredStats.reduce((s, u) => s + u.rejected, 0);
+    }
 
     updateCharts() {
         this.updateTopContributorsChart();
@@ -814,30 +1619,33 @@ export class UserWiseReportComponent implements OnInit {
     updateTopContributorsChart() {
         const top = [...this.filteredStats].slice(0, 10);
         this.topContributorsChartData = {
-            labels: top.map(s => s.name.split(' ')[0]),
+            labels: top.map((s) => s.name.split(' ')[0]),
             datasets: [
-                { label: 'Approved', data: top.map(s => s.approved), backgroundColor: '#22c55e', borderRadius: 4 },
-                { label: 'Pending',  data: top.map(s => s.pending),  backgroundColor: '#f59e0b', borderRadius: 4 },
-                { label: 'Rejected', data: top.map(s => s.rejected), backgroundColor: '#ef4444', borderRadius: 4 }
+                { label: 'Approved', data: top.map((s) => s.approved), backgroundColor: '#22c55e', borderRadius: 4 },
+                { label: 'Pending', data: top.map((s) => s.pending), backgroundColor: '#f59e0b', borderRadius: 4 },
+                { label: 'Rejected', data: top.map((s) => s.rejected), backgroundColor: '#ef4444', borderRadius: 4 }
             ]
         };
     }
 
     updateLoginActivityChart() {
         const top = [...this.filteredStats].sort((a, b) => b.login_count - a.login_count).slice(0, 10);
-        const colors = ['#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#1d4ed8','#2563eb','#3b82f6','#60a5fa'];
+        const colors = ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa'];
         this.loginActivityChartData = {
-            labels: top.map(s => s.name.split(' ')[0]),
-            datasets: [{ label: 'Logins', data: top.map(s => s.login_count), backgroundColor: colors.slice(0, top.length), borderRadius: 5, borderSkipped: false }]
+            labels: top.map((s) => s.name.split(' ')[0]),
+            datasets: [{ label: 'Logins', data: top.map((s) => s.login_count), backgroundColor: colors.slice(0, top.length), borderRadius: 5, borderSkipped: false }]
         };
     }
 
     updateIRMChart() {
         const groups = new Map<string, number>();
-        this.filteredStats.forEach(s => { const k = s.irm || 'N/A'; groups.set(k, (groups.get(k) || 0) + s.total_solutions); });
+        this.filteredStats.forEach((s) => {
+            const k = s.irm || 'N/A';
+            groups.set(k, (groups.get(k) || 0) + s.total_solutions);
+        });
         const sorted = Array.from(groups.entries()).sort((a, b) => b[1] - a[1]);
-        const palette      = ['#1c4535','#1565a8','#6d28d9','#c2410c','#0f766e','#b45309','#be185d','#0369a1','#4d7c0f','#7e22ce','#0e7490','#9a3412','#1d4ed8','#15803d','#a21caf'];
-        const hoverPalette = ['#2e7d52','#1d4ed8','#7c3aed','#ea580c','#0d9488','#d97706','#db2777','#0284c7','#65a30d','#9333ea','#0891b2','#c2410c','#2563eb','#16a34a','#c026d3'];
+        const palette = ['#1c4535', '#1565a8', '#6d28d9', '#c2410c', '#0f766e', '#b45309', '#be185d', '#0369a1', '#4d7c0f', '#7e22ce', '#0e7490', '#9a3412', '#1d4ed8', '#15803d', '#a21caf'];
+        const hoverPalette = ['#2e7d52', '#1d4ed8', '#7c3aed', '#ea580c', '#0d9488', '#d97706', '#db2777', '#0284c7', '#65a30d', '#9333ea', '#0891b2', '#c2410c', '#2563eb', '#16a34a', '#c026d3'];
         this.irmChartData = {
             labels: sorted.map(([k]) => k),
             datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: palette, hoverBackgroundColor: hoverPalette, borderWidth: 2, borderColor: '#ffffff' }]
@@ -846,8 +1654,8 @@ export class UserWiseReportComponent implements OnInit {
 
     updateMonthlySolutionsChart() {
         const monthly = new Map<string, number>();
-        this.filteredStats.forEach(stat => {
-            stat.solutions.forEach(s => {
+        this.filteredStats.forEach((stat) => {
+            stat.solutions.forEach((s) => {
                 if (s.created_at) {
                     const d = new Date(s.created_at);
                     const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -858,26 +1666,42 @@ export class UserWiseReportComponent implements OnInit {
         const sorted = Array.from(monthly.keys()).sort();
         const shades = sorted.map((_, i) => `rgba(234,88,12,${0.5 + (i / Math.max(sorted.length - 1, 1)) * 0.5})`);
         this.monthlySolutionsChartData = {
-            labels: sorted.map(mv => { const [y, m] = mv.split('-'); return new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }); }),
-            datasets: [{ label: 'Solutions Added', data: sorted.map(k => monthly.get(k) || 0), backgroundColor: shades, borderColor: '#c2410c', borderWidth: 1, borderRadius: 5, borderSkipped: false }]
+            labels: sorted.map((mv) => {
+                const [y, m] = mv.split('-');
+                return new Date(+y, +m - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            }),
+            datasets: [{ label: 'Solutions Added', data: sorted.map((k) => monthly.get(k) || 0), backgroundColor: shades, borderColor: '#c2410c', borderWidth: 1, borderRadius: 5, borderSkipped: false }]
         };
     }
 
     initializeChartOptions() {
         const tooltipBase = { backgroundColor: 'rgba(15,23,42,0.92)', padding: 12, titleFont: { size: 11, weight: '700' }, bodyFont: { size: 10 }, cornerRadius: 8, titleColor: '#f1f5f9', bodyColor: '#cbd5e1' };
-        const legendBase  = { display: true, position: 'top' as const, labels: { usePointStyle: true, padding: 12, font: { size: 10, weight: '600' }, color: '#475569', pointStyleWidth: 8 } };
-        const axisStyle   = {
+        const legendBase = { display: true, position: 'top' as const, labels: { usePointStyle: true, padding: 12, font: { size: 10, weight: '600' }, color: '#475569', pointStyleWidth: 8 } };
+        const axisStyle = {
             x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8', maxRotation: 35 } },
             y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 }, color: '#94a3b8' }, grid: { color: '#f1f5f9' } }
         };
-        this.barChartOptions          = { responsive: true, maintainAspectRatio: false, plugins: { legend: legendBase, tooltip: tooltipBase }, scales: { x: { ...axisStyle.x, stacked: true }, y: { ...axisStyle.y, stacked: true } } };
-        this.loginChartOptions        = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { title: (i: any[]) => i[0].label, label: (i: any) => ` ${i.raw} logins` } } }, scales: axisStyle };
-        this.pieChartOptions          = { responsive: true, maintainAspectRatio: false, plugins: { legend: { ...legendBase, position: 'bottom' as const, labels: { ...legendBase.labels, padding: 14 } }, tooltip: tooltipBase }, cutout: '62%' };
-        this.monthlyBarChartOptions   = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipBase }, scales: axisStyle };
+        this.barChartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: legendBase, tooltip: tooltipBase }, scales: { x: { ...axisStyle.x, stacked: true }, y: { ...axisStyle.y, stacked: true } } };
+        this.loginChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { title: (i: any[]) => i[0].label, label: (i: any) => ` ${i.raw} logins` } } },
+            scales: axisStyle
+        };
+        this.pieChartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { ...legendBase, position: 'bottom' as const, labels: { ...legendBase.labels, padding: 14 } }, tooltip: tooltipBase }, cutout: '62%' };
+        this.monthlyBarChartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipBase }, scales: axisStyle };
     }
 
-    viewUserSolutions(user: UserStats) { this.selectedUser = user; this.showSolutionsDialog = true; }
-    clearFilters() { this.selectedMonth = ''; this.selectedIRM = ''; this.searchText = ''; this.applyFilters(); }
+    viewUserSolutions(user: UserStats) {
+        this.selectedUser = user;
+        this.showSolutionsDialog = true;
+    }
+    clearFilters() {
+        this.selectedMonth = '';
+        this.selectedIRM = '';
+        this.searchText = '';
+        this.applyFilters();
+    }
 
     getInitials(name: string): string {
         if (!name) return '?';
@@ -890,8 +1714,10 @@ export class UserWiseReportComponent implements OnInit {
         try {
             const dt = new Date(d);
             if (isNaN(dt.getTime())) return 'Invalid';
-            return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-        } catch { return 'Invalid'; }
+            return `${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}-${dt.getFullYear()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+        } catch {
+            return 'Invalid';
+        }
     }
 
     formatDateOnly(d?: string): string {
@@ -899,8 +1725,10 @@ export class UserWiseReportComponent implements OnInit {
         try {
             const dt = new Date(d);
             if (isNaN(dt.getTime())) return 'Invalid';
-            return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
-        } catch { return 'Invalid'; }
+            return `${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}-${dt.getFullYear()}`;
+        } catch {
+            return 'Invalid';
+        }
     }
 
     getStatusSeverity(status?: string): 'success' | 'warning' | 'danger' {
@@ -913,75 +1741,133 @@ export class UserWiseReportComponent implements OnInit {
     exportToExcel() {
         try {
             const wb = XLSX.utils.book_new();
-            const headerStyle = (bgHex: string) => ({ font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11, name: 'Calibri' }, fill: { patternType: 'solid', fgColor: { rgb: bgHex } }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true }, border: { top: { style: 'thin', color: { rgb: 'FFFFFF' } }, bottom: { style: 'thin', color: { rgb: 'FFFFFF' } }, left: { style: 'thin', color: { rgb: 'FFFFFF' } }, right: { style: 'thin', color: { rgb: 'FFFFFF' } } } });
-            const cellStyle     = (bgHex: string, fgHex = '1A3D2E', bold = false) => ({ font: { bold, color: { rgb: fgHex }, sz: 10, name: 'Calibri' }, fill: { patternType: 'solid', fgColor: { rgb: bgHex } }, alignment: { horizontal: 'center', vertical: 'center' }, border: { top: { style: 'hair', color: { rgb: 'C8DDD1' } }, bottom: { style: 'hair', color: { rgb: 'C8DDD1' } }, left: { style: 'hair', color: { rgb: 'C8DDD1' } }, right: { style: 'hair', color: { rgb: 'C8DDD1' } } } });
+            const headerStyle = (bgHex: string) => ({
+                font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bgHex } },
+                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                border: { top: { style: 'thin', color: { rgb: 'FFFFFF' } }, bottom: { style: 'thin', color: { rgb: 'FFFFFF' } }, left: { style: 'thin', color: { rgb: 'FFFFFF' } }, right: { style: 'thin', color: { rgb: 'FFFFFF' } } }
+            });
+            const cellStyle = (bgHex: string, fgHex = '1A3D2E', bold = false) => ({
+                font: { bold, color: { rgb: fgHex }, sz: 10, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bgHex } },
+                alignment: { horizontal: 'center', vertical: 'center' },
+                border: { top: { style: 'hair', color: { rgb: 'C8DDD1' } }, bottom: { style: 'hair', color: { rgb: 'C8DDD1' } }, left: { style: 'hair', color: { rgb: 'C8DDD1' } }, right: { style: 'hair', color: { rgb: 'C8DDD1' } } }
+            });
             const leftCellStyle = (bgHex: string, fgHex = '1A3D2E', bold = false) => ({ ...cellStyle(bgHex, fgHex, bold), alignment: { horizontal: 'left', vertical: 'center' } });
 
             // Sheet 1: User Summary
-            const s1Headers = ['User ID','Name','Email','IRM','Logins','Last Login','Total','Approved','Pending','Rejected'];
+            const s1Headers = ['User ID', 'Name', 'Email', 'IRM', 'Logins', 'Last Login', 'Total', 'Approved', 'Pending', 'Rejected'];
             const s1Rows = this.filteredStats.map((s, i) => {
                 const bg = i % 2 === 0 ? 'F4F7F5' : 'E3F2EB';
                 return [
-                    { v: s.yash_id,                        s: leftCellStyle(bg) },
-                    { v: s.name,                           s: leftCellStyle(bg,'1A3D2E',true) },
-                    { v: s.email || '',                    s: leftCellStyle(bg) },
-                    { v: s.irm || 'N/A',                   s: cellStyle(bg) },
-                    { v: s.login_count,                    s: cellStyle(bg,'1565C0',true) },
+                    { v: s.yash_id, s: leftCellStyle(bg) },
+                    { v: s.name, s: leftCellStyle(bg, '1A3D2E', true) },
+                    { v: s.email || '', s: leftCellStyle(bg) },
+                    { v: s.irm || 'N/A', s: cellStyle(bg) },
+                    { v: s.login_count, s: cellStyle(bg, '1565C0', true) },
                     { v: this.formatDateOnly(s.last_login), s: cellStyle(bg) },
-                    { v: s.total_solutions,                s: cellStyle(bg,'2E7D52',true) },
-                    { v: s.approved,  s: cellStyle(s.approved  > 0 ? 'E8F5E9' : bg,'1B5E20',true) },
-                    { v: s.pending,   s: cellStyle(s.pending   > 0 ? 'FFF8E1' : bg,'E65100',true) },
-                    { v: s.rejected,  s: cellStyle(s.rejected  > 0 ? 'FFEBEE' : bg,'B71C1C',true) },
+                    { v: s.total_solutions, s: cellStyle(bg, '2E7D52', true) },
+                    { v: s.approved, s: cellStyle(s.approved > 0 ? 'E8F5E9' : bg, '1B5E20', true) },
+                    { v: s.pending, s: cellStyle(s.pending > 0 ? 'FFF8E1' : bg, 'E65100', true) },
+                    { v: s.rejected, s: cellStyle(s.rejected > 0 ? 'FFEBEE' : bg, 'B71C1C', true) }
                 ];
             });
-            const ws1 = this.buildStyledSheet(s1Headers.map(h => ({ v: h, s: headerStyle('1C4535') })), s1Rows, [12,22,28,14,9,14,9,11,11,11]);
+            const ws1 = this.buildStyledSheet(
+                s1Headers.map((h) => ({ v: h, s: headerStyle('1C4535') })),
+                s1Rows,
+                [12, 22, 28, 14, 9, 14, 9, 11, 11, 11]
+            );
             this.addTitleRow(ws1, 'User Activity Report — Summary', s1Headers.length, '1C4535');
             XLSX.utils.book_append_sheet(wb, ws1, 'User Summary');
 
             // Sheet 2: Detailed Solutions
-            const s2Headers = ['User ID','Name','IRM','Customer','Module','Domain','Sector','Created','Status','Approver','Approval Date'];
-            const sc = (status: string) => { const s = status?.toLowerCase(); return s === 'approved' ? { bg:'E8F5E9', fg:'1B5E20' } : s === 'rejected' ? { bg:'FFEBEE', fg:'B71C1C' } : { bg:'FFF8E1', fg:'E65100' }; };
+            const s2Headers = ['User ID', 'Name', 'IRM', 'Customer', 'Module', 'Domain', 'Sector', 'Created', 'Status', 'Approver', 'Approval Date'];
+            const sc = (status: string) => {
+                const s = status?.toLowerCase();
+                return s === 'approved' ? { bg: 'E8F5E9', fg: '1B5E20' } : s === 'rejected' ? { bg: 'FFEBEE', fg: 'B71C1C' } : { bg: 'FFF8E1', fg: 'E65100' };
+            };
             const s2Rows = this.filteredStats.flatMap((s, ui) =>
                 s.solutions.map((sol, si) => {
-                    const bg = (ui + si) % 2 === 0 ? 'F4F7F5' : 'EBF5EF'; const c = sc(sol.Approval_status);
+                    const bg = (ui + si) % 2 === 0 ? 'F4F7F5' : 'EBF5EF';
+                    const c = sc(sol.Approval_status);
                     return [
-                        { v: s.yash_id,                       s: leftCellStyle(bg) },
-                        { v: s.name,                          s: leftCellStyle(bg,'1A3D2E',true) },
-                        { v: s.irm || 'N/A',                  s: cellStyle(bg,'2E7D52') },
-                        { v: sol.customer_name || '',         s: leftCellStyle(bg) },
-                        { v: sol.module_name || '',           s: leftCellStyle(bg) },
-                        { v: sol.domain || '',                s: cellStyle(bg) },
-                        { v: sol.sector || '',                s: cellStyle(bg) },
+                        { v: s.yash_id, s: leftCellStyle(bg) },
+                        { v: s.name, s: leftCellStyle(bg, '1A3D2E', true) },
+                        { v: s.irm || 'N/A', s: cellStyle(bg, '2E7D52') },
+                        { v: sol.customer_name || '', s: leftCellStyle(bg) },
+                        { v: sol.module_name || '', s: leftCellStyle(bg) },
+                        { v: sol.domain || '', s: cellStyle(bg) },
+                        { v: sol.sector || '', s: cellStyle(bg) },
                         { v: this.formatDate(sol.created_at), s: cellStyle(bg) },
                         { v: sol.Approval_status || 'Pending', s: cellStyle(c.bg, c.fg, true) },
-                        { v: sol.Approver || 'N/A',           s: leftCellStyle(bg) },
-                        { v: sol.Approval_date || 'N/A',      s: cellStyle(bg) },
+                        { v: sol.Approver || 'N/A', s: leftCellStyle(bg) },
+                        { v: sol.Approval_date || 'N/A', s: cellStyle(bg) }
                     ];
                 })
             );
-            const ws2 = this.buildStyledSheet(s2Headers.map(h => ({ v: h, s: headerStyle('245C41') })), s2Rows, [12,20,14,22,26,14,14,18,14,22,14]);
+            const ws2 = this.buildStyledSheet(
+                s2Headers.map((h) => ({ v: h, s: headerStyle('245C41') })),
+                s2Rows,
+                [12, 20, 14, 22, 26, 14, 14, 18, 14, 22, 14]
+            );
             this.addTitleRow(ws2, 'User Activity Report — Detailed Solutions', s2Headers.length, '245C41');
             XLSX.utils.book_append_sheet(wb, ws2, 'Detailed Solutions');
 
             // Sheet 3: Engagement Insights
-            const s3Headers = ['User ID','Name','Email','IRM','Logins','Last Login','Total Solutions','Issue'];
-            const alertStyle = (bg: string, fg: string) => ({ font: { bold: true, color: { rgb: fg }, sz: 10, name: 'Calibri' }, fill: { patternType: 'solid', fgColor: { rgb: bg } }, alignment: { horizontal: 'center', vertical: 'center' }, border: { top: { style: 'hair', color: { rgb: 'E0E0E0' } }, bottom: { style: 'hair', color: { rgb: 'E0E0E0' } }, left: { style: 'hair', color: { rgb: 'E0E0E0' } }, right: { style: 'hair', color: { rgb: 'E0E0E0' } } } });
+            const s3Headers = ['User ID', 'Name', 'Email', 'IRM', 'Logins', 'Last Login', 'Total Solutions', 'Issue'];
+            const alertStyle = (bg: string, fg: string) => ({
+                font: { bold: true, color: { rgb: fg }, sz: 10, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bg } },
+                alignment: { horizontal: 'center', vertical: 'center' },
+                border: { top: { style: 'hair', color: { rgb: 'E0E0E0' } }, bottom: { style: 'hair', color: { rgb: 'E0E0E0' } }, left: { style: 'hair', color: { rgb: 'E0E0E0' } }, right: { style: 'hair', color: { rgb: 'E0E0E0' } } }
+            });
             const s3Rows: any[][] = [];
 
             this.neverLoggedInUsers.forEach((u, i) => {
                 const bg = i % 2 === 0 ? 'FFF5F5' : 'FFECEC';
-                s3Rows.push([{ v: u.yash_id, s: leftCellStyle(bg) }, { v: u.name, s: leftCellStyle(bg,'B91C1C',true) }, { v: u.email||'', s: leftCellStyle(bg) }, { v: u.irm||'N/A', s: cellStyle(bg) }, { v: 0, s: cellStyle(bg,'B91C1C',true) }, { v: 'Never', s: cellStyle(bg) }, { v: u.total_solutions, s: cellStyle(bg) }, { v: 'Never Logged In', s: alertStyle('FFECEC','B91C1C') }]);
+                s3Rows.push([
+                    { v: u.yash_id, s: leftCellStyle(bg) },
+                    { v: u.name, s: leftCellStyle(bg, 'B91C1C', true) },
+                    { v: u.email || '', s: leftCellStyle(bg) },
+                    { v: u.irm || 'N/A', s: cellStyle(bg) },
+                    { v: 0, s: cellStyle(bg, 'B91C1C', true) },
+                    { v: 'Never', s: cellStyle(bg) },
+                    { v: u.total_solutions, s: cellStyle(bg) },
+                    { v: 'Never Logged In', s: alertStyle('FFECEC', 'B91C1C') }
+                ]);
             });
             this.inactiveUsers.forEach((u, i) => {
                 const bg = i % 2 === 0 ? 'FFFBEB' : 'FEF3C7';
-                s3Rows.push([{ v: u.yash_id, s: leftCellStyle(bg) }, { v: u.name, s: leftCellStyle(bg,'92400E',true) }, { v: u.email||'', s: leftCellStyle(bg) }, { v: u.irm||'N/A', s: cellStyle(bg) }, { v: u.login_count, s: cellStyle(bg,'92400E',true) }, { v: this.formatDateOnly(u.last_login), s: cellStyle(bg) }, { v: u.total_solutions, s: cellStyle(bg) }, { v: `Inactive ${this.getDaysInactive(u.last_login)}d`, s: alertStyle('FEF3C7','92400E') }]);
+                s3Rows.push([
+                    { v: u.yash_id, s: leftCellStyle(bg) },
+                    { v: u.name, s: leftCellStyle(bg, '92400E', true) },
+                    { v: u.email || '', s: leftCellStyle(bg) },
+                    { v: u.irm || 'N/A', s: cellStyle(bg) },
+                    { v: u.login_count, s: cellStyle(bg, '92400E', true) },
+                    { v: this.formatDateOnly(u.last_login), s: cellStyle(bg) },
+                    { v: u.total_solutions, s: cellStyle(bg) },
+                    { v: `Inactive ${this.getDaysInactive(u.last_login)}d`, s: alertStyle('FEF3C7', '92400E') }
+                ]);
             });
             this.noSolutionUsers.forEach((u, i) => {
                 const bg = i % 2 === 0 ? 'F8FAFC' : 'F1F5F9';
-                s3Rows.push([{ v: u.yash_id, s: leftCellStyle(bg) }, { v: u.name, s: leftCellStyle(bg,'334155',true) }, { v: u.email||'', s: leftCellStyle(bg) }, { v: u.irm||'N/A', s: cellStyle(bg) }, { v: u.login_count, s: cellStyle(bg) }, { v: this.formatDateOnly(u.last_login), s: cellStyle(bg) }, { v: 0, s: cellStyle(bg,'334155',true) }, { v: 'No Solutions Uploaded', s: alertStyle('F1F5F9','475569') }]);
+                s3Rows.push([
+                    { v: u.yash_id, s: leftCellStyle(bg) },
+                    { v: u.name, s: leftCellStyle(bg, '334155', true) },
+                    { v: u.email || '', s: leftCellStyle(bg) },
+                    { v: u.irm || 'N/A', s: cellStyle(bg) },
+                    { v: u.login_count, s: cellStyle(bg) },
+                    { v: this.formatDateOnly(u.last_login), s: cellStyle(bg) },
+                    { v: 0, s: cellStyle(bg, '334155', true) },
+                    { v: 'No Solutions Uploaded', s: alertStyle('F1F5F9', '475569') }
+                ]);
             });
 
-            const ws3 = this.buildStyledSheet(s3Headers.map(h => ({ v: h, s: headerStyle('7C2D12') })), s3Rows, [12,22,28,14,9,14,14,22]);
+            const ws3 = this.buildStyledSheet(
+                s3Headers.map((h) => ({ v: h, s: headerStyle('7C2D12') })),
+                s3Rows,
+                [12, 22, 28, 14, 9, 14, 14, 22]
+            );
             this.addTitleRow(ws3, 'Engagement Insights — At-Risk Users', s3Headers.length, '7C2D12');
             XLSX.utils.book_append_sheet(wb, ws3, 'Engagement Insights');
 
@@ -997,16 +1883,25 @@ export class UserWiseReportComponent implements OnInit {
     private buildStyledSheet(headers: any[], rows: any[][], colWidths: number[]): any {
         const ws: any = {};
         const R_OFFSET = 2;
-        headers.forEach((cell, c) => { ws[XLSX.utils.encode_cell({ r: 1, c })] = cell; });
-        rows.forEach((row, r) => { row.forEach((cell, c) => { ws[XLSX.utils.encode_cell({ r: r + R_OFFSET, c })] = cell; }); });
-        ws['!ref']  = XLSX.utils.encode_range({ r: 0, c: 0 }, { r: rows.length + R_OFFSET, c: headers.length - 1 });
-        ws['!cols'] = colWidths.map(w => ({ wch: w }));
+        headers.forEach((cell, c) => {
+            ws[XLSX.utils.encode_cell({ r: 1, c })] = cell;
+        });
+        rows.forEach((row, r) => {
+            row.forEach((cell, c) => {
+                ws[XLSX.utils.encode_cell({ r: r + R_OFFSET, c })] = cell;
+            });
+        });
+        ws['!ref'] = XLSX.utils.encode_range({ r: 0, c: 0 }, { r: rows.length + R_OFFSET, c: headers.length - 1 });
+        ws['!cols'] = colWidths.map((w) => ({ wch: w }));
         ws['!rows'] = [{ hpt: 30 }, { hpt: 22 }, ...rows.map(() => ({ hpt: 18 }))];
         return ws;
     }
 
     private addTitleRow(ws: any, title: string, colCount: number, bgHex: string): void {
-        ws[XLSX.utils.encode_cell({ r: 0, c: 0 })] = { v: title, s: { font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 14, name: 'Calibri' }, fill: { patternType: 'solid', fgColor: { rgb: bgHex } }, alignment: { horizontal: 'left', vertical: 'center' } } };
+        ws[XLSX.utils.encode_cell({ r: 0, c: 0 })] = {
+            v: title,
+            s: { font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 14, name: 'Calibri' }, fill: { patternType: 'solid', fgColor: { rgb: bgHex } }, alignment: { horizontal: 'left', vertical: 'center' } }
+        };
         if (!ws['!merges']) ws['!merges'] = [];
         ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
     }
