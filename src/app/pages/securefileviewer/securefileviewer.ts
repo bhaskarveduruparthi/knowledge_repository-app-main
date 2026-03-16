@@ -1,11 +1,4 @@
-import {
-    Component,
-    Input,
-    OnDestroy,
-    OnInit,
-    signal,
-    ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
@@ -21,17 +14,10 @@ export type ViewerState = 'idle' | 'loading' | 'ready' | 'error' | 'unsupported'
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CommonModule, ButtonModule, ProgressSpinnerModule],
-    template: `
-        <p-button 
-            label="View" 
-            icon="pi pi-eye" 
-            (click)="openViewer()" 
-            [disabled]="disabled" />
-    `,
+    template: ` <p-button label="View" icon="pi pi-eye" (click)="openViewer()" [disabled]="disabled" /> `,
     styles: []
 })
 export class SecureFileViewerComponent implements OnInit, OnDestroy {
-
     @Input({ required: true }) repoId!: number;
     @Input() filename: string = '';
     @Input() disabled: boolean = false;
@@ -40,7 +26,10 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
     private newWindow: Window | null = null;
     private objectUrls: string[] = [];
 
-    constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
+    constructor(
+        private http: HttpClient,
+        private sanitizer: DomSanitizer
+    ) {}
 
     ngOnInit() {}
 
@@ -69,30 +58,30 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
 
     private getFileIcon(ext: string): string {
         const icons: Record<string, string> = {
-            'PDF':  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
-            'DOCX': `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
-            'DOC':  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-            'XLSX': `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>`,
-            'XLS':  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>`,
+            PDF: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+            DOCX: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+            DOC: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+            XLSX: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>`,
+            XLS: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>`
         };
         return icons[ext] || `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`;
     }
 
     private getFileAccentColor(ext: string): string {
         const colors: Record<string, string> = {
-            'PDF':  '#dc2626',
-            'DOCX': '#2563eb',
-            'DOC':  '#2563eb',
-            'XLSX': '#16a34a',
-            'XLS':  '#16a34a',
-            'CSV':  '#16a34a',
-            'PNG':  '#7c3aed',
-            'JPG':  '#7c3aed',
-            'JPEG': '#7c3aed',
-            'GIF':  '#7c3aed',
-            'WEBP': '#7c3aed',
-            'TXT':  '#4b7c59',
-            'MD':   '#4b7c59',
+            PDF: '#dc2626',
+            DOCX: '#2563eb',
+            DOC: '#2563eb',
+            XLSX: '#16a34a',
+            XLS: '#16a34a',
+            CSV: '#16a34a',
+            PNG: '#7c3aed',
+            JPG: '#7c3aed',
+            JPEG: '#7c3aed',
+            GIF: '#7c3aed',
+            WEBP: '#7c3aed',
+            TXT: '#4b7c59',
+            MD: '#4b7c59'
         };
         return colors[ext] || '#2d7a4f';
     }
@@ -103,9 +92,7 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         const ext = this.getFileExtension();
         const icon = this.getFileIcon(ext);
         const accent = this.getFileAccentColor(ext);
-        const shortName = this.filename.length > 52
-            ? this.filename.substring(0, 49) + '…'
-            : this.filename;
+        const shortName = this.filename.length > 52 ? this.filename.substring(0, 49) + '…' : this.filename;
 
         const doc = this.newWindow.document;
         doc.open();
@@ -697,56 +684,110 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         if (!this.newWindow || this.newWindow.closed) return;
         const win = this.newWindow;
 
-        win.document.addEventListener('contextmenu', (e: Event) => {
-            e.preventDefault(); e.stopPropagation(); return false;
-        }, true);
+        win.document.addEventListener(
+            'contextmenu',
+            (e: Event) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            },
+            true
+        );
 
-        win.document.addEventListener('keydown', (e: KeyboardEvent) => {
-            const blocked = ['c', 'a', 'x', 'v', 'u', 's', 'p'];
-            if ((e.ctrlKey || e.metaKey) && blocked.includes(e.key.toLowerCase())) {
-                e.preventDefault(); e.stopPropagation(); return false;
-            }
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) {
-                e.preventDefault(); e.stopPropagation(); return false;
-            }
-            if (e.key === 'F12' || e.keyCode === 123) {
-                e.preventDefault(); e.stopPropagation(); return false;
-            }
-            return true;
-        }, true);
+        win.document.addEventListener(
+            'keydown',
+            (e: KeyboardEvent) => {
+                const blocked = ['c', 'a', 'x', 'v', 'u', 's', 'p'];
+                if ((e.ctrlKey || e.metaKey) && blocked.includes(e.key.toLowerCase())) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                return true;
+            },
+            true
+        );
 
-        win.document.addEventListener('copy', (e: ClipboardEvent) => {
-            e.preventDefault(); e.stopPropagation();
-            if (e.clipboardData) e.clipboardData.setData('text/plain', '');
-            return false;
-        }, true);
+        win.document.addEventListener(
+            'copy',
+            (e: ClipboardEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.clipboardData) e.clipboardData.setData('text/plain', '');
+                return false;
+            },
+            true
+        );
 
-        win.document.addEventListener('cut', (e: ClipboardEvent) => {
-            e.preventDefault(); e.stopPropagation();
-            if (e.clipboardData) e.clipboardData.setData('text/plain', '');
-            return false;
-        }, true);
+        win.document.addEventListener(
+            'cut',
+            (e: ClipboardEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.clipboardData) e.clipboardData.setData('text/plain', '');
+                return false;
+            },
+            true
+        );
 
-        win.document.addEventListener('paste', (e: ClipboardEvent) => {
-            e.preventDefault(); e.stopPropagation(); return false;
-        }, true);
+        win.document.addEventListener(
+            'paste',
+            (e: ClipboardEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            },
+            true
+        );
 
-        win.document.addEventListener('selectstart', (e: Event) => {
-            e.preventDefault(); e.stopPropagation(); return false;
-        }, true);
+        win.document.addEventListener(
+            'selectstart',
+            (e: Event) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            },
+            true
+        );
 
-        win.document.addEventListener('dragstart', (e: DragEvent) => {
-            e.preventDefault(); e.stopPropagation(); return false;
-        }, true);
+        win.document.addEventListener(
+            'dragstart',
+            (e: DragEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            },
+            true
+        );
 
-        win.document.addEventListener('mousedown', (e: MouseEvent) => {
-            if (e.detail > 1) { e.preventDefault(); e.stopPropagation(); return false; }
-            return true;
-        }, true);
+        win.document.addEventListener(
+            'mousedown',
+            (e: MouseEvent) => {
+                if (e.detail > 1) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                return true;
+            },
+            true
+        );
 
         setInterval(() => {
             if (win && !win.closed) {
-                try { win.navigator.clipboard?.writeText('').catch(() => {}); } catch {}
+                try {
+                    win.navigator.clipboard?.writeText('').catch(() => {});
+                } catch {}
             }
         }, 1000);
     }
@@ -755,22 +796,34 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
         if (!this.newWindow || this.newWindow.closed) return;
         const contentDiv = this.newWindow.document.getElementById('content');
         if (contentDiv) {
-            contentDiv.innerHTML = html;
+            // Extract <script> blocks before setting innerHTML
+            const scriptMatches = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)];
+            const cleanHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
+            contentDiv.innerHTML = cleanHtml;
+
+            // Re-inject scripts via createElement so they actually execute
+            scriptMatches.forEach((match) => {
+                const script = this.newWindow!.document.createElement('script');
+                script.textContent = match[1];
+                this.newWindow!.document.body.appendChild(script);
+            });
+
             setTimeout(() => this.applySecurityProtections(), 100);
         }
     }
 
     private loadFile() {
         const token = this.getToken();
-        if (!token) { this.showError('Authentication token missing.'); return; }
+        if (!token) {
+            this.showError('Authentication token missing.');
+            return;
+        }
 
         const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-        this.http.get(
-            `${this.apiBase}/repos/refview/${this.repoId}`,
-            { headers, responseType: 'blob', observe: 'response' }
-        ).subscribe({
-            next: res => this.classifyFile(res.body!, res.body!.type),
-            error: ()  => this.showError('Failed to load file.')
+        this.http.get(`${this.apiBase}/repos/refview/${this.repoId}`, { headers, responseType: 'blob', observe: 'response' }).subscribe({
+            next: (res) => this.classifyFile(res.body!, res.body!.type),
+            error: () => this.showError('Failed to load file.')
         });
     }
 
@@ -792,11 +845,26 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
 
     private classifyFile(blob: Blob, contentType: string) {
         const type = contentType.toLowerCase();
-        if (type.includes('pdf'))                                         { this.renderPdf(blob);   return; }
-        if (type.startsWith('image/'))                                    { this.renderImage(blob); return; }
-        if (type.startsWith('text/'))                                     { this.renderText(blob);  return; }
-        if (type.includes('word') || type.includes('wordprocessingml'))   { this.renderWord(blob);  return; }
-        if (type.includes('sheet') || type.includes('excel'))             { this.renderExcel(blob); return; }
+        if (type.includes('pdf')) {
+            this.renderPdf(blob);
+            return;
+        }
+        if (type.startsWith('image/')) {
+            this.renderImage(blob);
+            return;
+        }
+        if (type.startsWith('text/')) {
+            this.renderText(blob);
+            return;
+        }
+        if (type.includes('word') || type.includes('wordprocessingml')) {
+            this.renderWord(blob);
+            return;
+        }
+        if (type.includes('sheet') || type.includes('excel')) {
+            this.renderExcel(blob);
+            return;
+        }
         this.showError('Preview is not available for this file type.');
     }
 
@@ -849,21 +917,24 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
     }
 
     private async renderExcel(blob: Blob) {
-    try {
-        const arrayBuffer = await blob.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer);
-        const sheetNames = workbook.SheetNames;
+        try {
+            const arrayBuffer = await blob.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer);
+            const sheetNames = workbook.SheetNames;
 
-        const buildSheetHtml = (sheetName: string): string => {
-            const worksheet = workbook.Sheets[sheetName];
-            const html = XLSX.utils.sheet_to_html(worksheet);
-            return this.injectExcelRowNumbers(html);
-        };
+            const buildSheetHtml = (sheetName: string): string => {
+                const worksheet = workbook.Sheets[sheetName];
+                const html = XLSX.utils.sheet_to_html(worksheet);
+                return this.injectExcelRowNumbers(html);
+            };
 
-        const tabsHtml = sheetNames.length > 1
-            ? `
+            const tabsHtml =
+                sheetNames.length > 1
+                    ? `
             <div class="excel-tabs" id="excel-tabs">
-                ${sheetNames.map((name, i) => `
+                ${sheetNames
+                    .map(
+                        (name, i) => `
                     <button class="excel-tab ${i === 0 ? 'active' : ''}" 
                             onclick="switchSheet(${i})" 
                             data-index="${i}">
@@ -873,17 +944,25 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                         </svg>
                         ${this.escapeHtml(name)}
                     </button>
-                `).join('')}
+                `
+                    )
+                    .join('')}
             </div>`
-            : '';
+                    : '';
 
-        const sheetsDataHtml = sheetNames.map((name, i) => `
+            const sheetsDataHtml = sheetNames
+                .map(
+                    (name, i) => `
             <div class="sheet-panel ${i === 0 ? 'active' : ''}" data-sheet="${i}">
                 <div class="excel-viewer">${buildSheetHtml(name)}</div>
             </div>
-        `).join('');
+        `
+                )
+                .join('');
 
-        const tabStyles = sheetNames.length > 1 ? `
+            const tabStyles =
+                sheetNames.length > 1
+                    ? `
             <style>
                 .excel-tabs {
                     display: flex;
@@ -932,9 +1011,12 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                 .sheet-panel { display: none; flex: 1; overflow: auto; }
                 .sheet-panel.active { display: block; }
             </style>
-        ` : '';
+        `
+                    : '';
 
-        const switchScript = sheetNames.length > 1 ? `
+            const switchScript =
+                sheetNames.length > 1
+                    ? `
             <script>
                 function switchSheet(index) {
                     document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
@@ -943,11 +1025,12 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
                     document.querySelector('.excel-tab[data-index="' + index + '"]').classList.add('active');
                 }
             </script>
-        ` : '';
+        `
+                    : '';
 
-        const wrapperClass = sheetNames.length > 1 ? 'excel-tabs-scroll-wrapper' : '';
+            const wrapperClass = sheetNames.length > 1 ? 'excel-tabs-scroll-wrapper' : '';
 
-        this.updateContent(`
+            this.updateContent(`
             ${tabStyles}
             <div class="excel-scroll" style="${sheetNames.length > 1 ? 'padding:0; display:flex; flex-direction:column;' : ''}">
                 <div class="${wrapperClass}">
@@ -961,20 +1044,14 @@ export class SecureFileViewerComponent implements OnInit, OnDestroy {
             </div>
             ${switchScript}
         `);
-    } catch {
-        this.showError('Failed to render Excel document.');
+        } catch {
+            this.showError('Failed to render Excel document.');
+        }
     }
-}
 
-private escapeHtml(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
-
-
+    private escapeHtml(str: string): string {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     private injectExcelRowNumbers(html: string): string {
         let rowIndex = 0;
@@ -988,7 +1065,7 @@ private escapeHtml(str: string): string {
     }
 
     cleanup() {
-        this.objectUrls.forEach(url => URL.revokeObjectURL(url));
+        this.objectUrls.forEach((url) => URL.revokeObjectURL(url));
         this.objectUrls = [];
     }
 
