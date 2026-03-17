@@ -501,13 +501,13 @@ import { CommonModule } from '@angular/common';
         </div>
 
         <div class="headline">
-          Unique/Complex Solutions,<br/>
           <em>Discover &amp; Reuse.</em><br/>
+          
         </div>
 
         <p class="brand-desc">
-          A centralised hub where the team uploads, discovers, and reuses
-          solutions across every project.       
+          A centralised hub where the team uploads, discovers, and reuse
+          solutions.       
         </p>
 
         

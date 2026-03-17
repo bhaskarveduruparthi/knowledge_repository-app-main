@@ -54,7 +54,7 @@ interface MonthOption {
             min-height: 100vh;
             background: #fff;
             border-radius: 10px;
-            box-shadow: 0 8px 32px 0 rgba(144,238,144,0.5);
+            box-shadow: 0 8px 32px 0 rgba(144, 238, 144, 0.5);
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
@@ -1213,6 +1213,9 @@ interface MonthOption {
                                     No Solutions Uploaded
                                 </div>
                                 <span class="insight-count-badge badge-slate">{{ noSolutionUsers.length }} users</span>
+                                <button class="btn-insight-export slate" (click)="exportNoSolutionsToExcel()" [disabled]="noSolutionUsers.length === 0" title="Download Excel">
+                                    <i class="pi pi-download"></i>
+                                </button>
                             </div>
                             <div class="insight-list" *ngIf="noSolutionUsers.length > 0; else emptyNoSolutions">
                                 <div class="insight-user-row" *ngFor="let u of noSolutionUsers">
@@ -1672,6 +1675,40 @@ export class UserWiseReportComponent implements OnInit {
             }),
             datasets: [{ label: 'Solutions Added', data: sorted.map((k) => monthly.get(k) || 0), backgroundColor: shades, borderColor: '#c2410c', borderWidth: 1, borderRadius: 5, borderSkipped: false }]
         };
+    }
+
+    /**
+     * Export "No Solutions Uploaded" users to Excel
+     */
+    exportNoSolutionsToExcel() {
+        try {
+            if (this.noSolutionUsers.length === 0) {
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'No Data',
+                    detail: 'No users without solutions to export'
+                });
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            // Define styles
+            const headerStyle = {
+                font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: '475569' } }
+                // ... rest of the styling
+            };
+
+            // ... (rest of the method creating the Excel file)
+        } catch (err) {
+            console.error(err);
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to export data'
+            });
+        }
     }
 
     initializeChartOptions() {
