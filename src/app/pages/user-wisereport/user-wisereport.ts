@@ -1213,8 +1213,14 @@ interface MonthOption {
                                     No Solutions Uploaded
                                 </div>
                                 <span class="insight-count-badge badge-slate">{{ noSolutionUsers.length }} users</span>
-                                <button class="btn-insight-export slate" (click)="exportNoSolutionsToExcel()" [disabled]="noSolutionUsers.length === 0" title="Download Excel">
-                                    <i class="pi pi-download"></i>
+                                <button 
+                                        type="button"
+                                        class="btn-insight-export slate" 
+                                        (click)="exportNoSolutionsToExcel()"
+                                        [disabled]="noSolutionUsers.length === 0"
+                                        title="Export to Excel">
+                                        <i class="pi pi-file-excel"></i>
+                                        Excel
                                 </button>
                             </div>
                             <div class="insight-list" *ngIf="noSolutionUsers.length > 0; else emptyNoSolutions">
@@ -1677,36 +1683,105 @@ export class UserWiseReportComponent implements OnInit {
         };
     }
 
+    
     /**
      * Export "No Solutions Uploaded" users to Excel
      */
     exportNoSolutionsToExcel() {
+        console.log('exportNoSolutionsToExcel called');
+        console.log('noSolutionUsers:', this.noSolutionUsers);
+        console.log('noSolutionUsers.length:', this.noSolutionUsers.length);
+        
         try {
             if (this.noSolutionUsers.length === 0) {
-                this.messageService.add({
-                    severity: 'info',
-                    summary: 'No Data',
-                    detail: 'No users without solutions to export'
+                this.messageService.add({ 
+                    severity: 'info', 
+                    summary: 'No Data', 
+                    detail: 'No users without solutions to export' 
                 });
                 return;
             }
-
+            
+            console.log('Creating Excel file...');
+ 
             const wb = XLSX.utils.book_new();
-
+            
             // Define styles
             const headerStyle = {
                 font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11, name: 'Calibri' },
-                fill: { patternType: 'solid', fgColor: { rgb: '475569' } }
-                // ... rest of the styling
+                fill: { patternType: 'solid', fgColor: { rgb: '475569' } },
+                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                border: { 
+                    top: { style: 'thin', color: { rgb: 'FFFFFF' } }, 
+                    bottom: { style: 'thin', color: { rgb: 'FFFFFF' } }, 
+                    left: { style: 'thin', color: { rgb: 'FFFFFF' } }, 
+                    right: { style: 'thin', color: { rgb: 'FFFFFF' } } 
+                }
             };
-
-            // ... (rest of the method creating the Excel file)
+ 
+            const cellStyle = (bgHex: string, fgHex = '334155', bold = false) => ({
+                font: { bold, color: { rgb: fgHex }, sz: 10, name: 'Calibri' },
+                fill: { patternType: 'solid', fgColor: { rgb: bgHex } },
+                alignment: { horizontal: 'center', vertical: 'center' },
+                border: { 
+                    top: { style: 'hair', color: { rgb: 'E2E8F0' } }, 
+                    bottom: { style: 'hair', color: { rgb: 'E2E8F0' } }, 
+                    left: { style: 'hair', color: { rgb: 'E2E8F0' } }, 
+                    right: { style: 'hair', color: { rgb: 'E2E8F0' } } 
+                }
+            });
+ 
+            const leftCellStyle = (bgHex: string, fgHex = '334155', bold = false) => ({ 
+                ...cellStyle(bgHex, fgHex, bold), 
+                alignment: { horizontal: 'left', vertical: 'center' } 
+            });
+ 
+            // Headers
+            const headers = ['User ID', 'Name', 'Email', 'IRM', 'Login Count', 'Last Login', 'Total Solutions'];
+            
+            // Data rows
+            const rows = this.noSolutionUsers.map((u, i) => {
+                const bg = i % 2 === 0 ? 'F8FAFC' : 'F1F5F9';
+                return [
+                    { v: u.yash_id, s: leftCellStyle(bg) },
+                    { v: u.name, s: leftCellStyle(bg, '334155', true) },
+                    { v: u.email || 'N/A', s: leftCellStyle(bg) },
+                    { v: u.irm || 'N/A', s: cellStyle(bg, '475569') },
+                    { v: u.login_count, s: cellStyle(bg, '475569', true) },
+                    { v: this.formatDateOnly(u.last_login), s: cellStyle(bg) },
+                    { v: 0, s: cellStyle(bg, '475569', true) }
+                ];
+            });
+ 
+            const ws = this.buildStyledSheet(
+                headers.map(h => ({ v: h, s: headerStyle })),
+                rows,
+                [12, 22, 28, 14, 12, 14, 14]
+            );
+ 
+            // Add title row
+            this.addTitleRow(ws, 'Users with No Solutions Uploaded', headers.length, '475569');
+ 
+            XLSX.utils.book_append_sheet(wb, ws, 'No Solutions');
+ 
+            // Generate and download
+            const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            saveAs(
+                new Blob([out], { type: 'application/octet-stream' }), 
+                `No_Solutions_Users_${new Date().toISOString().split('T')[0]}.xlsx`
+            );
+ 
+            this.messageService.add({ 
+                severity: 'success', 
+                summary: 'Exported', 
+                detail: `${this.noSolutionUsers.length} users exported successfully` 
+            });
         } catch (err) {
             console.error(err);
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to export data'
+            this.messageService.add({ 
+                severity: 'error', 
+                summary: 'Error', 
+                detail: 'Failed to export data' 
             });
         }
     }
