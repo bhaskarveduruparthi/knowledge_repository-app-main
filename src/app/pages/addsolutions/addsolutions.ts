@@ -138,6 +138,7 @@ interface ExportColumn {
         display: flex; flex-direction: column; gap: 0;
         /* ensure the form fills whatever width PrimeNG gives the dialog content */
         width: 100%; box-sizing: border-box;
+        min-height: 0;
     }
     .cd-dialog-header {
         display: flex; align-items: center; gap: 0.75rem;
@@ -517,7 +518,7 @@ interface ExportColumn {
         <!-- CREATE REPOSITORY DIALOG -->
         <p-dialog [(visible)]="createdialog" [modal]="true" [showHeader]="false"
     [style]="{ width: '860px', maxWidth: '94vw' }"
-    [contentStyle]="{ padding: '1.25rem 1.5rem', overflow: 'visible' }"
+    [contentStyle]="{ padding: '1.25rem 1.5rem', overflow: 'auto',maxHeight: '80vh' }"
     [resizable]="false" [draggable]="true">
             <ng-template pTemplate="content">
                 <div class="cd-wrap">
