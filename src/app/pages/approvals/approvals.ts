@@ -171,6 +171,50 @@ interface ExportColumn {
             white-space: nowrap;
         }
 
+        /* ── IRM Filter ── */
+        .irm-filter-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select {
+            border-radius: 50px !important;
+            border: 1.5px solid #c8e6c9 !important;
+            background: #f9fafb !important;
+            font-size: 0.88rem !important;
+            min-width: 180px !important;
+            font-family: 'Arial', sans-serif !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select:hover {
+            border-color: #43a047 !important;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select.p-focus {
+            border-color: #43a047 !important;
+            box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.12) !important;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select .p-select-label {
+            color: #2e3a2f !important;
+            padding: 0.5rem 0.85rem !important;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select .p-placeholder {
+            color: #aab5ab !important;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select-clear-icon {
+            color: #aab5ab !important;
+            transition: color 0.15s !important;
+        }
+
+        .irm-filter-wrap ::ng-deep .p-select-clear-icon:hover {
+            color: #43a047 !important;
+        }
+
         /* ── Grid ── */
         .cards-grid {
             display: grid;
@@ -192,8 +236,6 @@ interface ExportColumn {
             position: relative;
             overflow: hidden;
         }
-
-        
 
         @keyframes shimmer {
             0%   { background-position: 200% 0; }
@@ -595,6 +637,7 @@ interface ExportColumn {
             .page-wrapper { padding: 1rem; }
             .toolbar-shell { flex-direction: column; align-items: flex-start; }
             .search-pill input { width: 200px; }
+            .irm-filter-wrap ::ng-deep .p-select { min-width: 150px !important; }
             .cards-grid { grid-template-columns: 1fr; }
         }
     `],
@@ -619,8 +662,22 @@ interface ExportColumn {
                 </div>
 
                 <div class="toolbar-right">
+
+                    <!-- IRM Filter -->
+                    <div class="irm-filter-wrap">
+                        <p-select
+                            [options]="irmOptions()"
+                            [ngModel]="irmFilter()"
+                            (ngModelChange)="onIrmChange($event)"
+                            placeholder="All IRMs"
+                            [showClear]="true"
+                            (onClear)="clearIrmFilter()">
+                        </p-select>
+                    </div>
+
+                    <!-- Search -->
                     <div class="search-pill">
-                        
+                        <i class="pi pi-search"></i>
                         <input
                             type="text"
                             [value]="searchQuery()"
@@ -635,7 +692,9 @@ interface ExportColumn {
                             <i class="pi pi-times"></i>
                         </button>
                     </div>
-                    <span *ngIf="searchQuery()" class="result-badge">
+
+                    <!-- Result count badge — shown when any filter is active -->
+                    <span *ngIf="searchQuery() || irmFilter()" class="result-badge">
                         {{ filteredRepositories().length }} / {{ repositories().length }}
                     </span>
                 </div>
@@ -644,13 +703,17 @@ interface ExportColumn {
             <!-- ── Cards Grid ── -->
             <div class="cards-grid">
 
-                <!-- No search results -->
-                <div *ngIf="filteredRepositories().length === 0 && searchQuery()" class="state-card">
+                <!-- No search / filter results -->
+                <div *ngIf="filteredRepositories().length === 0 && (searchQuery() || irmFilter())" class="state-card">
                     <i class="pi pi-search state-icon"></i>
-                    <p>No results for <b>"{{ searchQuery() }}"</b></p>
-                    <p class="sub">Try customer name, module, domain, or sector.</p>
-                    <button class="state-clear-btn" (click)="clearSearch()">
-                        <i class="pi pi-times" style="font-size:0.75rem; margin-right:0.3rem"></i>Clear Search
+                    <p>
+                        No results
+                        <ng-container *ngIf="searchQuery()"> for <b>"{{ searchQuery() }}"</b></ng-container>
+                        <ng-container *ngIf="irmFilter()"> · IRM: <b>{{ irmFilter() }}</b></ng-container>
+                    </p>
+                    <p class="sub">Try adjusting your search or IRM filter.</p>
+                    <button class="state-clear-btn" (click)="clearSearch(); clearIrmFilter()">
+                        <i class="pi pi-times" style="font-size:0.75rem; margin-right:0.3rem"></i>Clear All Filters
                     </button>
                 </div>
 
@@ -660,14 +723,14 @@ interface ExportColumn {
                     <p>Loading approvals…</p>
                 </div>
 
-                <!-- Empty state -->
-                <div *ngIf="repositories().length === 0 && !searchQuery() && !loading" class="state-card">
+                <!-- Empty state — no data at all -->
+                <div *ngIf="repositories().length === 0 && !searchQuery() && !irmFilter() && !loading" class="state-card">
                     <i class="pi pi-inbox state-icon"></i>
                     <p>No repositories pending approval.</p>
                     <p class="sub">Check back later or refresh the page.</p>
                 </div>
 
-                <!-- Repo Cards — uses pagedRepositories() for 6-per-page slicing -->
+                <!-- Repo Cards — uses pagedRepositories() for per-page slicing -->
                 <div *ngFor="let repo of pagedRepositories()" class="repo-card">
 
                     <!-- Header -->
@@ -698,8 +761,8 @@ interface ExportColumn {
                             <span class="meta-value" [title]="repo.sector">{{ repo.sector }}</span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-label">Type</span>
-                            <span class="meta-value">{{ repo.standard_custom }}</span>
+                            <span class="meta-label">IRM</span>
+                            <span class="meta-value">{{ repo.irm }}</span>
                         </div>
                     </div>
 
@@ -817,7 +880,6 @@ interface ExportColumn {
         <!-- ── Approve Dialog ── -->
         <p-dialog [(visible)]="approvedialog" header="Approve Solution" [modal]="true" [style]="{ width: '440px' }">
             <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
-                
                 <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
                     Confirm approval of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
                     <br><span style="font-size:0.82rem; color:#81c784">This action will mark the solution as approved.</span>
@@ -837,7 +899,6 @@ interface ExportColumn {
             [style]="{ width: '560px' }">
             <div style="display:flex; flex-direction:column; gap:1.1rem; padding:0.25rem 0">
                 <div style="display:flex; align-items:flex-start; gap:0.85rem">
-                    
                     <span style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
                         Delegate <b>{{ repository?.module_name }}</b> for <b>{{ repository?.customer_name }}</b> to another user.
                     </span>
@@ -885,7 +946,6 @@ interface ExportColumn {
         <!-- ── Reject Dialog ── -->
         <p-dialog [(visible)]="rejectdialog" header="Reject Solution" [modal]="true" [style]="{ width: '440px' }">
             <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
-                
                 <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
                     Confirm rejection of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
                     <br><span style="font-size:0.82rem; color:#ef9a9a">This action will mark the solution as rejected.</span>
@@ -946,30 +1006,55 @@ export class ManageApprovals implements OnInit {
     pageSize: number = 10;
     currentPage = signal<number>(0);
 
+    // ── Filters ──
     searchQuery = signal<string>('');
+    irmFilter   = signal<string>('');
+
+    // Unique IRM (username) list derived from loaded data, sorted alphabetically
+    irmOptions = computed(() => {
+        const names = this.repositories()
+            .map(r => r.irm)
+            .filter((v): v is string => !!v);
+        return Array.from(new Set(names)).sort();
+    });
 
     filteredRepositories = computed(() => {
         const query = this.searchQuery().trim().toLowerCase();
-        if (!query) return this.repositories();
+        const irm   = this.irmFilter().trim().toLowerCase();
 
         return this.repositories().filter(repo => {
-            return (
-                repo.customer_name?.toLowerCase().includes(query) ||
-                repo.module_name?.toLowerCase().includes(query) ||
-                repo.domain?.toLowerCase().includes(query) ||
-                repo.sector?.toLowerCase().includes(query) ||
-                repo.standard_custom?.toLowerCase().includes(query) ||
+            const matchesSearch = !query || (
+                repo.customer_name?.toLowerCase().includes(query)    ||
+                repo.module_name?.toLowerCase().includes(query)      ||
+                repo.domain?.toLowerCase().includes(query)           ||
+                repo.sector?.toLowerCase().includes(query)           ||
+                repo.standard_custom?.toLowerCase().includes(query)  ||
                 repo.technical_details?.toLowerCase().includes(query)
             );
+            const matchesIrm = !irm || repo.username?.toLowerCase() === irm;
+            return matchesSearch && matchesIrm;
         });
     });
 
     // Returns only the current page slice of filtered results
     pagedRepositories = computed(() => {
-        const all = this.filteredRepositories();
+        const all   = this.filteredRepositories();
         const start = this.currentPage() * this.pageSize;
         return all.slice(start, start + this.pageSize);
     });
+
+    /**
+     * Clamps currentPage so it stays on the highest valid page after
+     * the filtered set shrinks. If you're on page 3 and results drop to
+     * 15 items (1 full page + 5), you land on page 1 (index 0), not a blank page.
+     * If the result count stays large enough to cover your current page, you stay put.
+     */
+    private clampPage(): void {
+        const maxPage = Math.max(0, Math.ceil(this.filteredRepositories().length / this.pageSize) - 1);
+        if (this.currentPage() > maxPage) {
+            this.currentPage.set(maxPage);
+        }
+    }
 
     onPageChange(event: any): void {
         this.currentPage.set(event.page);
@@ -978,14 +1063,24 @@ export class ManageApprovals implements OnInit {
     onSearchChange(event: Event): void {
         const value = (event.target as HTMLInputElement).value;
         this.searchQuery.set(value);
-        this.currentPage.set(0); // Reset to first page on search
+        this.clampPage();
+    }
+
+    onIrmChange(value: string): void {
+        this.irmFilter.set(value ?? '');
+        this.clampPage();
     }
 
     clearSearch(): void {
         this.searchQuery.set('');
-        this.currentPage.set(0); // Reset to first page on clear
+        this.clampPage();
         const input = document.querySelector('.search-pill input') as HTMLInputElement;
         if (input) input.value = '';
+    }
+
+    clearIrmFilter(): void {
+        this.irmFilter.set('');
+        this.clampPage();
     }
 
     get isAdmin(): boolean { return this.downloadvalid === true; }
@@ -1037,7 +1132,7 @@ export class ManageApprovals implements OnInit {
         this.managereposervice.get_approval_repos().subscribe({
             next: (data: any) => {
                 this.repositories.set(data);
-                this.currentPage.set(0); // Reset page when data reloads
+                this.clampPage(); // Stay on current page if still valid, otherwise clamp
                 this.loading = false;
             },
             error: () => {
@@ -1134,7 +1229,7 @@ export class ManageApprovals implements OnInit {
                 this.delegatedialog = false;
                 this.selectedDelegateUserId = null;
                 this.messageservice.add({ severity: 'success', summary: 'Delegated', detail: `Delegated to ${selectedUser?.name}` });
-                this.reloadPage();
+                this.loadDemoData(); // Reload data in-place — preserves current page
             },
             error: (error: any) => {
                 this.messageservice.add({
@@ -1158,7 +1253,7 @@ export class ManageApprovals implements OnInit {
         this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
             this.approvedialog = false;
             this.messageservice.add({ severity: 'success', summary: 'Approved', detail: 'Repository has been approved successfully.' });
-            this.reloadPage();
+            this.loadDemoData(); // Reload data in-place — preserves current page
         });
     }
 
@@ -1166,7 +1261,7 @@ export class ManageApprovals implements OnInit {
         this.managereposervice.RepoRejection(this.repository).subscribe((data: any) => {
             this.rejectdialog = false;
             this.messageservice.add({ severity: 'warn', summary: 'Rejected', detail: 'Repository has been rejected.' });
-            this.reloadPage();
+            this.loadDemoData(); // Reload data in-place — preserves current page
         });
     }
 
