@@ -1031,7 +1031,7 @@ export class ManageApprovals implements OnInit {
                 repo.standard_custom?.toLowerCase().includes(query)  ||
                 repo.technical_details?.toLowerCase().includes(query)
             );
-            const matchesIrm = !irm || repo.username?.toLowerCase() === irm;
+            const matchesIrm = !irm || repo.irm?.toLowerCase() === irm;
             return matchesSearch && matchesIrm;
         });
     });
