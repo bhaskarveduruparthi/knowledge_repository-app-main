@@ -692,6 +692,23 @@ background-image:
                     </div>
                 </div>
 
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+    <span style="font-size:0.78rem; font-weight:600; color:#4a7060; text-transform:uppercase; letter-spacing:0.07em; margin-right:0.3rem;">Period</span>
+    <button
+        *ngFor="let opt of [
+            { label: 'All Time', value: 'all' },
+            { label: 'This Month', value: 'monthly' },
+            { label: 'This Quarter', value: 'quarterly' },
+            { label: 'This Year', value: 'yearly' }
+        ]"
+        (click)="onContributorPeriodChange(opt.value)"
+        [style]="contributorPeriod === opt.value
+            ? 'background:#228b4e; color:#fff; border:none; border-radius:20px; padding:0.3rem 0.9rem; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;'
+            : 'background:#f4f8f5; color:#4a7060; border:1px solid rgba(34,139,78,0.2); border-radius:20px; padding:0.3rem 0.9rem; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;'"
+    >
+        {{ opt.label }}
+    </button>
+</div>
                 <div class="charts-row">
                     <div class="chart-panel">
                         <div class="chart-panel-title"><span class="dot" style="background:#43bfe6"></span> Top Contributors — Overall</div>
@@ -725,80 +742,76 @@ background-image:
                 </div>
             </div>
 
+            
             <!-- ── Manager Stats (Superadmin only) ── -->
-            <div class="manager-section" *ngIf="userType === 'Superadmin'">
-                <div class="section-title">Manager Repository Statistics</div>
+<div class="manager-section" *ngIf="userType === 'Superadmin'">
+    <div class="section-title">
+        Manager Repository Statistics
+        <span style="font-size:0.78rem; font-weight:500; color:#7a9484; margin-left:auto;">
+            Period: {{ filterPeriodLabel }}
+        </span>
+    </div>
 
-                <div class="filters-row">
-                    <span class="filter-label">Filter by</span>
-                    <p-autoComplete
-                        [(ngModel)]="selectedYear"
-                        [suggestions]="filteredYears"
-                        (completeMethod)="filterYears($event)"
-                        (onDropdownClick)="onYearDropdownClick()"
-                        placeholder="All Years"
-                        field="label"
-                        [dropdown]="true"
-                        [showClear]="true"
-                        (onSelect)="onYearSelect($event)"
-                        (onClear)="onYearClear()"
-                        [forceSelection]="true"
-                        [style]="{ width: '170px' }"
-                    ></p-autoComplete>
-                    <p-autoComplete
-                        [(ngModel)]="selectedMonth"
-                        [suggestions]="filteredMonths"
-                        (completeMethod)="filterMonths($event)"
-                        (onDropdownClick)="onMonthDropdownClick()"
-                        placeholder="All Months"
-                        field="label"
-                        [dropdown]="true"
-                        [showClear]="true"
-                        (onSelect)="onMonthSelect($event)"
-                        (onClear)="onMonthClear()"
-                        [forceSelection]="true"
-                        [style]="{ width: '170px' }"
-                    ></p-autoComplete>
-                </div>
+    <div class="filters-row">
+        <span class="filter-label">Filter by</span>
+        <p-autoComplete
+            [(ngModel)]="selectedYear"
+            [suggestions]="filteredYears"
+            (completeMethod)="filterYears($event)"
+            (onDropdownClick)="onYearDropdownClick()"
+            placeholder="All Years"
+            field="label"
+            [dropdown]="true"
+            [showClear]="true"
+            (onSelect)="onYearSelect($event)"
+            (onClear)="onYearClear()"
+            [forceSelection]="true"
+            [style]="{ width: '170px' }"
+        ></p-autoComplete>
+        <p-autoComplete
+            [(ngModel)]="selectedMonth"
+            [suggestions]="filteredMonths"
+            (completeMethod)="filterMonths($event)"
+            (onDropdownClick)="onMonthDropdownClick()"
+            placeholder="All Months"
+            field="label"
+            [dropdown]="true"
+            [showClear]="true"
+            (onSelect)="onMonthSelect($event)"
+            (onClear)="onMonthClear()"
+            [forceSelection]="true"
+            [style]="{ width: '170px' }"
+        ></p-autoComplete>
+    </div>
 
-                <p-table [value]="managerStatsTableData" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped clean-table">
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th>Manager</th>
-                            <th>Period</th>
-                            <th>Approved</th>
-                            <th>Pending</th>
-                            <th>Rejected</th>
-                            <th>Total</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-stat>
-                        <tr>
-                            <td>
-                                <strong>{{ stat.manager_name }}</strong>
-                            </td>
-                            <td>{{ stat.period }}</td>
-                            <td>
-                                <span class="badge badge-approved">{{ stat.approved }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-pending">{{ stat.pending }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-rejected">{{ stat.rejected }}</span>
-                            </td>
-                            <td>
-                                <strong style="color:#228b4e;">{{ stat.total }}</strong>
-                            </td>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="emptymessage">
-                        <tr>
-                            <td colspan="6">No data available for the selected filters.</td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </div>
+    <p-table [value]="managerStatsTableData"
+             [tableStyle]="{ 'min-width': '40rem' }"
+             styleClass="p-datatable-striped clean-table">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Manager</th>
+                <th>Approved</th>
+                <th>Pending</th>
+                <th>Rejected</th>
+                <th>Total</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-stat>
+            <tr>
+                <td><strong>{{ stat.manager_name }}</strong></td>
+                <td><span class="badge badge-approved">{{ stat.approved }}</span></td>
+                <td><span class="badge badge-pending">{{ stat.pending }}</span></td>
+                <td><span class="badge badge-rejected">{{ stat.rejected }}</span></td>
+                <td><strong style="color:#228b4e;">{{ stat.total }}</strong></td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5">No data available for the selected filters.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
         </ng-container>
     `
 })
@@ -829,6 +842,9 @@ export class Dashboard implements OnInit {
     domainLegend: LegendItem[] = [];
     overallLegend: LegendItem[] = [];
     communityLegend: LegendItem[] = [];
+
+    // Top Contributors period filters
+    contributorPeriod: 'all' | 'monthly' | 'quarterly' | 'yearly' = 'all';
 
     barChartOptions: any;
     chartOptions: any;
@@ -1038,81 +1054,95 @@ export class Dashboard implements OnInit {
     }
 
     loadManagerStats() {
-        if (this.userType !== 'Superadmin') return;
-        const yearValue = typeof this.selectedYear === 'object' ? this.selectedYear?.value : this.selectedYear;
-        const monthValue = typeof this.selectedMonth === 'object' ? this.selectedMonth?.value : this.selectedMonth;
+    if (this.userType !== 'Superadmin') return;
+    const yearValue  = typeof this.selectedYear  === 'object' ? this.selectedYear?.value  : this.selectedYear;
+    const monthValue = typeof this.selectedMonth === 'object' ? this.selectedMonth?.value : this.selectedMonth;
 
-        this.managereposervice.getManagerStatsMonthly(yearValue, monthValue).subscribe({
-            next: (response: any) => {
-                this.managerStatsTableData =
-                    response.success && Array.isArray(response.data)
-                        ? response.data.map((item: any) => {
-                              const monthName = new Date(item.year, item.month - 1).toLocaleString('default', { month: 'short' });
-                              return { manager_name: item.manager_name, period: `${monthName} ${item.year}`, approved: item.approved || 0, pending: item.pending || 0, rejected: item.rejected || 0, total: item.total || 0 };
-                          })
-                        : [];
-            },
-            error: () => {
+    this.managereposervice.getManagerStatsMonthly(yearValue, monthValue).subscribe({
+        next: (response: any) => {
+            if (response.success && Array.isArray(response.data)) {
+                // Aggregate rows by manager name
+                const agg: Record<string, { approved: number; pending: number; rejected: number; total: number }> = {};
+                for (const item of response.data) {
+                    if (!agg[item.manager_name]) {
+                        agg[item.manager_name] = { approved: 0, pending: 0, rejected: 0, total: 0 };
+                    }
+                    agg[item.manager_name].approved  += item.approved  || 0;
+                    agg[item.manager_name].pending   += item.pending   || 0;
+                    agg[item.manager_name].rejected  += item.rejected  || 0;
+                    agg[item.manager_name].total     += item.total     || 0;
+                }
+                this.managerStatsTableData = Object.entries(agg).map(([name, stats]) => ({
+                    manager_name: name,
+                    ...stats
+                }));
+            } else {
                 this.managerStatsTableData = [];
             }
-        });
-    }
+        },
+        error: () => { this.managerStatsTableData = []; }
+    });
+}
+
+get filterPeriodLabel(): string {
+    const y = typeof this.selectedYear  === 'object' ? this.selectedYear?.label  : this.selectedYear?.toString();
+    const m = typeof this.selectedMonth === 'object' ? this.selectedMonth?.label : null;
+    if (!y && !m) return 'All Time';
+    if (y && !m)  return y;
+    if (!y && m)  return m;
+    return `${m} ${y}`;
+}
+
+onContributorPeriodChange(period: string) {
+    this.contributorPeriod = period as 'all' | 'monthly' | 'quarterly' | 'yearly';
+    // Reset load counter for just these two fetches
+    this.loadedCount = Math.max(0, this.loadedCount - 2);
+    this.isLoading = true;
+    this.fetchtopvotes();
+    this.fetchtopusers();
+}
 
     fetchtopvotes() {
-        this.managereposervice.getTopUsersVotes().subscribe({
-            next: (data: any) => {
-                const srcDataset = data.datasets?.[0] ?? {};
-                const rawLabels: string[] = data.labels ?? [];
-                const rawCounts: number[] = srcDataset.data ?? [];
-                const paletteColors = ['#a855f7', '#228b4e', '#43bfe6', '#f59e0b', '#34c97a', '#64748b', '#0ea5e9'];
-                const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
-                const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
-                this.chartData = {
-                    labels: sorted.labels,
-                    datasets: [
-                        {
-                            ...srcDataset,
-                            data: sorted.counts,
-                            backgroundColor: sorted.colors,
-                            borderRadius: 6,
-                            borderSkipped: false
-                        }
-                    ]
-                };
-                this.communityLegend = this.buildLegend(this.chartData);
-            },
-            error: (err) => console.error('Error loading top votes chart', err),
-            complete: () => this.markLoaded() // ← mark complete
-        });
-    }
+    const period = this.contributorPeriod === 'all' ? undefined : this.contributorPeriod;
+    this.managereposervice.getTopUsersVotes('user', period).subscribe({
+        next: (data: any) => {
+            const srcDataset = data.datasets?.[0] ?? {};
+            const rawLabels: string[] = data.labels ?? [];
+            const rawCounts: number[] = srcDataset.data ?? [];
+            const paletteColors = ['#a855f7', '#228b4e', '#43bfe6', '#f59e0b', '#34c97a', '#64748b', '#0ea5e9'];
+            const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
+            const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
+            this.chartData = {
+                labels: sorted.labels,
+                datasets: [{ ...srcDataset, data: sorted.counts, backgroundColor: sorted.colors, borderRadius: 6, borderSkipped: false }]
+            };
+            this.communityLegend = this.buildLegend(this.chartData);
+        },
+        error: (err) => console.error('Error loading top votes chart', err),
+        complete: () => this.markLoaded()
+    });
+}
 
-    fetchtopusers() {
-        this.managereposervice.getTopUsersSolutions().subscribe({
-            next: (data: any) => {
-                const srcDataset = data.datasets?.[0] ?? {};
-                const rawLabels: string[] = data.labels ?? [];
-                const rawCounts: number[] = srcDataset.data ?? [];
-                const paletteColors = ['#43bfe6', '#228b4e', '#a855f7', '#f59e0b', '#34c97a', '#64748b', '#0ea5e9'];
-                const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
-                const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
-                this.s_chartData = {
-                    labels: sorted.labels,
-                    datasets: [
-                        {
-                            ...srcDataset,
-                            data: sorted.counts,
-                            backgroundColor: sorted.colors,
-                            borderRadius: 6,
-                            borderSkipped: false
-                        }
-                    ]
-                };
-                this.overallLegend = this.buildLegend(this.s_chartData);
-            },
-            error: (err) => console.error('Error loading top users chart', err),
-            complete: () => this.markLoaded() // ← mark complete
-        });
-    }
+fetchtopusers() {
+    const period = this.contributorPeriod === 'all' ? undefined : this.contributorPeriod;
+    this.managereposervice.getTopUsersSolutions('user', period).subscribe({
+        next: (data: any) => {
+            const srcDataset = data.datasets?.[0] ?? {};
+            const rawLabels: string[] = data.labels ?? [];
+            const rawCounts: number[] = srcDataset.data ?? [];
+            const paletteColors = ['#43bfe6', '#228b4e', '#a855f7', '#f59e0b', '#34c97a', '#64748b', '#0ea5e9'];
+            const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
+            const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
+            this.s_chartData = {
+                labels: sorted.labels,
+                datasets: [{ ...srcDataset, data: sorted.counts, backgroundColor: sorted.colors, borderRadius: 6, borderSkipped: false }]
+            };
+            this.overallLegend = this.buildLegend(this.s_chartData);
+        },
+        error: (err) => console.error('Error loading top users chart', err),
+        complete: () => this.markLoaded()
+    });
+}
 
     setGreetingMessage() {
         const h = new Date().getHours();

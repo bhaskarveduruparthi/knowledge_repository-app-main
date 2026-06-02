@@ -325,13 +325,19 @@ deleteModule(id: number) {
     return this.http.post<any>(`${this.url}support/createanswer`, payload);
   }
 
-  getTopUsersVotes(): Observable<any> {
-    return this.http.get<any>(`${this.url}support/top-users-votes`);
-  }
+  getTopUsersVotes(userType?: string, period?: string): Observable<any> {
+    let params = new HttpParams();
+    if (userType) params = params.set('user_type', userType);
+    if (period)   params = params.set('period', period);
+    return this.http.get<any>(`${this.url}support/top-users-votes`, { params });
+}
 
-  getTopUsersSolutions(): Observable<any> {
-    return this.http.get<any>(`${this.url}repos/top-users-solutions`);
-  }
+  getTopUsersSolutions(userType?: string, period?: string): Observable<any> {
+    let params = new HttpParams();
+    if (userType) params = params.set('user_type', userType);
+    if (period)   params = params.set('period', period);
+    return this.http.get<any>(`${this.url}repos/top-users-solutions`, { params });
+}
 
   getUsers() {
     return this.http.get(`${this.url}users/getallusers`);
