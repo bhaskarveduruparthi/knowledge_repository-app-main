@@ -254,7 +254,7 @@ interface ExportColumn {
                             <th>Repository Id</th>
                             <th>File Name</th>
                             <th>IP Address</th>
-                            <th>User Agent</th>
+                            
                             <th>TimeStamp</th>
                             
                             
@@ -268,7 +268,7 @@ interface ExportColumn {
     <td style="white-space: nowrap;">{{ log.file_id || '-' }}</td>
     <td style="white-space: nowrap;">{{ log.filename || '-' }}</td>
     <td style="white-space: nowrap;">{{ log.ip_address || '-' }}</td>
-    <td style="white-space: nowrap;">{{ log.user_agent || '-' }}</td>
+    
     <td style="white-space: nowrap;">{{ formatDate(log.timestamp) }}</td>
           
                             

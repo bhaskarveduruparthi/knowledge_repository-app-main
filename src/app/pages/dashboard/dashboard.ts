@@ -569,6 +569,65 @@ background-image:
         <!-- ═══════════════════════════════════════
          SKELETON LOADER  (shown while loading)
     ════════════════════════════════════════════ -->
+        <!-- ── Global Period Filter Bar ── -->
+<div style="
+    display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;
+    background:#f4f8f5; border:1px solid rgba(34,139,78,0.12);
+    border-radius:14px; padding:0.85rem 1.2rem; margin-bottom:1.6rem;">
+
+    <span style="font-size:0.78rem;font-weight:700;color:#4a7060;
+                 text-transform:uppercase;letter-spacing:0.07em;
+                 white-space:nowrap;margin-right:0.4rem;">
+        <i class="pi pi-filter" style="margin-right:0.3rem;"></i>Filter Period
+    </span>
+
+    <!-- Pill buttons -->
+    <button *ngFor="let opt of chartPeriodOptions"
+        (click)="onGlobalPeriodChange(opt.value)"
+        [style]="globalPeriod === opt.value
+            ? 'background:#228b4e;color:#fff;border:none;border-radius:20px;padding:0.3rem 1rem;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;'
+            : 'background:#fff;color:#4a7060;border:1px solid rgba(34,139,78,0.22);border-radius:20px;padding:0.3rem 1rem;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;'">
+        {{ opt.label }}
+    </button>
+
+    <!-- Custom date range picker -->
+    <ng-container *ngIf="showCustomPicker">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-left:0.4rem;flex-wrap:wrap;">
+            <span style="font-size:0.8rem;color:#4a7060;font-weight:600;">From</span>
+            <input type="date" [(ngModel)]="customFrom"
+                style="border:1px solid rgba(34,139,78,0.25);border-radius:8px;
+                       padding:0.28rem 0.6rem;font-size:0.82rem;color:#0d3d24;
+                       background:#fff;outline:none;cursor:pointer;" />
+            <span style="font-size:0.8rem;color:#4a7060;font-weight:600;">To</span>
+            <input type="date" [(ngModel)]="customTo"
+                style="border:1px solid rgba(34,139,78,0.25);border-radius:8px;
+                       padding:0.28rem 0.6rem;font-size:0.82rem;color:#0d3d24;
+                       background:#fff;outline:none;cursor:pointer;" />
+            <button (click)="onCustomDateApply()"
+                [disabled]="!customFrom || !customTo"
+                style="background:#228b4e;color:#fff;border:none;border-radius:8px;
+                       padding:0.3rem 0.9rem;font-size:0.8rem;font-weight:600;
+                       cursor:pointer;opacity:1;transition:opacity 0.15s;"
+                [style.opacity]="(!customFrom || !customTo) ? '0.45' : '1'">
+                Apply
+            </button>
+            <button (click)="onCustomDateClear()"
+                style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;
+                       border-radius:8px;padding:0.3rem 0.75rem;font-size:0.8rem;
+                       font-weight:600;cursor:pointer;">
+                Clear
+            </button>
+        </div>
+    </ng-container>
+
+    <!-- Active filter badge -->
+    <span *ngIf="globalPeriod !== 'all'"
+        style="margin-left:auto;font-size:0.76rem;color:#228b4e;
+               background:rgba(34,139,78,0.1);border-radius:20px;
+               padding:0.2rem 0.75rem;font-weight:600;white-space:nowrap;">
+        {{ filterPeriodLabel }}
+    </span>
+</div>
         <ng-container *ngIf="isLoading">
             <!-- Skeleton stat cards -->
             <div class="sk-stats-grid">
@@ -692,23 +751,7 @@ background-image:
                     </div>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
-    <span style="font-size:0.78rem; font-weight:600; color:#4a7060; text-transform:uppercase; letter-spacing:0.07em; margin-right:0.3rem;">Period</span>
-    <button
-        *ngFor="let opt of [
-            { label: 'All Time', value: 'all' },
-            { label: 'This Month', value: 'monthly' },
-            { label: 'This Quarter', value: 'quarterly' },
-            { label: 'This Year', value: 'yearly' }
-        ]"
-        (click)="onContributorPeriodChange(opt.value)"
-        [style]="contributorPeriod === opt.value
-            ? 'background:#228b4e; color:#fff; border:none; border-radius:20px; padding:0.3rem 0.9rem; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;'
-            : 'background:#f4f8f5; color:#4a7060; border:1px solid rgba(34,139,78,0.2); border-radius:20px; padding:0.3rem 0.9rem; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;'"
-    >
-        {{ opt.label }}
-    </button>
-</div>
+               
                 <div class="charts-row">
                     <div class="chart-panel">
                         <div class="chart-panel-title"><span class="dot" style="background:#43bfe6"></span> Top Contributors — Overall</div>
@@ -846,6 +889,19 @@ export class Dashboard implements OnInit {
     // Top Contributors period filters
     contributorPeriod: 'all' | 'monthly' | 'quarterly' | 'yearly' = 'all';
 
+    globalPeriod: 'all' | 'monthly' | 'quarterly' | 'yearly' | 'custom' = 'all';
+customFrom: string = '';
+customTo:   string = '';
+showCustomPicker = false;
+
+chartPeriodOptions: { label: string; value: 'all' | 'monthly' | 'quarterly' | 'yearly' | 'custom' }[] = [
+    { label: 'All Time',     value: 'all'       },
+    { label: 'This Month',   value: 'monthly'   },
+    { label: 'This Quarter', value: 'quarterly' },
+    { label: 'This Year',    value: 'yearly'    },
+    { label: 'Custom',       value: 'custom'    }
+];
+
     barChartOptions: any;
     chartOptions: any;
     s_chartOptions: any;
@@ -962,6 +1018,51 @@ export class Dashboard implements OnInit {
         return paired;
     }
 
+    onGlobalPeriodChange(period: 'all' | 'monthly' | 'quarterly' | 'yearly' | 'custom') {
+    this.globalPeriod = period;
+    this.showCustomPicker = period === 'custom';
+    if (period !== 'custom') {
+        this.customFrom = '';
+        this.customTo   = '';
+        this.refreshAll();
+    }
+}
+
+onCustomDateApply() {
+    if (this.customFrom && this.customTo) {
+        this.refreshAll();
+    }
+}
+
+onCustomDateClear() {
+    this.customFrom     = '';
+    this.customTo       = '';
+    this.globalPeriod   = 'all';
+    this.showCustomPicker = false;
+    this.refreshAll();
+}
+
+private refreshAll() {
+    this.isLoading  = true;
+    this.loadedCount = 0;
+    this.fetchCounts();
+    this.loadChartData();
+    this.fetchtopvotes();
+    this.fetchtopusers();
+    if (this.userType === 'Superadmin') {
+        this.loadManagerStats();
+    }
+}
+
+// Helper used by all fetch methods
+private getPeriodParams(): { period?: string; from?: string; to?: string } {
+    if (this.globalPeriod === 'custom') {
+        return { from: this.customFrom, to: this.customTo };
+    }
+    if (this.globalPeriod === 'all') return {};
+    return { period: this.globalPeriod };
+}
+
     ngOnInit() {
         this.fetchCounts();
         this.setGreetingMessage();
@@ -1057,11 +1158,11 @@ export class Dashboard implements OnInit {
     if (this.userType !== 'Superadmin') return;
     const yearValue  = typeof this.selectedYear  === 'object' ? this.selectedYear?.value  : this.selectedYear;
     const monthValue = typeof this.selectedMonth === 'object' ? this.selectedMonth?.value : this.selectedMonth;
+    const p = this.getPeriodParams();
 
-    this.managereposervice.getManagerStatsMonthly(yearValue, monthValue).subscribe({
+    this.managereposervice.getManagerStatsMonthly(yearValue, monthValue, p.period, p.from, p.to).subscribe({
         next: (response: any) => {
             if (response.success && Array.isArray(response.data)) {
-                // Aggregate rows by manager name
                 const agg: Record<string, { approved: number; pending: number; rejected: number; total: number }> = {};
                 for (const item of response.data) {
                     if (!agg[item.manager_name]) {
@@ -1073,8 +1174,7 @@ export class Dashboard implements OnInit {
                     agg[item.manager_name].total     += item.total     || 0;
                 }
                 this.managerStatsTableData = Object.entries(agg).map(([name, stats]) => ({
-                    manager_name: name,
-                    ...stats
+                    manager_name: name, ...stats
                 }));
             } else {
                 this.managerStatsTableData = [];
@@ -1085,12 +1185,10 @@ export class Dashboard implements OnInit {
 }
 
 get filterPeriodLabel(): string {
-    const y = typeof this.selectedYear  === 'object' ? this.selectedYear?.label  : this.selectedYear?.toString();
-    const m = typeof this.selectedMonth === 'object' ? this.selectedMonth?.label : null;
-    if (!y && !m) return 'All Time';
-    if (y && !m)  return y;
-    if (!y && m)  return m;
-    return `${m} ${y}`;
+    if (this.globalPeriod === 'custom' && this.customFrom && this.customTo) {
+        return `${this.customFrom} → ${this.customTo}`;
+    }
+    return this.chartPeriodOptions.find(o => o.value === this.globalPeriod)?.label ?? 'All Time';
 }
 
 onContributorPeriodChange(period: string) {
@@ -1102,15 +1200,15 @@ onContributorPeriodChange(period: string) {
     this.fetchtopusers();
 }
 
-    fetchtopvotes() {
-    const period = this.contributorPeriod === 'all' ? undefined : this.contributorPeriod;
-    this.managereposervice.getTopUsersVotes('user', period).subscribe({
+   fetchtopvotes() {
+    const p = this.getPeriodParams();
+    this.managereposervice.getTopUsersVotes('user', p.period, p.from, p.to).subscribe({
         next: (data: any) => {
             const srcDataset = data.datasets?.[0] ?? {};
             const rawLabels: string[] = data.labels ?? [];
             const rawCounts: number[] = srcDataset.data ?? [];
             const paletteColors = ['#a855f7', '#228b4e', '#43bfe6', '#f59e0b', '#34c97a', '#64748b', '#0ea5e9'];
-            const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
+            const rawColors = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
             const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
             this.chartData = {
                 labels: sorted.labels,
@@ -1124,14 +1222,14 @@ onContributorPeriodChange(period: string) {
 }
 
 fetchtopusers() {
-    const period = this.contributorPeriod === 'all' ? undefined : this.contributorPeriod;
-    this.managereposervice.getTopUsersSolutions('user', period).subscribe({
+    const p = this.getPeriodParams();
+    this.managereposervice.getTopUsersSolutions('user', p.period, p.from, p.to).subscribe({
         next: (data: any) => {
             const srcDataset = data.datasets?.[0] ?? {};
             const rawLabels: string[] = data.labels ?? [];
             const rawCounts: number[] = srcDataset.data ?? [];
             const paletteColors = ['#43bfe6', '#228b4e', '#a855f7', '#f59e0b', '#34c97a', '#64748b', '#0ea5e9'];
-            const rawColors: string[] = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
+            const rawColors = rawLabels.map((_, i) => paletteColors[i % paletteColors.length]);
             const sorted = this.sortDescending(rawLabels, rawCounts, rawColors);
             this.s_chartData = {
                 labels: sorted.labels,
@@ -1143,6 +1241,7 @@ fetchtopusers() {
         complete: () => this.markLoaded()
     });
 }
+
 
     setGreetingMessage() {
         const h = new Date().getHours();
@@ -1157,60 +1256,55 @@ fetchtopusers() {
     }
 
     fetchCounts() {
-        this.managereposervice.fetchCounts().subscribe({
-            next: (data: any) => {
-                this.allReposCount = data.all_repos_count;
-                this.approvedReposCount = data.approved_repos_count;
-                this.unapprovedReposCount = data.unapproved_repos_count;
-                this.sentforapprovalcount = data.sentforapproval_count;
-            },
-            error: (err) => console.error('Error loading counts', err),
-            complete: () => this.markLoaded() // ← mark complete
-        });
-    }
+    const p = this.getPeriodParams();
+    this.managereposervice.fetchCounts(p.period, p.from, p.to).subscribe({
+        next: (data: any) => {
+            this.allReposCount        = data.all_repos_count;
+            this.approvedReposCount   = data.approved_repos_count;
+            this.unapprovedReposCount = data.unapproved_repos_count;
+            this.sentforapprovalcount = data.sentforapproval_count;
+        },
+        error: (err) => console.error('Error loading counts', err),
+        complete: () => this.markLoaded()
+    });
+}
 
     loadChartData() {
-        const truncateName = (name: string): string => name.split(/[:,\s]/)[0].trim();
-        const moduleColors = ['#228b4e', '#34c97a', '#43bfe6', '#f59e0b', '#a855f7', '#64748b', '#0ea5e9'];
-        const domainColors = ['#f59e0b', '#228b4e', '#a855f7', '#43bfe6', '#34c97a', '#64748b', '#0ea5e9'];
+    const truncateName = (name: string): string => name.split(/[:,\s]/)[0].trim();
+    const moduleColors = ['#228b4e', '#34c97a', '#43bfe6', '#f59e0b', '#a855f7', '#64748b', '#0ea5e9'];
+    const domainColors = ['#f59e0b', '#228b4e', '#a855f7', '#43bfe6', '#34c97a', '#64748b', '#0ea5e9'];
+    const p = this.getPeriodParams();
 
-        // Use forkJoin so module + domain together count as one load tick
-        forkJoin({
-            module: this.managereposervice.getdatabymodule(),
-            domain: this.managereposervice.getdatabydomain()
-        }).subscribe({
-            next: ({ module: moduleRaw, domain: domainRaw }: any) => {
-                // Module chart
-                const truncatedData: { [key: string]: number } = {};
-                Object.entries(moduleRaw).forEach(([key, value]) => {
-                    const s = truncateName(key);
-                    truncatedData[s] = (truncatedData[s] || 0) + (value as number);
-                });
-                const moduleSorted = this.sortDescending(Object.keys(truncatedData), Object.values(truncatedData) as number[], moduleColors);
-                this.moduleData = {
-                    labels: moduleSorted.labels,
-                    datasets: [{ label: 'Modules', data: moduleSorted.counts, backgroundColor: moduleSorted.colors, borderRadius: 6, borderSkipped: false }]
-                };
-                this.moduleLegend = moduleSorted.labels.map((label, i) => ({
-                    label,
-                    count: moduleSorted.counts[i],
-                    color: moduleSorted.colors[i]
-                }));
+    forkJoin({
+        module: this.managereposervice.getdatabymodule(p.period, p.from, p.to),
+        domain: this.managereposervice.getdatabydomain(p.period, p.from, p.to)
+    }).subscribe({
+        next: ({ module: moduleRaw, domain: domainRaw }: any) => {
+            const truncatedData: { [key: string]: number } = {};
+            Object.entries(moduleRaw).forEach(([key, value]) => {
+                const s = truncateName(key);
+                truncatedData[s] = (truncatedData[s] || 0) + (value as number);
+            });
+            const moduleSorted = this.sortDescending(Object.keys(truncatedData), Object.values(truncatedData) as number[], moduleColors);
+            this.moduleData = {
+                labels: moduleSorted.labels,
+                datasets: [{ label: 'Modules', data: moduleSorted.counts, backgroundColor: moduleSorted.colors, borderRadius: 6, borderSkipped: false }]
+            };
+            this.moduleLegend = moduleSorted.labels.map((label, i) => ({
+                label, count: moduleSorted.counts[i], color: moduleSorted.colors[i]
+            }));
 
-                // Domain chart
-                const domainSorted = this.sortDescending(Object.keys(domainRaw), Object.values(domainRaw) as number[], domainColors);
-                this.domainData = {
-                    labels: domainSorted.labels,
-                    datasets: [{ label: 'Domains', data: domainSorted.counts, backgroundColor: domainSorted.colors, borderRadius: 6, borderSkipped: false }]
-                };
-                this.domainLegend = domainSorted.labels.map((label, i) => ({
-                    label,
-                    count: domainSorted.counts[i],
-                    color: domainSorted.colors[i]
-                }));
-            },
-            error: (err) => console.error('Error loading chart data', err),
-            complete: () => this.markLoaded() // ← counts as 1 combined load
-        });
-    }
+            const domainSorted = this.sortDescending(Object.keys(domainRaw), Object.values(domainRaw) as number[], domainColors);
+            this.domainData = {
+                labels: domainSorted.labels,
+                datasets: [{ label: 'Domains', data: domainSorted.counts, backgroundColor: domainSorted.colors, borderRadius: 6, borderSkipped: false }]
+            };
+            this.domainLegend = domainSorted.labels.map((label, i) => ({
+                label, count: domainSorted.counts[i], color: domainSorted.colors[i]
+            }));
+        },
+        error: (err) => console.error('Error loading chart data', err),
+        complete: () => this.markLoaded()
+    });
+}
 }

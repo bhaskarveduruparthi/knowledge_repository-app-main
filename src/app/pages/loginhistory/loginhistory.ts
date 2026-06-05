@@ -226,7 +226,7 @@ interface ExportColumn {
                         <tr>
                             <th>Yash Id</th>
                             <th>IP Address</th>
-                            <th>User Agent</th>
+                            
                             <th>Success</th>
                             <th>Message</th>
                             <th>TimeStamp</th>
@@ -236,7 +236,7 @@ interface ExportColumn {
                         <tr *ngFor="let log of logs()">
                             <td style="white-space: nowrap;">{{ log.yash_id || '-' }}</td>
                             <td style="white-space: nowrap;">{{ log.ip_address || '-' }}</td>
-                            <td style="white-space: nowrap;">{{ log.user_agent || '-' }}</td>
+                            
                             <td style="white-space: nowrap;">
                                 <p-tag
                                     [severity]="log.success ? 'success' : 'danger'"

@@ -233,9 +233,13 @@ deleteModule(id: number) {
     return this.http.get(`${this.url}repos/getallrepos`);
   }
 
-  fetchCounts() {
-    return this.http.get(`${this.url}/repos/counts`);
-  }
+  fetchCounts(period?: string, from?: string, to?: string): Observable<any> {
+    let params = new HttpParams();
+    if (period) params = params.set('period', period);
+    if (from)   params = params.set('from', from);
+    if (to)     params = params.set('to', to);
+    return this.http.get(`${this.url}/repos/counts`, { params });
+}
 
   get_repo_records() {
     return this.http.get(`${this.url}/repos/getallreporecords`);
@@ -297,9 +301,14 @@ deleteModule(id: number) {
     return this.http.get(`${this.url}/repos/refview/${id}`);
   }
 
-  getdatabydomain() {
-    return this.http.get(`${this.url}/repos/repodatabydomain`);
-  }
+  getdatabydomain(period?: string, from?: string, to?: string): Observable<any> {
+    let params = new HttpParams();
+    if (period) params = params.set('period', period);
+    if (from)   params = params.set('from', from);
+    if (to)     params = params.set('to', to);
+    return this.http.get(`${this.url}/repos/repodatabydomain`, { params });
+}
+
 
   upvoteAnswer(answerId: number) {
     return this.http.post(`${this.url}support/upvote/${answerId}`, {});
@@ -309,9 +318,13 @@ deleteModule(id: number) {
     return this.http.post(`${this.url}support/downvote/${answerId}`, {});
   }
 
-  getdatabymodule() {
-    return this.http.get(`${this.url}/repos/repodatabymodule`);
-  }
+  getdatabymodule(period?: string, from?: string, to?: string): Observable<any> {
+    let params = new HttpParams();
+    if (period) params = params.set('period', period);
+    if (from)   params = params.set('from', from);
+    if (to)     params = params.set('to', to);
+    return this.http.get(`${this.url}/repos/repodatabymodule`, { params });
+}
 
   getQuestions(): Observable<any> {
     return this.http.get<any>(`${this.url}support/getquestions`);
@@ -325,17 +338,21 @@ deleteModule(id: number) {
     return this.http.post<any>(`${this.url}support/createanswer`, payload);
   }
 
-  getTopUsersVotes(userType?: string, period?: string): Observable<any> {
+  getTopUsersVotes(userType?: string, period?: string, from?: string, to?: string): Observable<any> {
     let params = new HttpParams();
     if (userType) params = params.set('user_type', userType);
     if (period)   params = params.set('period', period);
+    if (from)     params = params.set('from', from);
+    if (to)       params = params.set('to', to);
     return this.http.get<any>(`${this.url}support/top-users-votes`, { params });
 }
 
-  getTopUsersSolutions(userType?: string, period?: string): Observable<any> {
+  getTopUsersSolutions(userType?: string, period?: string, from?: string, to?: string): Observable<any> {
     let params = new HttpParams();
     if (userType) params = params.set('user_type', userType);
     if (period)   params = params.set('period', period);
+    if (from)     params = params.set('from', from);
+    if (to)       params = params.set('to', to);
     return this.http.get<any>(`${this.url}repos/top-users-solutions`, { params });
 }
 
@@ -371,12 +388,15 @@ deleteModule(id: number) {
     return this.http.post<any>(`${this.url}repos/delegate`, payload);
   }
 
-  getManagerStatsMonthly(year?: number, month?: number): Observable<any> {
+  getManagerStatsMonthly(year?: number, month?: number, period?: string, from?: string, to?: string): Observable<any> {
     let params = new HttpParams();
-    if (year) params = params.set('year', year.toString());
-    if (month) params = params.set('month', month.toString());
+    if (year)   params = params.set('year', year.toString());
+    if (month)  params = params.set('month', month.toString());
+    if (period) params = params.set('period', period);
+    if (from)   params = params.set('from', from);
+    if (to)     params = params.set('to', to);
     return this.http.get(`${this.url}repos/manager-stats/monthly`, { params });
-  }
+}
 
   getManagerStatsSummary(): Observable<any> {
     return this.http.get(`${this.url}/manager-stats/summary`);
