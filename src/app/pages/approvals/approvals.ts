@@ -567,6 +567,95 @@ interface ExportColumn {
             margin: 0.1rem 0;
         }
 
+        /* ── Rejection remarks banner (shown inside Details dialog) ── */
+        .rejection-banner {
+            grid-column: 1 / -1;
+            background: #fff5f5;
+            border: 1px solid #ffcdd2;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .rejection-banner .pi {
+            color: #c62828;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .rejection-banner-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .rejection-banner-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #c62828;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .rejection-banner-text {
+            font-size: 0.88rem;
+            color: #7f1d1d;
+            line-height: 1.5;
+        }
+
+        /* ── Remarks textarea inside Reject dialog ── */
+        .remarks-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        .remarks-field label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #2e3a2f;
+        }
+
+        .remarks-textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 0.6rem 0.85rem;
+            border-radius: 10px;
+            border: 1.5px solid #ffcdd2;
+            background: #fff9f9;
+            font-size: 0.875rem;
+            font-family: 'Arial', sans-serif;
+            color: #2e3a2f;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        .remarks-textarea:focus {
+            border-color: #e57373;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(229, 115, 115, 0.15);
+        }
+
+        .remarks-textarea::placeholder {
+            color: #bcaaa4;
+        }
+
+        .remarks-char-count {
+            font-size: 0.75rem;
+            color: #bdbdbd;
+            text-align: right;
+        }
+
+        .remarks-char-count.warn {
+            color: #e57373;
+        }
+
         /* ── Paginator ── */
         .paginator-wrapper {
             margin-top: 1.75rem;
@@ -693,7 +782,7 @@ interface ExportColumn {
                         </button>
                     </div>
 
-                    <!-- Result count badge — shown when any filter is active -->
+                    <!-- Result count badge -->
                     <span *ngIf="searchQuery() || irmFilter()" class="result-badge">
                         {{ filteredRepositories().length }} / {{ repositories().length }}
                     </span>
@@ -703,7 +792,6 @@ interface ExportColumn {
             <!-- ── Cards Grid ── -->
             <div class="cards-grid">
 
-                <!-- No search / filter results -->
                 <div *ngIf="filteredRepositories().length === 0 && (searchQuery() || irmFilter())" class="state-card">
                     <i class="pi pi-search state-icon"></i>
                     <p>
@@ -717,23 +805,19 @@ interface ExportColumn {
                     </button>
                 </div>
 
-                <!-- Loading -->
                 <div *ngIf="loading" class="state-card">
                     <i class="pi pi-spin pi-spinner state-icon"></i>
                     <p>Loading approvals…</p>
                 </div>
 
-                <!-- Empty state — no data at all -->
                 <div *ngIf="repositories().length === 0 && !searchQuery() && !irmFilter() && !loading" class="state-card">
                     <i class="pi pi-inbox state-icon"></i>
                     <p>No repositories pending approval.</p>
                     <p class="sub">Check back later or refresh the page.</p>
                 </div>
 
-                <!-- Repo Cards — uses pagedRepositories() for per-page slicing -->
                 <div *ngFor="let repo of pagedRepositories()" class="repo-card">
 
-                    <!-- Header -->
                     <div class="card-header">
                         <div class="card-title-group">
                             <div class="card-module" [title]="repo.module_name"><strong>{{ repo.module_name }}</strong></div>
@@ -750,7 +834,6 @@ interface ExportColumn {
                         </span>
                     </div>
 
-                    <!-- Meta grid -->
                     <div class="card-meta">
                         <div class="meta-item">
                             <span class="meta-label">Customer</span>
@@ -768,7 +851,6 @@ interface ExportColumn {
 
                     <div class="card-divider"></div>
 
-                    <!-- Creator -->
                     <div class="card-creator">
                         <div class="creator-avatar">
                             {{ (repo.username || 'U').charAt(0).toUpperCase() }}
@@ -778,7 +860,6 @@ interface ExportColumn {
                         </span>
                     </div>
 
-                    <!-- Actions -->
                     <div class="card-actions">
                         <p-button
                             label="Approve" icon="pi pi-check"
@@ -829,6 +910,7 @@ interface ExportColumn {
             [style]="{width: '680px', borderRadius: '20px'}"
             (onHide)="closeDetails()">
             <div *ngIf="selectedRepo" class="detail-grid" style="padding: 0.5rem 0">
+
                 <span class="detail-label">Customer</span>
                 <span class="detail-value">{{ selectedRepo.customer_name }}</span>
                 <div class="detail-divider"></div>
@@ -874,6 +956,19 @@ interface ExportColumn {
                         apiBase="http://10.6.102.245:5002">
                     </app-secure-file-viewer>
                 </span>
+
+                <!-- ── Rejection remarks banner — only when status is Rejected ── -->
+                <ng-container *ngIf="selectedRepo.Approval_status === 'Rejected' && selectedRepo.rejection_remarks">
+                    <div class="detail-divider"></div>
+                    <div class="rejection-banner">
+                        <i class="pi pi-ban"></i>
+                        <div class="rejection-banner-body">
+                            <span class="rejection-banner-title">Rejection Remarks</span>
+                            <span class="rejection-banner-text">{{ selectedRepo.rejection_remarks }}</span>
+                        </div>
+                    </div>
+                </ng-container>
+
             </div>
         </p-dialog>
 
@@ -944,16 +1039,50 @@ interface ExportColumn {
         </p-dialog>
 
         <!-- ── Reject Dialog ── -->
-        <p-dialog [(visible)]="rejectdialog" header="Reject Solution" [modal]="true" [style]="{ width: '440px' }">
-            <div style="display:flex; align-items:flex-start; gap:0.85rem; padding:0.25rem 0">
+        <p-dialog
+            [(visible)]="rejectdialog"
+            header="Reject Solution"
+            [modal]="true"
+            [style]="{ width: '480px' }"
+            (onHide)="onRejectDialogHide()">
+
+            <div style="padding:0.25rem 0; display:flex; flex-direction:column; gap:0.85rem;">
+
+                <!-- Confirmation sentence -->
                 <span *ngIf="repository" style="font-size:0.95rem; color:#2e3a2f; line-height:1.55">
-                    Confirm rejection of <b>{{ repository.module_name }}</b> for <b>{{ repository.customer_name }}</b>?
-                    <br><span style="font-size:0.82rem; color:#ef9a9a">This action will mark the solution as rejected.</span>
+                    Confirm rejection of <b>{{ repository.module_name }}</b>
+                    for <b>{{ repository.customer_name }}</b>?
+                    <br>
+                    <span style="font-size:0.82rem; color:#ef9a9a">
+                        This action will mark the solution as rejected.
+                    </span>
                 </span>
+
+                <!-- Remarks textarea -->
+                <div class="remarks-field">
+                    <label for="rejectionRemarks">
+                        Rejection Remarks
+                        <span style="font-weight:400; color:#bdbdbd; font-size:0.78rem">(optional)</span>
+                    </label>
+                    <textarea
+                        id="rejectionRemarks"
+                        class="remarks-textarea"
+                        [(ngModel)]="rejectionRemarks"
+                        placeholder="Provide a reason or feedback for the submitter…"
+                        maxlength="500"
+                        rows="4">
+                    </textarea>
+                    <span class="remarks-char-count" [ngClass]="{ warn: rejectionRemarks.length > 450 }">
+                        {{ rejectionRemarks.length }} / 500
+                    </span>
+                </div>
             </div>
+
             <ng-template pTemplate="footer">
-                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Cancel" (click)="rejectdialog = false"></button>
-                <button pButton pRipple icon="pi pi-ban" class="p-button-danger" label="Reject" (click)="Reporeject(repository)"></button>
+                <button pButton pRipple icon="pi pi-times" class="p-button-text"
+                    label="Cancel" (click)="rejectdialog = false; onRejectDialogHide()"></button>
+                <button pButton pRipple icon="pi pi-ban" class="p-button-danger"
+                    label="Reject" (click)="Reporeject(repository)"></button>
             </ng-template>
         </p-dialog>
     `,
@@ -1002,6 +1131,9 @@ export class ManageApprovals implements OnInit {
     users = signal<User[]>([]);
     delegateUsers: User[] = [];
 
+    /** Bound to the rejection remarks textarea */
+    rejectionRemarks: string = '';
+
     // ── Pagination ──
     pageSize: number = 10;
     currentPage = signal<number>(0);
@@ -1010,7 +1142,6 @@ export class ManageApprovals implements OnInit {
     searchQuery = signal<string>('');
     irmFilter   = signal<string>('');
 
-    // Unique IRM (username) list derived from loaded data, sorted alphabetically
     irmOptions = computed(() => {
         const names = this.repositories()
             .map(r => r.irm)
@@ -1036,33 +1167,21 @@ export class ManageApprovals implements OnInit {
         });
     });
 
-    // Returns only the current page slice of filtered results
     pagedRepositories = computed(() => {
         const all   = this.filteredRepositories();
         const start = this.currentPage() * this.pageSize;
         return all.slice(start, start + this.pageSize);
     });
 
-    /**
-     * Clamps currentPage so it stays on the highest valid page after
-     * the filtered set shrinks. If you're on page 3 and results drop to
-     * 15 items (1 full page + 5), you land on page 1 (index 0), not a blank page.
-     * If the result count stays large enough to cover your current page, you stay put.
-     */
     private clampPage(): void {
         const maxPage = Math.max(0, Math.ceil(this.filteredRepositories().length / this.pageSize) - 1);
-        if (this.currentPage() > maxPage) {
-            this.currentPage.set(maxPage);
-        }
+        if (this.currentPage() > maxPage) this.currentPage.set(maxPage);
     }
 
-    onPageChange(event: any): void {
-        this.currentPage.set(event.page);
-    }
+    onPageChange(event: any): void  { this.currentPage.set(event.page); }
 
     onSearchChange(event: Event): void {
-        const value = (event.target as HTMLInputElement).value;
-        this.searchQuery.set(value);
+        this.searchQuery.set((event.target as HTMLInputElement).value);
         this.clampPage();
     }
 
@@ -1087,7 +1206,8 @@ export class ManageApprovals implements OnInit {
 
     get isExportEnabled(): boolean {
         if (this.isAdmin) return this.selectedrepositories.length > 0;
-        return this.selectedrepositories.length > 0 && this.selectedrepositories.every((repo) => repo.Approval_status === 'Approved');
+        return this.selectedrepositories.length > 0 &&
+               this.selectedrepositories.every(r => r.Approval_status === 'Approved');
     }
 
     ngOnInit() {
@@ -1132,7 +1252,7 @@ export class ManageApprovals implements OnInit {
         this.managereposervice.get_approval_repos().subscribe({
             next: (data: any) => {
                 this.repositories.set(data);
-                this.clampPage(); // Stay on current page if still valid, otherwise clamp
+                this.clampPage();
                 this.loading = false;
             },
             error: () => {
@@ -1145,31 +1265,26 @@ export class ManageApprovals implements OnInit {
             }
         });
         this.cols = [
-            { field: 'id', header: 'S.No.' },
-            { field: 'customer_name', header: 'Customer Name' },
-            { field: 'domain', header: 'Domain' },
-            { field: 'sector', header: 'Sector' },
-            { field: 'module_name', header: 'Module Name' },
-            { field: 'detailed_requirement', header: 'Detailed Requirement' },
-            { field: 'standard_custom', header: 'Standard/Custom' },
-            { field: 'technical_details', header: 'Technical Details / Z Object Name' },
-            { field: 'customer_benefit', header: 'Customer Benefit' },
-            { field: 'remarks', header: 'Remarks' },
+            { field: 'id',                    header: 'S.No.' },
+            { field: 'customer_name',          header: 'Customer Name' },
+            { field: 'domain',                 header: 'Domain' },
+            { field: 'sector',                 header: 'Sector' },
+            { field: 'module_name',            header: 'Module Name' },
+            { field: 'detailed_requirement',   header: 'Detailed Requirement' },
+            { field: 'standard_custom',        header: 'Standard/Custom' },
+            { field: 'technical_details',      header: 'Technical Details / Z Object Name' },
+            { field: 'customer_benefit',       header: 'Customer Benefit' },
+            { field: 'rejection_remarks',      header: 'Rejection Remarks' },      // ← NEW
             { field: 'attach_code_or_document', header: 'Code/Process Document' }
         ];
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
     }
 
-    gotoRepos() {
-        this.router.navigate(['/app/pages/managerepos']);
-    }
+    gotoRepos() { this.router.navigate(['/app/pages/managerepos']); }
 
     toggleRepoSelection(repo: Repository, checked: boolean) {
-        if (checked) {
-            this.selectedrepositories.push(repo);
-        } else {
-            this.selectedrepositories = this.selectedrepositories.filter((r) => r.id !== repo.id);
-        }
+        if (checked) this.selectedrepositories.push(repo);
+        else this.selectedrepositories = this.selectedrepositories.filter(r => r.id !== repo.id);
     }
 
     approve_dialog(repository: Repository) {
@@ -1184,17 +1299,23 @@ export class ManageApprovals implements OnInit {
     }
 
     reject_dialog(repository: Repository) {
+        this.rejectionRemarks = '';          // reset on each open
         this.rejectdialog = true;
         this.repository = { ...repository };
+    }
+
+    /** Clears the remarks field whenever the reject dialog closes */
+    onRejectDialogHide(): void {
+        this.rejectionRemarks = '';
     }
 
     loadUsers() {
         this.managereposervice.getUsers().subscribe({
             next: (data: any) => {
                 let usersArray: User[] = [];
-                if (Array.isArray(data)) usersArray = data as User[];
-                else if (Array.isArray(data?.data)) usersArray = data.data as User[];
-                else if (Array.isArray(data?.users)) usersArray = data.users as User[];
+                if (Array.isArray(data))              usersArray = data as User[];
+                else if (Array.isArray(data?.data))   usersArray = data.data as User[];
+                else if (Array.isArray(data?.users))  usersArray = data.users as User[];
                 else if (Array.isArray(data?.results)) usersArray = data.results as User[];
                 else usersArray = data ? [data as User] : [];
 
@@ -1229,7 +1350,7 @@ export class ManageApprovals implements OnInit {
                 this.delegatedialog = false;
                 this.selectedDelegateUserId = null;
                 this.messageservice.add({ severity: 'success', summary: 'Delegated', detail: `Delegated to ${selectedUser?.name}` });
-                this.loadDemoData(); // Reload data in-place — preserves current page
+                this.loadDemoData();
             },
             error: (error: any) => {
                 this.messageservice.add({
@@ -1242,10 +1363,10 @@ export class ManageApprovals implements OnInit {
     }
 
     formatDate(dateString: string): string {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
+        const date  = new Date(dateString);
+        const day   = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
+        const year  = date.getFullYear();
         return `${day}-${month}-${year}`;
     }
 
@@ -1253,15 +1374,17 @@ export class ManageApprovals implements OnInit {
         this.managereposervice.RepoApproval(this.repository).subscribe((data: any) => {
             this.approvedialog = false;
             this.messageservice.add({ severity: 'success', summary: 'Approved', detail: 'Repository has been approved successfully.' });
-            this.loadDemoData(); // Reload data in-place — preserves current page
+            this.loadDemoData();
         });
     }
 
     Reporeject(repository: Repository) {
-        this.managereposervice.RepoRejection(this.repository).subscribe((data: any) => {
+        // Pass the remarks text to the service so it is sent to Flask
+        this.managereposervice.RepoRejection(this.repository, this.rejectionRemarks).subscribe((data: any) => {
             this.rejectdialog = false;
+            this.rejectionRemarks = '';
             this.messageservice.add({ severity: 'warn', summary: 'Rejected', detail: 'Repository has been rejected.' });
-            this.loadDemoData(); // Reload data in-place — preserves current page
+            this.loadDemoData();
         });
     }
 
@@ -1269,8 +1392,8 @@ export class ManageApprovals implements OnInit {
 
     form_records() {
         this.managereposervice.get_approval_records().subscribe((data: any) => {
-            this.totalitems = data.length;
-            this.totalrecords = data.totalrecords;
+            this.totalitems    = data.length;
+            this.totalrecords  = data.totalrecords;
         });
     }
 

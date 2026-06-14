@@ -212,9 +212,10 @@ deleteModule(id: number) {
     return this.http.put(`${this.url}/repos/repoapproval/${repository.id}`, repository);
   }
 
-  RepoRejection(repository: Repository) {
-    return this.http.put(`${this.url}/repos/reporejection/${repository.id}`, repository);
-  }
+  RepoRejection(repository: Repository, rejectionRemarks?: string): Observable<any> {
+  const body = { rejection_remarks: rejectionRemarks ?? '' };
+  return this.http.put(`${this.url}/repos/reporejection/${repository.id}`, body);
+}
 
   SendforApproval(id: number, business_justification: string) {
     const body = { business_justification };
