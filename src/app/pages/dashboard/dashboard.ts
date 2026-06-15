@@ -75,7 +75,7 @@ export interface LegendItem {
         }
 
         /* skeleton layout */
-        .sk-wrap        { padding: 2rem 2.4rem; }
+        .sk-wrap        { padding: 2rem 2.4rem; width: 100%; margin: 0 auto; }
         .sk-ticker      { display:grid; grid-template-columns:repeat(4,1fr); gap:0; background:var(--panel);
                           border-radius:var(--radius-lg); border:1px solid var(--border);
                           box-shadow:var(--shadow); margin-bottom:1.6rem; overflow:hidden; }
@@ -106,7 +106,8 @@ export interface LegendItem {
         ───────────────────────────────────────────────────── */
         .page-wrap {
             padding: 2rem 2.4rem 3rem;
-            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
         }
 
         /* ─────────────────────────────────────────────────────
