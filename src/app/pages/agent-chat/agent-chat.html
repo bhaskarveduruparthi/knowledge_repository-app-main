@@ -1,0 +1,157 @@
+<div class="fab" (click)="toggleChat()" *ngIf="!isOpen">
+  <i class="pi pi-comments"></i>
+</div>
+
+<div class="chat-panel" *ngIf="isOpen">
+  <div class="chat-header">
+    <span>Knowledge Repository Assistant</span>
+    <i class="pi pi-times close-icon" (click)="toggleChat()"></i>
+  </div>
+
+  <div class="chat-messages">
+    <div *ngIf="messages.length === 0" class="empty-state">
+      Ask me anything about the knowledge repository.
+    </div>
+
+    <div *ngFor="let msg of messages" class="message-row" [ngClass]="msg.role">
+      <div class="message-bubble">
+
+        <p class="research-intro" *ngIf="msg.role === 'agent' && msg.sources && msg.sources.length > 0">
+          Here are the results from my research:
+        </p>
+
+        <div class="message-text" *ngIf="msg.role === 'agent'" [innerHTML]="formatMessage(msg.text)"></div>
+        <p class="message-text plain" *ngIf="msg.role === 'user'">{{ msg.text }}</p>
+
+        <div class="sources-block" *ngIf="msg.sources && msg.sources.length > 0">
+
+          <div class="source-tag">Primary Match</div>
+          <div class="source-line">
+            <span class="source-chip">{{ msg.sources[0].customer_name }} — {{ msg.sources[0].module_name }}</span>
+            <a class="view-link" (click)="openSolution(msg.sources[0].doc_id)">View Solution</a>
+          </div>
+
+          <ng-container *ngIf="msg.sources.length > 1">
+            <div class="similar-label">Similar results</div>
+            <div class="source-line" *ngFor="let source of msg.sources.slice(1)">
+              <span class="source-chip muted">{{ source.customer_name }} — {{ source.module_name }}</span>
+              <a class="view-link" (click)="openSolution(source.doc_id)">View Solution</a>
+            </div>
+          </ng-container>
+
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="message-row agent">
+      <div class="message-bubble loading-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input
+      type="text"
+      pInputText
+      [(ngModel)]="currentQuery"
+      (keyup.enter)="sendMessage()"
+      placeholder="Ask a question..."
+      [disabled]="isLoading"
+    />
+    <button pButton icon="pi pi-send" (click)="sendMessage()"
+      [disabled]="isLoading || !currentQuery.trim()"></button>
+  </div>
+</div>
+
+<!-- Solution Detail Dialog -->
+<p-dialog
+  header="Solution Details"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [resizable]="true"
+  [draggable]="true"
+  [style]="{width: '90vw', maxWidth: '820px'}"
+  [breakpoints]="{ '960px': '95vw' }"
+  (onHide)="closeSolution()">
+
+  <div *ngIf="isDocLoading" class="dialog-loading">Loading...</div>
+
+  <div class="detail-grid" *ngIf="selectedDoc && !isDocLoading">
+    <div class="detail-row">
+      <span class="detail-label">Domain</span>
+      <span class="detail-value">{{ selectedDoc.domain }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Sector</span>
+      <span class="detail-value">{{ selectedDoc.sector }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Module Name</span>
+      <span class="detail-value">{{ selectedDoc.module_name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Detailed Requirement</span>
+      <span class="detail-value">{{ selectedDoc.detailed_requirement }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Technical Details</span>
+      <span class="detail-value">{{ selectedDoc.technical_details }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Customer Benefit</span>
+      <span class="detail-value">{{ selectedDoc.customer_benefit }}</span>
+    </div>
+  </div>
+
+  <div class="summary-section" *ngIf="selectedDoc">
+    <button pButton type="button"
+      label="Summarize Document"
+      icon="pi pi-file-edit"
+      severity="secondary"
+      [disabled]="isSummarizing || selectedDoc.attach_code_or_document !== 'ATTACHED'"
+      (click)="summarizeDocument()">
+    </button>
+
+    <div *ngIf="isSummarizing" class="summary-loading">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      Summarizing document...
+    </div>
+
+    <div *ngIf="summaryText" class="summary-result">
+      <span class="summary-heading">Summary</span>
+      <p>{{ summaryText }}</p>
+    </div>
+
+    <div *ngIf="summaryError" class="summary-error">
+      {{ summaryError }}
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <ng-container *ngIf="selectedDoc">
+        <app-secure-file-viewer
+          [repoId]="selectedDoc.id"
+          [filename]="selectedDoc.attachment_filename || ''"
+          [disabled]="selectedDoc.attach_code_or_document === 'UPLOADED'"
+          apiBase="http://127.0.0.1:5001">
+        </app-secure-file-viewer>
+
+        <button pButton type="button"
+          label="Request Download Access"
+          severity="info"
+          (click)="requestDownload(selectedDoc)"
+          *ngIf="selectedDoc.attach_code_or_document === 'ATTACHED' && selectedDoc.download_approved !== true">
+        </button>
+
+        <button pButton type="button"
+          [label]="isAttachmentLoading ? 'Loading…' : 'Download Attachment'"
+          [disabled]="isAttachmentLoading"
+          (click)="openAttachment(selectedDoc)"
+          *ngIf="selectedDoc.attach_code_or_document === 'ATTACHED' && selectedDoc.download_approved === true">
+        </button>
+      </ng-container>
+    </div>
+  </ng-template>
+</p-dialog>

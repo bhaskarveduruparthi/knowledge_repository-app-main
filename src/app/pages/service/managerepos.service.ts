@@ -28,6 +28,20 @@ export interface Repository {
   download_approved?: boolean;
 }
 
+export interface AgentSource {
+  doc_id: number;
+  customer_name: string;
+  module_name: string;
+  approval_status: string;
+  owner_user_id: number;
+}
+
+export interface AgentChatResponse {
+  query: string;
+  answer: string;
+  sources: AgentSource[];
+}
+
 export interface Sector {
     id: number;
     name: string;
@@ -482,4 +496,18 @@ deleteModule(id: number) {
             { sectors }
         );
     }
+
+     // ─── AI AGENT ────────────────────────────────────────────────────────────────
+
+  chatWithAgent(query: string): Observable<AgentChatResponse> {
+    return this.http.post<AgentChatResponse>(`${this.url}agent/chat`, { query });
+  }
+
+  getAgentDocument(docId: number): Observable<Repository> {
+  return this.http.get<Repository>(`${this.url}agent/document/${docId}`);
+  }
+
+  summarizeDocument(docId: number): Observable<{ summary: string }> {
+  return this.http.post<{ summary: string }>(`${this.url}agent/document/${docId}/summarize`, {});
+}
 }
