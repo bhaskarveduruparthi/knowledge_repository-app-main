@@ -103,9 +103,11 @@ export interface DownloadLog {
 export class ManageReposService {
 
   private url: string;
+  private agentUrl: string;
 
   constructor(private http: HttpClient, private _url: UrlService) {
     this.url = `${this._url.getApiUrl()}`;
+    this.agentUrl = `${this._url.getAgentApiUrl()}`;
   }
 
   // ─── HOME PAGE ───────────────────────────────────────────────────────────────
@@ -500,14 +502,14 @@ deleteModule(id: number) {
      // ─── AI AGENT ────────────────────────────────────────────────────────────────
 
   chatWithAgent(query: string): Observable<AgentChatResponse> {
-    return this.http.post<AgentChatResponse>(`${this.url}agent/chat`, { query });
+    return this.http.post<AgentChatResponse>(`${this.agentUrl}agent/chat`, { query });
   }
 
   getAgentDocument(docId: number): Observable<Repository> {
-  return this.http.get<Repository>(`${this.url}agent/document/${docId}`);
+  return this.http.get<Repository>(`${this.agentUrl}agent/document/${docId}`);
   }
 
   summarizeDocument(docId: number): Observable<{ summary: string }> {
-  return this.http.post<{ summary: string }>(`${this.url}agent/document/${docId}/summarize`, {});
+  return this.http.post<{ summary: string }>(`${this.agentUrl}agent/document/${docId}/summarize`, {});
 }
 }

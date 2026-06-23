@@ -11,5 +11,9 @@ export class UrlService {
     return `${environment.protocol}://${environment.apiBaseHost}/`;
   }
 
+  getAgentApiUrl() : string {
+    return `${environment.protocol}://${environment.agentApiBaseHost}/`;
+  }
+
 
 }
