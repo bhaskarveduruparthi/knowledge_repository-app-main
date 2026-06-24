@@ -58,6 +58,14 @@ export interface Domain {
     updated_at?: string;
 }
 
+export interface AgentReportResponse {
+  query: string;
+  answer: string;
+  report_data: any[];
+  report_type: string;
+  downloadable: boolean;
+}
+
 export interface BulkSectorResult {
     created: string[];
     skipped: string[];
@@ -511,5 +519,18 @@ deleteModule(id: number) {
 
   summarizeDocument(docId: number): Observable<{ summary: string }> {
   return this.http.post<{ summary: string }>(`${this.agentUrl}agent/document/${docId}/summarize`, {});
+}
+
+searchSimilarRequirements(query: string): Observable<{ query: string; results: any[] }> {
+    return this.http.post<{ query: string; results: any[] }>(`${this.agentUrl}agent/search`, { query });
+  }
+
+
+  runAgentReport(query: string): Observable<AgentReportResponse> {
+  return this.http.post<AgentReportResponse>(`${this.agentUrl}agent/report`, { query });
+}
+
+exportAgentReport(reportData: any[]): Observable<Blob> {
+  return this.http.post(`${this.agentUrl}agent/report/export`, { report_data: reportData }, { responseType: 'blob' });
 }
 }

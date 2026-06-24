@@ -1,0 +1,42 @@
+<div class="report-tab">
+  <label class="field-label">Ask for a report</label>
+  <div class="query-row">
+    <input
+      type="text"
+      pInputText
+      [(ngModel)]="query"
+      (keyup.enter)="runReport()"
+      placeholder="e.g. top 10 contributors, list all modules, solutions for FI module"
+      [disabled]="isLoading" />
+    <button pButton label="Run Report" icon="pi pi-chart-bar"
+      [disabled]="isLoading || !query.trim()"
+      (click)="runReport()"></button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-text">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    Generating report
+  </div>
+
+  <div *ngIf="asked && !isLoading" class="report-result">
+    <p class="report-answer">{{ answer }}</p>
+
+    <div class="report-actions" *ngIf="downloadable">
+      <button pButton label="Download as Excel" icon="pi pi-download" severity="secondary" size="small"
+        (click)="downloadExcel()"></button>
+    </div>
+
+    <div class="report-table-wrap" *ngIf="reportData.length > 0">
+      <table class="report-table">
+        <thead>
+          <tr><th *ngFor="let col of columns">{{ columnLabel(col) }}</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of reportData">
+            <td *ngFor="let col of columns">{{ row[col] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

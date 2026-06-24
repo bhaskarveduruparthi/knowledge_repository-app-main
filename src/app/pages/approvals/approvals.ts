@@ -847,6 +847,10 @@ interface ExportColumn {
                             <span class="meta-label">IRM</span>
                             <span class="meta-value">{{ repo.irm }}</span>
                         </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Sent for Approval On</span>
+                            <span class="meta-value">{{ repo.created_at | date:'short' }}</span>
+                        </div>
                     </div>
 
                     <div class="card-divider"></div>

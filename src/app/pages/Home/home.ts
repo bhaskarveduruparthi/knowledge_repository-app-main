@@ -594,6 +594,10 @@ const PAGE_SIZE = 12; // cards per scroll batch
                   {{ normalizeStandardCustom(repo.standard_custom) }}
                 </span>
               </div>
+              <div class="meta-row">
+                <span class="meta-label">Description</span>
+                <span class="meta-value">{{ repo.detailed_requirement }}</span>
+              </div>
             </div>
 
             <div class="card-divider"></div>

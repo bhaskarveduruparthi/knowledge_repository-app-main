@@ -25,7 +25,8 @@ export class AppMenu implements OnInit {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
             { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
-        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }
+        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] },
+        { label: 'AI Agents', icon: 'pi pi-fw pi-bolt', routerLink: ['/app/pages/ai-agents'] }
         ],
 
         },
@@ -84,7 +85,8 @@ export class AppMenu implements OnInit {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
             { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
-        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
+        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] },
+    ]
         },
         {
             label: 'User',
@@ -108,7 +110,9 @@ export class AppMenu implements OnInit {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/app'] },
             { label: 'Knowledge Repository', icon: 'pi pi-fw pi-book', routerLink: ['/app/pages/managerepos'] },
-        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] }]
+        { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/app/pages/home'] },
+        
+    ]
         },
         {
             label: 'Manager',

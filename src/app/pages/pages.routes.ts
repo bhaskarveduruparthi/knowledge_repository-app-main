@@ -17,6 +17,7 @@ import { UserWiseReportComponent } from './user-wisereport/user-wisereport';
 import { ViewHistory } from './viewhistory/viewhistory';
 import { ManageDomainsSectors } from './managedomains_sectors/managedomains_sectors';
 import { ManageModules } from './managemodules/managemodules';
+import { AiAgentsPage } from './ai-agents-page/ai-agents-page';
 
 
 export default [
@@ -38,5 +39,6 @@ export default [
      {path: 'manage-managers', component: ManageManagers, title: 'Manage Managers'},
      {path: 'download-history', component: DownloadHistory, title: 'Download History'},
      {path: 'view-history', component: ViewHistory, title: 'View History'},
+     { path: 'ai-agents', component: AiAgentsPage, title: 'AI Agents' },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

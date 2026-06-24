@@ -1,0 +1,66 @@
+<div class="search-tab">
+  <label class="field-label">Describe the requirement or problem you're looking for</label>
+  <textarea
+    pTextarea
+    [(ngModel)]="problemStatement"
+    rows="5"
+    placeholder="e.g. We need a way to automatically validate vendor invoice amounts against purchase order line items before approval..."
+    [disabled]="isSearching"
+    (keydown)="onSearchKeydown($event)">
+  </textarea>
+  <span class="input-hint">Ctrl + Enter to search</span>
+
+  <button pButton label="Find Similar Requirements" icon="pi pi-search"
+    [disabled]="isSearching || !problemStatement.trim()"
+    (click)="findSimilar()" class="search-btn"></button>
+
+  <div *ngIf="isSearching" class="loading-text">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    Searching the knowledge repository
+  </div>
+
+  <div *ngIf="hasError && !isSearching" class="error-state">
+    <div class="error-text">
+      <span class="error-eyebrow">Couldn't complete the search</span>
+      <p>Something went wrong reaching the knowledge repository.</p>
+    </div>
+    <button type="button" class="retry-btn" (click)="retry()" aria-label="Retry search">
+      <i class="pi pi-refresh"></i>
+    </button>
+  </div>
+
+  <div *ngIf="searched && !isSearching && !hasError && results.length === 0" class="empty-state">
+    <span class="empty-eyebrow">No matches</span>
+    <p>Nothing in the repository is closely related to this yet. Try describing it differently, or check back as more solutions are added.</p>
+  </div>
+
+  <div class="results-grid" *ngIf="results.length > 0">
+    <div class="result-card" *ngFor="let r of results">
+      <div class="result-header">
+        <span class="match-score">{{ (1 - r.distance) * 100 | number:'1.0-0' }}% match</span>
+        <span class="result-customer">{{ r.metadata.customer_name }}</span>
+      </div>
+
+      <div class="result-meta">
+        <span class="module-pill">{{ r.metadata.module_name }}</span>
+        <span class="meta-text">{{ r.metadata.domain }} · {{ r.metadata.sector }}</span>
+      </div>
+
+      <p class="result-preview">{{ r.requirementPreview }}</p>
+
+      <div class="tech-tags" *ngIf="r.technicalTags.length">
+        <span class="tech-tag" *ngFor="let tag of r.technicalTags">{{ tag }}</span>
+      </div>
+
+      <p class="result-benefit" *ngIf="r.benefit">
+        <i class="pi pi-bolt"></i> {{ r.benefit }}
+      </p>
+
+      <button pButton label="View Solution" severity="secondary" size="small"
+        class="view-btn"
+        (click)="viewSolution(r.metadata.doc_id)"></button>
+    </div>
+  </div>
+</div>
+
+<app-solution-detail-dialog [docId]="selectedDocId" [(visible)]="dialogVisible"></app-solution-detail-dialog>

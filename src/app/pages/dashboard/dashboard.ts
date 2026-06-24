@@ -367,6 +367,34 @@ export interface LegendItem {
             padding: 0.2rem 0.6rem;
         }
 
+        /* ─── SIDE-BY-SIDE VARIANT (Top Contributors) ─── */
+.chart-card-body-row {
+    display: flex;
+    align-items: stretch;
+    gap: 1.3rem;
+}
+.chart-card-chart-col {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.legend-divider-vertical {
+    width: 1px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+.chart-legend--side {
+    flex: 0 0 190px;
+    max-height: none;
+    margin: 0;
+    padding-left: 0.2rem;
+}
+
+@media (max-width: 900px) {
+    .chart-card-body-row { flex-direction: column; }
+    .legend-divider-vertical { width: 100%; height: 1px; }
+    .chart-legend--side { flex: 0 0 auto; max-height: 180px; }
+}
+
         :host ::ng-deep .chart-card p-chart,
         :host ::ng-deep .chart-card p-chart > div,
         :host ::ng-deep .chart-card canvas {
@@ -767,49 +795,29 @@ export interface LegendItem {
 
 
     <!-- ── CHARTS ROW 2 : Contributors ── -->
-    <div class="charts-grid">
-
-        <div class="chart-card">
-            <div class="chart-card-header">
-                <div class="chart-card-title">
-                    <span class="chart-card-dot" style="background:#12B76A;"></span>
-                    Top Contributors — Overall
-                </div>
-            </div>
+    <div class="chart-card">
+    <div class="chart-card-header">
+        <div class="chart-card-title">
+            <span class="chart-card-dot" style="background:#12B76A;"></span>
+            Top Contributors — Overall
+        </div>
+    </div>
+    <div class="chart-card-body-row">
+        <div class="chart-card-chart-col">
             <p-chart type="bar" [data]="s_chartData" [options]="barChartOptions" *ngIf="s_chartData"></p-chart>
-            <ng-container *ngIf="overallLegend.length">
-                <div class="legend-divider"></div>
-                <div class="chart-legend">
-                    <div class="legend-row" *ngFor="let item of overallLegend">
-                        <span class="legend-swatch" [style.background]="item.color"></span>
-                        <span class="legend-label" [title]="item.label">{{ item.label }}</span>
-                        <span class="legend-count">{{ item.count }}</span>
-                    </div>
-                </div>
-            </ng-container>
         </div>
-
-        <div class="chart-card">
-            <div class="chart-card-header">
-                <div class="chart-card-title">
-                    <span class="chart-card-dot" style="background:#A855F7;"></span>
-                    Top Contributors — Community
+        <ng-container *ngIf="overallLegend.length">
+            <div class="legend-divider-vertical"></div>
+            <div class="chart-legend chart-legend--side">
+                <div class="legend-row" *ngFor="let item of overallLegend">
+                    <span class="legend-swatch" [style.background]="item.color"></span>
+                    <span class="legend-label" [title]="item.label">{{ item.label }}</span>
+                    <span class="legend-count">{{ item.count }}</span>
                 </div>
             </div>
-            <p-chart type="bar" [data]="chartData" [options]="barChartOptions" *ngIf="chartData"></p-chart>
-            <ng-container *ngIf="communityLegend.length">
-                <div class="legend-divider"></div>
-                <div class="chart-legend">
-                    <div class="legend-row" *ngFor="let item of communityLegend">
-                        <span class="legend-swatch" [style.background]="item.color"></span>
-                        <span class="legend-label" [title]="item.label">{{ item.label }}</span>
-                        <span class="legend-count">{{ item.count }}</span>
-                    </div>
-                </div>
-            </ng-container>
-        </div>
-
-    </div><!-- /charts-grid row 2 -->
+        </ng-container>
+    </div>
+</div><!-- /charts-grid row 2 -->
 
 
     <!-- ── MANAGER STATS (Superadmin only) ── -->

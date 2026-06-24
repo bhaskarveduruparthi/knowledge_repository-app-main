@@ -1,0 +1,47 @@
+<div class="agents-page">
+  <header class="mobile-bar">
+    <button type="button" class="hamburger" (click)="toggleSidebar()" aria-label="Toggle agents menu" [attr.aria-expanded]="sidebarOpen">
+      <i class="pi pi-bars"></i>
+    </button>
+    <span class="mobile-title">{{ activeAgent.label }}</span>
+  </header>
+
+  <div class="backdrop" *ngIf="sidebarOpen" (click)="toggleSidebar()"></div>
+
+  <aside class="agents-sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-brand">
+      <span class="brand-mark">✳</span>
+      <div class="brand-text">
+        <span class="brand-eyebrow">Knowledge Repository</span>
+        <span class="brand-title">AI Agents</span>
+      </div>
+    </div>
+
+    <nav class="agent-nav" aria-label="Agents">
+      <button
+        type="button"
+        class="agent-nav-item"
+        *ngFor="let agent of agents"
+        [class.active]="agent.id === activeTab"
+        (click)="selectAgent(agent.id)">
+        <i class="{{ agent.icon }}"></i>
+        <span class="agent-nav-label">{{ agent.label }}</span>
+        <span class="agent-nav-index">{{ agent.index }}</span>
+      </button>
+    </nav>
+  </aside>
+
+  <main class="agents-main">
+    <div class="agents-main-header">
+      <span class="eyebrow">{{ activeAgent.index }} · AI AGENT</span>
+      <h1>{{ activeAgent.label }}</h1>
+      <p>{{ activeAgent.description }}</p>
+    </div>
+
+    <div class="agents-main-body">
+      <app-search-agent-tab *ngIf="activeTab === '0'"></app-search-agent-tab>
+      <app-report-agent-tab *ngIf="activeTab === '1'"></app-report-agent-tab>
+      <app-manage-agent-tab *ngIf="activeTab === '2'"></app-manage-agent-tab>
+    </div>
+  </main>
+</div>
